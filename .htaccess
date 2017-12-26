@@ -1,0 +1,27 @@
+# nerb framework /.htaccess
+
+	<IfModule mod_headers.c>
+	    #Header set Cache-Control "no-cache, no-store, must-revalidate"
+	    #Header set Pragma "no-cache"
+	    #Header set Expires 0
+	</IfModule>
+
+	Options -Indexes
+
+    RewriteEngine on
+    RewriteBase /public/app
+    
+    # safe request methods
+	RewriteCond %{REQUEST_METHOD} !^(GET|HEAD|POST|PROPFIND|OPTIONS|PUT)$ [NC]
+ 	RewriteRule .? - [F,NS,L]
+ 	
+ 	   
+    # https rewrite
+    RewriteCond %{HTTPS} !=on
+	RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
+
+	#rewrite to /app/public folder
+	RewriteRule   ^robots.txt$ robots.txt    [L]
+    RewriteRule   ((?s).*) /app/public/$1 [L]
+    
+    

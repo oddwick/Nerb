@@ -1,0 +1,165 @@
+/* The Modal and Flyout (background) */
+.modal-window,
+.flyout {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1001; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+
+/* The Modal (background) */
+.modal-window {
+    padding-top: 10%; /* Location of the box */
+    overflow: auto; /* Enable scroll if needed */
+}
+
+/* Modal window sizes */
+.modal-40{ width: 40vw !important; }
+.modal-50{ width: 50vw !important; }
+.modal-60{ width: 60vw !important; }
+.modal-70{ width: 70vw !important; }
+.modal-80{ width: 80vw !important; }
+.modal-auto{ width: auto !important; }
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: auto;
+    padding: 1rem 1.5rem 0 1.5rem;
+    /* border: 1px solid rgba(0,0,0,0.4); */
+    width: 50vw;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+   /* 
+    border-radius: 3px;
+	-webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s */
+}
+
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0} 
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.modal-close {
+    color: #999;
+    font-size: 3rem;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    margin:0;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+
+
+.flyout{
+	position: fixed;
+	left: 0;
+	right:0;
+	top:0;
+	bottom: 0;
+	z-index: 1001;
+    background-color: rgba(0,0,0,0.9);
+    display: none;
+}
+
+
+.flyout-panel{
+	display: none;
+	position: fixed;
+	right:0;
+	top:0;
+	background-color: #ffffff;	
+	height: 100vh !important;
+	max-height: 100vh;
+	width: 40vw;
+	overflow-y: auto !important;
+}
+
+.flyout-close{
+	position: absolute;
+	right: 1rem;
+	top: 1rem;
+	cursor: pointer;
+}
+
+.flyout-content{
+	padding-top: 1rem;
+	padding-bottom: 8rem;
+}
+
+.flyout-tab{
+	position: fixed;
+	z-index:999;
+	background-color:#000;
+	right:0;
+	top: 30vh;
+	padding: 0.5rem;
+	border-radius: 10rem 0 0 10rem;
+	-webkit-box-shadow:  2px 2px 8px #444444;
+	-moz-box-shadow:  2px 2px 8px #444444;
+	box-shadow:  2px 2px 8px #444444;
+	cursor: pointer;
+}
+
+.flyout-tab-label{
+	font-weight: bold;
+	font-size: 1.5rem;
+	margin-left: 1rem;
+	color: #fff;
+	vertical-align: middle !important;
+	-webkit-animation: pulse 1.5s infinite;
+	-moz-animation: pulse 1.5s infinite;
+	-o-animation: pulse 1.5s infinite;
+	animation: pulse 1.5s infinite;
+}
+
+
+
+@keyframes pulse {
+  0%   { opacity:1; }
+  50%  { opacity:0.3; }
+  100% { opacity:1; }
+}
+@-o-keyframes pulse{
+  0%   { opacity:1; }
+  50%  { opacity:0.3; }
+  100% { opacity:1; }
+}
+@-moz-keyframes pulse{
+  0%   { opacity:1; }
+  50%  { opacity:0.3; }
+  100% { opacity:1; }
+}
+@-webkit-keyframes pulse{
+  0%   { opacity:1; }
+  50%  { opacity:0.3; }
+  100% { opacity:1; }
+}
+
+
+

@@ -1,0 +1,135 @@
+/* 
+ *	The default css stylesheet for the nerb framework
+ *	This is included whenever the Nerb engine needs to make an output
+ *	to HTML
+ */
+* {
+	font-size:13pt;
+	font-weight:lighter;
+}
+
+body {
+	margin:0;
+	padding:0 2rem;
+	font-family:sans-serif;
+}
+
+header{
+	margin-bottom: 2rem;	
+}
+
+footer{
+	margin-top: 2rem;
+	
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-weight:lighter;
+	margin-bottom:0.5rem;
+}
+
+h1 {
+	font-size:2.8rem;
+}
+
+h2 {
+	font-size:1.4rem;
+}
+
+a {
+	color:gray;
+	text-decoration:underline;
+}
+
+p {
+	margin:0;
+	line-height: 1.3rem;
+}
+
+strong {
+	font-weight:700;
+}
+
+ul {
+	margin-top:0;
+}
+
+li {
+	line-height: 1.3rem;
+}
+
+.no-bullet {
+	margin-left:0;
+	padding-left:0;
+}
+
+ul.no-bullet li,ol.no-bullet li {
+	list-style:none;
+}
+
+img {
+	border:none;
+}
+
+monospace,code,path {
+	font-size:inherit;
+	font-family:'Courier New',Courier,monospace;
+}
+
+code {
+}
+
+path {
+	color:orange;
+}
+
+error {
+	color:red;
+}
+
+quote {
+}
+
+.material-icons {
+	display:inline;
+	vertical-align:middle!important;
+}
+
+/* Rules for sizing the icon. */
+.material-icons.md-12 {
+	font-size:12pt;
+}
+
+.material-icons.md-18 {
+	font-size:18pt;
+}
+
+.material-icons.md-24 {
+	font-size:24pt;
+}
+
+.material-icons.md-36 {
+	font-size:36pt;
+}
+
+.material-icons.md-48 {
+	font-size:48pt;
+}
+
+/* Rules for using icons as black on a light background. */
+.material-icons.md-dark {
+	color:rgba(0,0,0,0.54);
+}
+
+.material-icons.md-dark.md-inactive {
+	color:rgba(0,0,0,0.26);
+}
+
+/* Rules for using icons as white on a dark background. */
+.material-icons.md-light {
+	color:rgba(255,255,255,1);
+}
+
+.material-icons.md-light.md-inactive {
+	color:rgba(255,255,255,0.3);
+}
