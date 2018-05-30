@@ -1,0 +1,289 @@
+/* Nurb framework app.css  */
+
+/* 
+-----------------------------------------------------
+contains all of the default styles involved with setting up a 
+standard site
+
+*/
+
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	!error and msg bars
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+.msg-bar, .error-bar{
+	width: 100%;
+	height: 40px;
+	line-height: 40px;
+	padding: 0 40px;
+}
+
+.msg-bar p, .error-bar p{
+	color: #fff !important;
+	line-height: 40px;
+	font-weight:bold;
+}
+
+.msg-bar{
+	background-color: rgb(43, 166, 203);
+}
+
+.error-bar{
+	background-color: #C00;
+}
+
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	!default input styles -- soften input boxes
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+input:focus:invalid {
+  color: red;
+}
+
+input[type=text], 
+input[type=number], 
+input[type=input], 
+input[type=email], 
+input[type=password], 
+input[type=search],
+select, 
+textarea{
+	border-radius: 0;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	font-size: 15pt;
+	font-weight: normal;
+	-webkit-transition: box-shadow 0.6s;
+	transition: box-shadow 0.6s;
+	padding: 1rem;
+	height: auto;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+	outline: none;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+
+optgroup{
+	color:#fff;
+	width: 100%;
+	font-size:24px !important;
+}
+
+.required{
+	background-color: #ffd !important;
+}
+
+textarea
+{
+   resize: vertical;
+}
+
+::-webkit-input-placeholder{
+	color: #ccc;
+	font-weight:lighter;
+	font-style: italic;
+}
+
+input::placeholder,
+-webkit-input-placeholder,
+-moz-placeholder, 
+-moz-placeholder,
+-ms-input-placeholder,
+{
+	color: red;
+}
+
+
+label,
+fieldset legend{
+	display: block;
+	font-size: 0.75rem;
+	font-weight: normal !important;
+	margin-bottom: 0.25rem;
+}
+
+fieldset , legend{ 
+	padding:0px; 
+}
+
+fieldset{
+	margin-bottom: 0.5rem;
+	border:none;
+}
+
+fieldset.stacked{
+	display: inline-block;
+	margin-right: 5rem;
+	vertical-align: top;
+}
+
+/* checkboxes and radio buttons */
+input.checkbox, 
+input[type=checkbox],
+input.radio,
+input[type=radio] {
+	opacity: 0;
+	position: absolute;
+}
+
+input.checkbox + label, 
+input[type=checkbox] + label,
+input.radio + label,
+input[type=radio] + label {
+	margin-left: 0;
+	font-size: 1rem;
+}
+
+input.checkbox + label:before, 
+input[type=checkbox] + label:before,
+input.radio + label:before,
+input[type=radio] + label:before {
+	display: inline-block;
+	text-align: center;
+	line-height: 1.5rem;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	width: 1.5rem;
+	height: 1.5rem;
+	margin-right: 0.5rem; 
+	margin-bottom: 0.5rem;
+	margin-left: 0;
+	padding-left:1px;
+	font-size: 1rem;
+	color: white;
+	background-color: #fff;
+}
+
+input.checkbox:checked + label:before, 
+input[type=checkbox]:checked + label:before,
+input.radio:checked + label:before,
+input[type=radio]:checked + label:before {
+	background: #999;
+}
+
+input[type=checkbox] + label:before,
+input.checkbox + label:before {
+	content: "\2715";
+	padding-right: 1px;
+	border-radius: 0.125rem;
+}
+
+input[type=radio] + label:before,
+input.radio + label:before {
+	content: "\2713";
+	border-radius: 50%;
+}
+
+input.checkbox:disabled + label:before, 
+input[type=checkbox]:disabled + label:before,
+input.radio:disabled + label:before,
+input[type=radio]:disabled + label:before {
+	background-color: #dfdfdf;
+}
+
+
+
+
+
+
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	!material icons
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: middle;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
+/* Rules for sizing the icon. */
+.material-icons.md-12 { font-size: 12px; }
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+.material-icons.md-64 { font-size: 64px; }
+
+/* Rules for using icons as black on a light background. */
+.material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
+
+/* Rules for using icons as white on a dark background. */
+.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+
+
+
+
+
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	!utility classes
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+.no-bullet{
+}
+
+.no-top-margin{
+	margin-top:0;
+}
+
+.no-margin{
+	margin: 0 !important;
+}
+
+.hidden{
+	display:none;
+}
+
+.alert{
+	color: red;
+	font-weight:bold;
+}
+
+.stretch{
+	width: 100%;
+}
+
+.note{ font-style:italic; }
+
+
+.center{ text-align:center!important; }
+
+.small{
+	font-size: 9px;
+}
+
+.restricted{
+	padding-left: 20px;
+	background: url('/img/lock-icon.png') no-repeat left center !important;
+}
+
+.restricted.white{
+	background: url('/img/lock-icon-white.png') no-repeat left center !important;
+	color: #fff;
+}

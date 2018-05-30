@@ -55,7 +55,15 @@ class NerbDatabaseRow implements Iterator
      */
     protected $columns = array();
 
-    protected $database = "";
+    /**
+     * database
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $database = '';
 
     /**
      * table
@@ -169,7 +177,7 @@ class NerbDatabaseRow implements Iterator
     {
         // check to see if field exists
         if ( !array_key_exists( $field, $this->columns ) ) {
-            throw new NerbError( "Column '<b>$field</b>' does not exist.<br /><br /><code>".implode( ", ", $this->columns() )."</code>" );
+            throw new NerbError( 'Column <code>$field</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
         }
         return $this->data[$field];
         
@@ -191,12 +199,12 @@ class NerbDatabaseRow implements Iterator
         // error checking
         // ensure the field is a valid column
         if ( !array_key_exists( $field, $this->columns ) ) {
-            throw new NerbError( "Column '<b>$field</b>' does not exist.<br /><br /><code>".implode( ", ", $this->columns() )."</code>" );
+            throw new NerbError( 'Column <code>$field</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
         }
 
         // primary key cant be modified
         if ( $field == $this->table->primary && !$this->primary_key_lock ) {
-            throw new NerbError( "Primary key '<b>$field</b>' value cannot be changed" );
+            throw new NerbError( 'Primary key <code>$field</code> value cannot be changed' );
         }
 
         // capture old value
@@ -372,7 +380,7 @@ class NerbDatabaseRow implements Iterator
     {
         // fetch objects
         $database = Nerb::fetch( $this->database );
-        $table = Nerb::fetch( $this->database.".".$this->table );
+        $table = Nerb::fetch( $this->database.'.'.$this->table );
 
         // send data to table for saving
         $table->save( $this->data );
@@ -396,7 +404,7 @@ class NerbDatabaseRow implements Iterator
     public function duplicate( string $key = null )
     {
 		// fetch database
-        $table = Nerb::fetch( $this->database.".".$this->table );
+        $table = Nerb::fetch( $this->database.'.'.$this->table );
 
         // move row data into temp variable
         $data = $this->data;
@@ -460,12 +468,12 @@ class NerbDatabaseRow implements Iterator
 
         // check to see if table exists or throw an error
         if ( !$database->isTable( $insert_table ) ) {
-            throw new NerbError( "Can not save row to table '<b>$table</b>' because table does not exist in database." );
+            throw new NerbError( 'Can not save row to table <code>$table</code> because table does not exist in database.' );
         } // endif
 
         // check to see if table is open and registered
-        if ( Nerb::isRegistered( $this->database.".".$insert_table ) ) {
-            $destination = Nerb::fetch( $this->database.".".$insert_table );
+        if ( Nerb::isRegistered( $this->database.'.'.$insert_table ) ) {
+            $destination = Nerb::fetch( $this->database.'.'.$insert_table );
         } else {
             $destination = new Nerb_database_table( $this->database, $insert_table );
         }

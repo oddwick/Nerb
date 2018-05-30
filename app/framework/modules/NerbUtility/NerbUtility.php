@@ -12,7 +12,7 @@
  * @class           Nerb
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright (c)2017
+ * @copyright       Copyright ( c )2017
  * @license         https://www.oddwick.com
  *
  * @todo
@@ -37,7 +37,7 @@ class NerbUtility
 
 
     /**
-    * Singleton Pattern prevents multiple instances of Nerb.  all calls must be made statically e.g. Nerb::function( args );
+    * Singleton Pattern prevents multiple instances of NerbUtility.  all calls must be made statically e.g. NerbUtility::function(  args  );
     *
     *   @access     public
     *   @return     void
@@ -62,7 +62,7 @@ class NerbUtility
     public static function isMicrosoftBrowser()
     {
         global $HTTP_USER_AGENT;
-        if (strstr(strtolower($HTTP_USER_AGENT), "msie")) {
+        if ( strstr( strtolower( $HTTP_USER_AGENT ), 'msie' ) ) {
             return true;
         } else {
             return false;
@@ -83,26 +83,28 @@ class NerbUtility
     *   @see        Debug
     *   @throws     Nerb_Error
     */
-    public static function syntax($class, $method = null)
+    public static function syntax( $class, $method = null )
     {
 
-        if (is_object($class)) {
-            $class = get_class($class);
+        if ( is_object( $class ) ) {
+            $class = get_class( $class );
         }
 
-        if (!class_exists($class)) {
-            throw new Nerb_Error("Class '<code>".$class."</code>'has not been defined");
+        if ( !class_exists( $class ) ) {
+            throw new Nerb_Error( 'Class <code>['.$class.']</code> has not been defined' );
         }
 
-        if ($method && !method_exists($class, $method)) {
-            throw new Nerb_Error("Method '<code>".$method."</code>'does not exist in class '<code>".$class."</code>'");
+        if ( $method && !method_exists( $class, $method ) ) {
+            throw new Nerb_Error( 'Method <code>['.$method.']</code> does not exist in class <code>['.$class.']</code> ' );
         }
 
-        Nerb::loadClass("Nerb_Debug");
+        Nerb::loadClass( 'Nerb_Debug' );
         $debug = new Nerb_Debug;
-        return $debug->syntax($class, $method);
+        return $debug->syntax( $class, $method );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
     /**
@@ -110,18 +112,16 @@ class NerbUtility
     *
     *   @access     public
 	* 	@static
-    *   @param      string $path (the absolute or relative path being translated)
+    *   @param      string $path ( the absolute or relative path being translated )
     *   @return     string
     */
     public static function path2url( $path )
     {
         // make path absolute
-        $path = str_replace(  realpath( "." ), "", $path );
-        return $_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].$path;
+        $path = str_replace(   realpath(  '.'  ), '', $path  );
+        return $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$path;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 
 
@@ -136,19 +136,19 @@ class NerbUtility
     public static function getMaxUpload()
     {
 
-        $val = ini_get("upload_max_filesize");
-        $val = trim($val);
-        $last = strtolower($val( strlen($val) -1 ));
-        $val = substr($val, 0, strlen($val)- 1);
-        switch ($last) {
-            case "g":
-                $val .= " Gb";
+        $val = ini_get( 'upload_max_filesize' );
+        $val = trim( $val );
+        $last = strtolower( $val(  strlen( $val ) -1  ) );
+        $val = substr( $val, 0, strlen( $val )- 1 );
+        switch ( $last ) {
+            case 'g':
+                $val .= ' Gb';
                 break;
-            case "m":
-                $val .= " Mb";
+            case 'm':
+                $val .= ' Mb';
                 break;
-            case "k":
-                $val .= " Kb";
+            case 'k':
+                $val .= ' Kb';
                 break;
         }
 
@@ -166,11 +166,11 @@ class NerbUtility
     *   @param      array $haystack
     *   @return     mixed the key of the array if found
     */
-    public static function recursive_array_search($needle, $haystack)
+    public static function recursive_array_search( $needle, $haystack )
     {
-        foreach ($haystack as $key => $value) {
+        foreach ( $haystack as $key => $value ) {
             $current_key=$key;
-            if ($needle===$value or ( is_array($value) && recursive_array_search($needle, $value) !== false )) {
+            if ( $needle===$value or (  is_array( $value ) && recursive_array_search( $needle, $value ) !== false  ) ) {
                 return $current_key;
             }
         }
@@ -191,7 +191,7 @@ class NerbUtility
     *   @param      string $title name to display if using multiple inspections
     *   @return     void
     */
-    public static function inspect($var, $die = false, $title = "")
+    public static function inspect( $var, $die = false, $title = '' )
     {
 
         // stop all output buffering and clear contents so hopefully the error is displayed on a clean page
@@ -203,34 +203,34 @@ class NerbUtility
         // gets the trace data that lead up to the error
         $trace_data = debug_backtrace();
 
-        if (SHOW_TRACE) {
-            //array_shift ( $trace_data );
-            $trace_data = array_reverse($trace_data);
+        if ( SHOW_TRACE ) {
+            //array_shift (  $trace_data  );
+            $trace_data = array_reverse( $trace_data );
 
-            $count = count($trace_data);
+            $count = count( $trace_data );
             $count = 1;
-            $trace = "<p><strong>Trace</strong></p>"
-                    ."<div>#0 {INIT}</div>";
+            $trace = '<p><strong>Trace</strong></p>'
+                    .'<div>#0 {INIT}</div>';
 
-            foreach ($trace_data as $node) {
-                $trace .= "<div>#".$count++.":&nbsp;".str_replace(APP_PATH, "", $node['file'])." (<strong>".$node['line']."</strong>) &mdash; ".$node['class'].$node['type'].$node['function']."()</div>";
+            foreach ( $trace_data as $node ) {
+                $trace .= '<div>#'.$count++.':&nbsp;'.str_replace( APP_PATH, '', $node['file'] ).' ( <strong>'.$node['line'].'</strong> ) &mdash; '.$node['class'].$node['type'].$node['function'].'()</div>';
             }
         } else {
-            $node = array_shift($trace_data);
-            $trace = "<p><strong>Inspect: ".$title."</strong></p>";
-            $trace .= "<div><code>".str_replace(APP_PATH, "", $node['file'])." (".$node['line'].")</code></div>";
+            $node = array_shift( $trace_data );
+            $trace = '<p><strong>Inspect: '.$title.'</strong></p>';
+            $trace .= '<div><code>['.str_replace( APP_PATH, '', $node['file'] ).' ( '.$node['line'].' )]</code></div>';
         }
 
         echo $trace;
         echo '<pre>';
-        print_r($var);
+        print_r( $var );
         echo '</pre>';
         echo '<hr>';
 
         // end outbuffering and clear buffer
         ob_flush();
 
-        if ($die) die;
+        if ( $die ) die;
         
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -258,7 +258,7 @@ class NerbUtility
     */
     public static function paren( string $string )
     {
-        return "(".$string.")";
+        return '('.$string.')';
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -275,7 +275,7 @@ class NerbUtility
     */
     public static function brace( string $string )
     {
-        return "{".$string."}";
+        return '{'.$string.'}';
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -292,7 +292,7 @@ class NerbUtility
     */
     public static function bracket( string $string )
     {
-        return "[".$string."]";
+        return '['.$string.']';
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

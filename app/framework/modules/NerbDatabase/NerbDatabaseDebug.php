@@ -38,7 +38,7 @@ class NerbDatabaseDebug extends NerbDatabase
     public function __construct( $database_handle, $params )
     {
         // set credentials for connecting
-        $this->params["connection"] = $params;
+        $this->params['connection'] = $params;
 
         // give this database connection a name for other classes to retrieve it
         $this->database_handle = $database_handle;
@@ -89,37 +89,37 @@ class NerbDatabaseDebug extends NerbDatabase
     {
         if ($print) {
             if (empty($this->query)) {
-                $string = "<P>No queries have been made</P>";
+                $string = '<P>No queries have been made</P>';
             }
             $count = 0;
             print_r($this->_profile);
 
             foreach ($this->query as $query) {
-                $string .= "<LI>(<I>".$query." [calledBy]</I>) "
-                                .nl2br(Nerb_Format::tag($query["string"], 'code'));
+                $string .= '<Lcode>(<code>'.$query.' [calledBy]</code>) '
+                                .nl2br(Nerb_Format::tag($query['string'], 'code'));
 
                 // additional debugging information
                 if ($this->_debug) {
                     $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Connect time</CODE>: '.
-                        number_format($this->_profile[$count]["connect"]-$this->_profile[$count]["start"], 7)." ms";
+                        number_format($this->_profile[$count]['connect']-$this->_profile[$count]['start'], 7).' ms';
                     $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Query time</CODE>: '.
-                        number_format($this->_profile[$count]["query_time"]-$this->_profile[$count]["connect"], 7)." ms";
+                        number_format($this->_profile[$count]['query_time']-$this->_profile[$count]['connect'], 7).' ms';
                     $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Total time</CODE>: '.
-                        number_format($this->_profile[$count]["query_time"]-$this->_profile[$count]["start"], 7)." ms";
-                    $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Rows</CODE>: '.$this->_profile[$count]["affected_rows"];
+                        number_format($this->_profile[$count]['query_time']-$this->_profile[$count]['start'], 7).' ms';
+                    $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Rows</CODE>: '.$this->_profile[$count]['affected_rows'];
                     $string .= '<BR /><BR />';
                 }
-                $string .="</LI>";
+                $string .='</Lcode>';
                 ++$count;
             }
             $string = Nerb_Format::tag($string, 'ol');
-            echo "<H3>Query made to database '<I>".$this->_connection["name"]."</I>'.</H3>";
+            echo '<H3>Query made to database <code>'.$this->_connection['name'].'</code>.</H3>';
 
-            echo str_ireplace("<BR />", "<BR />&nbsp;&nbsp;&nbsp;", $string);
+            echo str_ireplace('<BR />', '<BR />&nbsp;&nbsp;&nbsp;', $string);
 
                 // additional debugging information
             if ($this->_debug) {
-                echo "Total queries:<CODE> $count</CODE><BR />";
+                echo 'Total queries:<CODE> $count</CODE><BR />';
             }
         }
 

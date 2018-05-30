@@ -24,19 +24,10 @@
 
 
 // defines the software constants
-define( "SOFTWARE", "Nerb Application Framework" );
-define( "VERSION", "1.0" );
-define( "COPYRIGHT", "Copyright &copy;2001-".date( "Y" )." Oddwick Ltd." );
-define( "LICENSE", "https://www.oddwick.com/docs/license" );
-
-
-// define framework for working directories
-define( "FRAMEWORK", realpath( dirname( __FILE__ ) ) );
-
-
-// load Nerb configuration and superglobals
-require_once(  FRAMEWORK."/config.php"  );
-
+define( 'SOFTWARE', 'Nerb Application Framework' );
+define( 'VERSION', '1.0' );
+define( 'COPYRIGHT', 'Copyright &copy;2001-'.date( 'Y' ).' Oddwick Ltd.' );
+define( 'LICENSE', 'https://www.oddwick.com/docs/license' );
 
 
 /**
@@ -114,17 +105,20 @@ class Nerb
     */
     public static function init( array  $params = array()  )
     {
+		
+		//load configuration file
+		self::loadConfig();
 
         // add directories to the path
-        self::$path["root"] = FRAMEWORK;
-		self::$path["modules"] = MODULES;
+        self::$path['root'] = FRAMEWORK;
+		self::$path['modules'] = MODULES;
         $files = scandir( MODULES );
 		
         
 		// set include paths
         foreach( $files as $file ){
-			if( $file != "." && $file !=".." && is_dir( MODULES ."/". $file )){
-		        self::$path[$file] = MODULES ."/". $file;
+			if( $file != '.' && $file !='..' && is_dir( MODULES .'/'. $file )){
+		        self::$path[$file] = MODULES .'/'. $file;
 			}
         } // end foreach
         
@@ -137,15 +131,17 @@ class Nerb
 		
         
         // set the current url and path root
-        if ( isset( $params["URL"] ) ) {
-            self::$url=$params["URL"];
-        } else {
-            self::$url=$_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].(  str_replace( $_SERVER["DOCUMENT_ROOT"], "", self::$path["root"] )  );
-        } // end if
+        self::$url = $params['URL'] ?? $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].(  str_replace( $_SERVER['DOCUMENT_ROOT'], '', self::$path['root'] )  );
         
         
         // Load required classes
-        self::loadClass( "NerbError" );
+        self::loadClass( 'NerbError' );
+        
+        // sets the default exception handler for all uncaught errors
+        if( CATCH_EXCEPTIONS ) set_exception_handler( array('Nerb', 'exception_handler'));
+		
+        // sets the default error handler to catch all errors
+		if( CATCH_ERRORS ) set_error_handler( array('Nerb', 'error_handler'));
 
         // begin output buffering
         ob_start();
@@ -153,6 +149,136 @@ class Nerb
         return;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    #################################################################
+
+    //      !Exceptions, Errors & logs
+
+    #################################################################
+
+
+
+    /**
+     * simple method for adding to log files
+     *
+	 * @access public
+	 * @static
+	 * @param mixed $log_file
+	 * @param mixed $message
+	 * @param mixed $prefix (default: null)
+	 * @return void
+	 */
+	public static function log( string $log_file, string $message, string $prefix = null )
+	{
+		
+		// clean up message
+		$message = html_entity_decode( strip_tags( $message ));
+		
+		// create timestamp object with microtime
+		$micro = microtime( true );
+		$formated = sprintf( '%06d',( $micro - floor( $micro )) * 1000000 );
+		$timestamp = new DateTime( date( 'Y-m-d H:i:s.'. $formated , $micro ) );
+		
+		// build entry string with prefix if given
+		$entry = ( $prefix ? $prefix.' ' : null ).'['.$timestamp->format( 'D M d h:m:s.u Y' ).'] '.$message.PHP_EOL;
+		
+		// append contents to file
+		$status = file_put_contents ( $log_file , $entry , FILE_APPEND | LOCK_EX );
+		if ( !$status ) 
+			throw new NerbError( 'Unable to add entry to log');
+		return $status;
+			
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+    *   the default error handler to make pretty error messages
+    *
+    *   @access     public
+	* 	@static
+    *   @param      Exception $exception
+    *   @return     void
+    *   @throws     NerbError
+    */
+	public static function exception_handler( $exception ): void
+	{
+		//throws a general error for all uncaught exceptions
+		throw new NerbError( '<strong>Uncaught exception -> </strong> '.$exception->getMessage(), $exception->getTrace() );
+		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+    *   class for logging or supressing errors
+    *
+    *   @access     public
+	* 	@static
+    *   @param      Exception $exception
+    *   @return     void
+    *   @throws     NerbError
+    */
+	public static function error_handler( int $error_number, string $errstr, string $errfile, string $errline, array $errcontext )
+	{
+		if( USE_ERROR_LOGGING ){
+
+			// determines if full path is shown or masked with APP_PATH
+			if ( !SHOW_FULL_PATH ) {
+				$errfile = str_ireplace(FRAMEWORK, '', $errfile);
+			} 
+			
+			// switch through error number to determine error type and 
+			// whether or not it is logged
+			switch ( $error_number ){
+				
+				case 1:
+				case 256:
+					if( LOG_ALL_ERRORS == false ) return;
+					$prefix = 'ERROR ';
+					break;
+					
+				case 2:
+				case 512:
+					if( LOG_ALL_WARNINGS == false ) return;
+					$prefix = 'WARNING ';
+					break;
+				
+				case 4:
+					$prefix = 'PARSE ';
+					break;
+				
+				case 8:
+				case 1024:
+					if( LOG_ALL_NOTICE == false ) return;
+					$prefix = 'NOTICE ';
+					break;
+				
+				default:
+					$prefix = 'OTHER';
+					break;				
+			}// end switch
+			
+			// create error string
+			// WARNING | ERROR | NOTICE [date] file (line) string
+			$error = $errfile . ' (' . $errline . ') -- ' .$errstr;
+			
+			// log error to file
+			self::log( ERROR_LOG , $error , $prefix );
+			
+		} // end if
+				
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 
 
@@ -178,13 +304,13 @@ class Nerb
     {
 
         if ( !is_string( $handle ) ) {
-            throw new NerbError( $handle." must be a string." );
+            throw new NerbError( $handle.' must be a string.' );
         }
         if ( array_key_exists( $handle, self::$registry ) ) {
-            throw new NerbError( "An object named '<code>".$handle."::".get_class( self::$registry[ $handle ] )."</code>'already exists in the registry" );
+            throw new NerbError( 'An object named <code>['.$handle.'::'.get_class( self::$registry[ $handle ] ).']</code> already exists in the registry' );
         }
         if ( !is_object( $object ) ) {
-            throw new NerbError( "Can not register '<code>'.$handle.'</code>'because is not an object." );
+            throw new NerbError( 'Can not register <code>['.$handle.']</code> because is not an object.' );
         }
         
         self::$registry[ $handle ] = $object;
@@ -214,19 +340,18 @@ class Nerb
 
 
     /**
-    *   determines if class has been registered
+    *   determines if class has been registered and returns the name of the object
     *
     *   @access     public
 	* 	@static
     *   @param      string $class
-    *   @return     Bool
+    *   @return     mixed
     */
-    public static function isClassRegistered( $class )
+    public static function isClassRegistered( string $class )
     {
         foreach ( self::$registry as $handle => $object ) {
-            if ( is_a( $object, $class ) ) {
-                return true;
-            }
+            if ( is_a( $object, $class ) ) 
+            	return $handle;
         }
 
         return false;
@@ -252,7 +377,7 @@ class Nerb
         if ( self::isRegistered( $handle ) ) {
             return self::$registry[ $handle ];
         } else {
-            throw new NerbError( "Object <code>".$handle."</code> is not registered" );
+            throw new NerbError( 'Object <code>['.$handle.']</code> is not registered' );
         } // end if
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -272,7 +397,7 @@ class Nerb
     /**
     *   loads a class definition for use
     *
-    *   A class must be formatted in the form of "Class.php"and contain class "Class"as specified by
+    *   A class must be formatted in the form of 'Class.php' and contain class 'Class' as specified by
     *   $class, otherwise an exception will be thrown.
     *
     *   If a directory is specified, loadClass will first search that directory, then append the directory to the path, an if not found,
@@ -293,13 +418,13 @@ class Nerb
         }
 
         // load class file
-        self::loadFile( $class.".php", $dir );
+        self::loadFile( $class.'.php', $dir );
 
         // if the class was contained in the file, return true otherwise throw an error
         if ( class_exists( $class ) ) {
             return true;
         } else {
-            throw new NerbError( "Class '<code>".$class."</code>'was not contained in $class.php" );
+            throw new NerbError( 'Class <code>['.$class.']</code> was not contained in $class.php' );
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -327,7 +452,7 @@ class Nerb
 
         // set relative path
         if ( $dir ) {
-            $file = $dir."/".$file;
+            $file = $dir.'/'.$file;
         }
         
         if ( file_exists( $file ) ) {
@@ -336,11 +461,11 @@ class Nerb
             if ( $included = self::searchPath( $file ) ) {
                 return include $included;
             } else {
-                $error = "Could not load file '<code>".$file."</code>'using the following include paths:<br /><code>";
+                $error = 'Could not load file <code>'.$file.'</code> using the following include paths:<br /><code>';
                 foreach ( self::$path as $path ) {
-                    $error .= "&nbsp;&nbsp;&nbsp;&nbsp;".$path.'<br />';
+                    $error .= '&nbsp;&nbsp;&nbsp;&nbsp;'.$path.'<br />';
                 }
-                $error .= "</code> Please check to ensure the path specified is correct or that the file exists";
+                $error .= '</code> Please check to ensure the path specified is correct or that the file exists';
                 throw new NerbError( $error );
             }
         }// end if
@@ -348,7 +473,6 @@ class Nerb
         return false;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
@@ -389,7 +513,99 @@ class Nerb
 	
 	
 
-    #################################################################
+   /**
+    *   loads and parses the config.ini file
+    *
+    *   @access     private
+	* 	@static
+    *   @return     void
+    */
+    private static function loadConfig(): bool
+    {
+		
+		define( 'FRAMEWORK', realpath(__DIR__) );
+		
+		if( !is_file( FRAMEWORK.'/config.ini'  )){
+			echo 'Execution terminated -<br>A required configuration file could not be found.';
+			exit;
+		}
+
+		// load and parse ini file
+		$data = parse_ini_file( FRAMEWORK.'/config.ini', false, INI_SCANNER_TYPED );
+		
+		if ( !is_array( $data )){
+			echo 'Execution terminated -<br>Invalid file given for configuration.';
+			exit;
+		}
+		
+		// cycle through ini and convert each key to UPERCASE constant
+		foreach( $data as $key => $value ){
+			define( strtoupper($key), $value ); 
+		} // end foreach
+		
+		return true;	
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+   /**
+    *   loads additional config files specific to the app
+    *
+    *   @access     public
+	* 	@static
+    *   @return     bool
+    */
+    public static function addConfig( string $ini, string $path ): bool
+    {
+		
+		// error checking to ensure file exists
+		// if full path is given
+		if( is_file( $path.'/'.$ini )) {
+			$ini_file = $ini;
+			
+		// if path is relative to app root
+		} else if ( is_file( APP_PATH.$path.'/'.$ini )) {
+			$ini_file = APP_PATH.$path.'/'.$ini ;
+	
+		// oops. 
+		} else {
+            throw new NerbError( 'Could not locate given configuration file <code>['.$ini.']</code> using: <br><code>['.$path.']</code><br><code>[APP_PATH'.$path.']</code>' );
+		}
+
+		// load and parse ini file
+		$data = parse_ini_file( $ini_file, false, INI_SCANNER_TYPED );
+		
+		if ( empty( $data )) {
+            throw new NerbError( 
+                'Configuration file <code>[$ini]</code> appears to be empty.'
+             );
+		}
+		
+		if ( !is_array( $data )) {
+            throw new NerbError( 
+                'Could not parse configuration file <code>['.$ini.']</code>.<br /> 
+					Make that it is formatted properly and conforms to required standards. '
+             );
+		}
+		
+		// cycle through ini and convert each key to UPERCASE constant
+		foreach( $data as $key => $value ){
+			define( strtoupper($key), $value ); 
+		} // end foreach
+		
+		return true;	
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+   #################################################################
 
     //            !PATH METHODS
 
@@ -413,7 +629,7 @@ class Nerb
 
         // check to see if the path is a valid directory
         if ( !is_dir( $path ) )
-            throw new NerbError( "Set path error -- '<code>$path</code>' is not a valid path." );
+            throw new NerbError( 'Set path error -- <code>[$path]</code> is not a valid path.' );
         
         self::$path[$alias] = $path;
         
@@ -451,10 +667,9 @@ class Nerb
     */
     private static function searchPath( $file )
     {
-
         foreach ( self::$path as $value ) {
-            if ( file_exists( $value."/".$file ) ) {
-                return realpath( $value."/".$file );
+            if ( file_exists( $value.'/'.$file ) ) {
+                return realpath( $value.'/'.$file );
             }// end if
         }// end foreach
 
@@ -485,11 +700,11 @@ class Nerb
     {
 
         // if no url is given, the it is assumed that a jump to root url ( / ) is intended
-        $url = (  !$url  ) ? "/" : $url;
+        $url = (  !$url  ) ? '/' : $url;
 
         // this is a microsoft refresh BUG
         if ( self::isMicrosoftBrowser() ) {
-            Header( "Location: $url" );
+            Header( 'Location: $url' );
         } else {
             echo "<META HTTP-EQUIV='Refresh' CONTENT='0; URL=".$url."' />\n";
         }
@@ -511,7 +726,7 @@ class Nerb
     public static function isMicrosoftBrowser()
     {
         global $HTTP_USER_AGENT;
-        if ( strstr( strtolower( $HTTP_USER_AGENT ), "msie" ) ) {
+        if ( strstr( strtolower( $HTTP_USER_AGENT ), 'msie' ) ) {
             return true;
         } else {
             return false;
@@ -538,7 +753,7 @@ class Nerb
     *   @param      string $title (name to display if using multiple inspections)
     *   @return     void
     */
-    public static function inspect( $var, bool $die = false, string $title = "" )
+    public static function inspect( $var, bool $die = false, string $title = '' )
     {
 
         // stop all output buffering and clear contents so hopefully the error is displayed on a clean page
@@ -556,16 +771,16 @@ class Nerb
 
             $count = count( $trace_data );
             $count = 1;
-            $trace = "<p><strong>Trace</strong></p>"
-                    ."<div>#0 {INIT}</div>";
+            $trace = '<p><strong>Trace</strong></p>'
+                    .'<div>#0 {INIT}</div>';
 
             foreach ( $trace_data as $node ) {
-                $trace .= "<div>#".$count++.":&nbsp;".str_replace( APP_PATH, "", $node['file'] )." ( <strong>".$node['line']."</strong> ) &mdash; ".$node['class'].$node['type'].$node['function']."()</div>";
+                $trace .= '<div>#'.$count++.':&nbsp;'.str_replace( APP_PATH, '', $node['file'] ).' ( <strong>'.$node['line'].'</strong> ) &mdash; '.$node['class'].$node['type'].$node['function'].'()</div>';
             }
         } else {
             $node = array_shift( $trace_data );
-            $trace = "<p><strong>Inspect: ".$title."</strong></p>";
-            $trace .= "<div><code>".str_replace( APP_PATH, "", $node['file'] )." ( ".$node['line']." )</code></div>";
+            $trace = '<p><strong>Inspect: '.$title.'</strong></p>';
+            $trace .= '<div><code>['.str_replace( APP_PATH, '', $node['file'] ).' ( '.$node['line'].' )]</code></div>';
         }
 
         echo $trace;

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html lang='<?= $this->params["language"]; ?>'>
+<head>
+
+<meta http-equiv='content-type' content='text/html; charset=<?= $this->params["charset"]; ?>'>
+
+<!-- Set the viewport width to device width for mobile -->
+<meta name='viewport' content='<?= $this->params["viewport"]; ?>' />
+
+<!-- For third-generation iPad with high-resolution Retina display: -->
+<link rel='apple-touch-icon' sizes='144x144' href='/images/favicons/apple-touch-icon-144x144-precomposed.png'>
+<!-- For iPhone with high-resolution Retina display: -->
+<link rel='apple-touch-icon' sizes='114x114' href='/images/favicons/apple-touch-icon-114x114-precomposed.png'>
+<!-- For first- and second-generation iPad: -->
+<link rel='apple-touch-icon' sizes='72x72' href='/images/favicons/apple-touch-icon-72x72-precomposed.png'>
+<!-- For non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
+<link rel='apple-touch-icon' href='/images/favicons/apple-touch-icon-precomposed.png'>
+
+
+<!-- Link -->
+<link rel='icon' href='/images/favicon.ico' type='image/x-icon' />
+<?PHP 
+	foreach( $this->params["rel"] as $name =>  $url ){
+		if ($content){
+			echo "<link rel='".$name."' href='".$url."' />";
+		}
+	}
+?>
+
+<!-- Metadata -->
+<?PHP 
+	foreach( $this->params["meta"] as $name =>  $content ){
+		if ($content){
+			echo "<meta name='".$name."' content='".$content."' />";
+		}
+	}
+?>
+
+<title><?= $this->params["title"]; ?></title>
+
+<!-- Included CSS Files -->
+<?PHP 
+	foreach( $this->params["style"] as $link ){
+		if ($link){
+			echo "<link rel='stylesheet' type='text/css' href='".$link."' />";
+		}
+	}
+?>
+
+
+<!-- Included Script Files -->
+<?PHP 
+	foreach( $this->params["script"] as $link ){
+		if ($link){
+			echo "<script type='text/javascript' src='".$link."'></script>\n";
+		}
+	}
+?>
+
+<!-- Set Base -->
+<?PHP if( $this->params["base"] ){ ?>
+	<base href='<?= $this->params["base"];  ?>' />
+<?PHP } ?>
+<!-- IE Fix for HTML5 Tags -->
+<!--[if lt IE 9]>
+		<script src='https://html5shiv.googlecode.com/svn/trunk/html5.js'></script>
+<![endif]-->
+
+</head>
+<body>
+<!-- begin content injection -->
+

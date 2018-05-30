@@ -782,7 +782,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for bound tables and is intended to rename an existing table
 			if($this->isBound())
 				throw new NerbError("This table object is already bound to '<b>$this->_table</b>'.   "
-										.'Did you mean to call <code><b>rename()</code></b>?');
+										.'Did you mean to call <code>[<b>rename()]</code></b>?');
 			if($this->_database->isTable($table))
 				throw new NerbError("Cannot create table.   Table '<b>$table</b>' already exists in the database. ");
 			
@@ -811,7 +811,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for adding fields to unbound new tables
 			if($this->isBound())
 				throw new NerbError('This table object is bound.  '.
-										'For bound table objects use <code><b>insertField()</b></code>?');
+										'For bound table objects use <code>[<b>insertField()</b>]</code>?');
 
 			// if length, put in parens
 			$length=$length>0?"( $length )":NULL;
@@ -846,10 +846,10 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for aliasing fields in unbound new tables
 			if($this->isBound())
 				throw new NerbError('This table object is bound.  '.
-										'For bound table objects use <code><b>rename()</b></code>?');
+										'For bound table objects use <code>[<b>rename()</b>]</code>?');
 			// sure that this is a new table
 			if(empty($this->_table))
-				throw new NerbError('Cannot alias fields because no table has been declared.  Use <code><b>createTable()</b></code> to define a new table');
+				throw new NerbError('Cannot alias fields because no table has been declared.  Use <code>[<b>createTable()</b>]</code> to define a new table');
 			// make sure that some columns have been defined
 			if(empty($this->_columns))
 				throw new NerbError('Cannot alias fields because no fields have been declared');
@@ -1075,7 +1075,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for bound tables and is intended to rename an existing table
 			if(!$this->isBound())
 				throw new NerbError('This table object is unbound.  '.
-										'Did you mean to call <code><b>addIndex()</code></b>?');
+										'Did you mean to call <code>[<b>addIndex()]</code></b>?');
 		
 			$this->_query[] = "ALTER TABLE `$this->_table` DROP INDEX `$field` ";
 			$this->_database->query($this);
@@ -1102,7 +1102,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for bound tables and is intended to rename an existing table
 			if(!$this->isBound())
 				throw new NerbError('This table object is unbound.  '.
-										'Did you mean to call <code><b>createTable()</code></b>?');
+										'Did you mean to call <code>[<b>createTable()]</code></b>?');
 
 			if(!$overwrite && $this->_database->isTable($newName))
 				throw new NerbError("Table '<b>$newName</b>' already exists in the database.".
@@ -1140,7 +1140,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for bound tables and is intended to rename an existing table
 			if(!$this->isBound())
 				throw new NerbError('This table object is unbound.  '.
-										'Did you mean to call <code><b>createTable()</code></b>?');
+										'Did you mean to call <code>[<b>createTable()]</code></b>?');
 		
 			$this->_query[] = "ALTER TABLE `$this->_table` RENAME `$newName` ";
 			$this->_database->query($this);
@@ -1166,7 +1166,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for bound tables and is intended to rename an existing table
 			if(!$this->isBound())
 				throw new NerbError('This table object is unbound.  '.
-										'Did you mean to call <code><b>createTable()</code></b>?');
+										'Did you mean to call <code>[<b>createTable()]</code></b>?');
 										
 			if(!$this->_attribs[$field])
 				throw new NerbError("Cannot rename field.  Field '<b>$field</b>' is not defined <p>".
@@ -1221,7 +1221,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for bound tables
 			if(!$this->isBound())
 				throw new NerbError('Cannot set autoincrement from unbound table objects'.
-										'Did you mean to call <code><b>setAutoincrement()</code></b>?');
+										'Did you mean to call <code>[<b>setAutoincrement()]</code></b>?');
 		
 			$this->_query[] = "ALTER TABLE `$this->_table` PACK_KEYS =0 CHECKSUM =0 DELAY_KEY_WRITE =0 AUTO_INCREMENT =$value";
 			$this->_database->query($this);
@@ -1248,7 +1248,7 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
 			// this method can only be used for bound tables and is intended to alter table structure
 			if(!$this->isBound())
 				throw new NerbError('This table object is unbound.  '.
-										'Did you mean to call <code><b>addField()</code></b>?');
+										'Did you mean to call <code>[<b>addField()]</code></b>?');
 			
 			$length = $length>0?"($length)":NULL;
 			if($default) $default = $this->_database->quoteInto("DEFAULT ? ", $default);
