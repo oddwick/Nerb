@@ -30,8 +30,17 @@ class NerbPage
      * params
      * 
      * (default value: array(
-     * 	    'header' => MODULES.'/NerbPage/header.phtml',    
-     * 	    'footer' => MODULES.'/NerbPage/footer.phtml',    
+     * 	    'browser_check' => false,
+     * 	    'use_error_pages' => false,
+     * 	    'cache_control' => public,  // public | private | private_no_expire | nocache
+     * 	    'asynch_scripts' => false,
+     * 	    'scripts_in_header' => true,   
+     * 	    'header' => MODULES.'/NerbPage/includes/header.phtml',    
+     * 	    'footer' => MODULES.'/NerbPage/includes/footer.phtml',    
+     * 	    'error_100' => MODULES.'/NerbPage/includes/100.phtml',    
+     * 	    'error_403' => MODULES.'/NerbPage/includes/403.phtml',    
+     * 	    'error_404' => MODULES.'/NerbPage/includes/404.phtml',    
+     * 	    'error_500' => MODULES.'/NerbPage/includes/500.phtml',
      * 	    'title' => '',
      * 	    'charset' => 'UTF-8',
      * 		'language' => 'EN',
@@ -79,12 +88,22 @@ class NerbPage
      * 
      *     ))
      * 
-     * @var string
+     * @var array
      * @access protected
      */
     protected $params = array(
-	    'header' => MODULES.'/NerbPage/header.phtml',    
-	    'footer' => MODULES.'/NerbPage/footer.phtml',    
+	    'browser_check' => false,
+	    'use_error_pages' => false,
+	    'cache_control' => "public", 
+	    'asynch_scripts' => false,
+	    'scripts_in_header' => true,
+	    'preprocess' => false,   
+	    'header' => MODULES.'/NerbPage/includes/header.phtml',    
+	    'footer' => MODULES.'/NerbPage/includes/footer.phtml',    
+	    'error_100' => MODULES.'/NerbPage/includes/100.phtml',    
+	    'error_403' => MODULES.'/NerbPage/includes/403.phtml',    
+	    'error_404' => MODULES.'/NerbPage/includes/404.phtml',    
+	    'error_500' => MODULES.'/NerbPage/includes/500.phtml',
 	    'title' => '',
 	    'charset' => 'UTF-8',
 		'language' => 'EN',
@@ -129,7 +148,6 @@ class NerbPage
 	    'style' => array(),
 	    'base' => null,	        
 	    'alternate' => array(),
-
     );
 
 	/**
@@ -181,9 +199,17 @@ class NerbPage
 	 * @access protected
 	 */
 	protected $data = array();
+
+	/**
+	 * error (error code)
+	 * 
+	 * (default value: null)
+	 * 
+	 * @var int
+	 * @access protected
+	 */
+	protected $error = null;
 	
-
-
 
     /**
      *  Constructor initiates Page object
@@ -246,7 +272,23 @@ class NerbPage
         //Nerb::inspect(  $this->params[ $this->params_key ], true  );
         
         
+        if( $this->params['browser_check'] ){
+	        $this->browserCheck();
+        }
+        
+		// this sends header commands to prevent the browser from caching contents and 
+	    // must revalidate.  this is best for pages that one must be logged in to view
+	    if( $this->params['cache_control'] ){
+		    session_cache_limiter( $this->params['cache_control'] );
+		    //header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+			//header("Pragma: no-cache"); // HTTP 1.0.
+			//header("Expires: 0"); // Proxies.
+		}
 
+	    
+	    
+
+        
         return $this;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -274,6 +316,62 @@ class NerbPage
 		}
 		return $config = $array;
 		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * browserCheck function.
+     * 
+     * This function checks to see if the browser passes the minimum reqirements of the site and is set using the following
+     * variables set in the page.ini file:
+     *	(bool) browser_check
+     *	(bool) browser_kill_on_fail
+     *
+     * minimum versions are set on a per browser basis in page.ini and a cookie/session variable is set once the initial 
+     * browser check has been conducted.  	
+     * 
+     * @access protected
+     * @return void
+     */
+    protected function browserCheck()
+    {
+	    // if the check has already been conducted and passed, return
+	    // if a check has failed, and browser_fail is set set to kill, do not recheck
+	    // otherwise 
+	    if( $_SESSION['browser_check'] == 'pass' ){
+		    return;
+		    
+		} elseif( $_SESSION['browser_check'] == 'fail' && $this->params['browser_fail'] == 'error' ){
+			// set error to serve bad browser page
+			$this->error = 100;
+			
+	    } else {
+		    // get browser information
+		    // this requires browsercap.ini to be set up on the server and can be
+		    // checked through the phpinfo() function
+			$browser = get_browser();
+			if( $this->params[ 'browser' ][ $browser->browser ] > $browser->version ){
+				
+				// set session var to indicate browser failure
+				$_SESSION['browser_check'] = 'fail';
+				// set error to serve bad browser page
+				if( $this->params['browser_kill_on_fail'] )	$this->error = 100;
+				
+			} else {
+				$_SESSION['browser_check'] = 'pass';
+			}
+			
+			// set flags to indicate what type of device the user is on
+			// to determine if you want to serve mobile specific versions of the site
+			$_SESSION['browser'] = $browser->browser;
+			$_SESSION['browser_version'] = $browser->version;
+			$_SESSION['browser_device'] = $browser->device;
+			$_SESSION['browser_platform'] = $browser->platform;
+			
+	    } // end if
+	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -360,9 +458,11 @@ class NerbPage
     public function render()
     {
 	    
+	    // clear any buffers
 	    ob_end_clean();
 
 	    ob_start();
+	    
 	    // include header
 /*
 	    $file = file_get_contents( $this->params['header'] );
@@ -378,9 +478,55 @@ class NerbPage
 	    
 	    if( $this->contentHeader ) require $this->contentHeader;
 	    
-	    foreach( $this->content as $key => $value ){
-		    require $value;
-	    } // end foreach
+	    if( $this->error || ( empty( $this->content ) && $this->params['use_error_pages'] )){
+	    	
+	    	switch( $this->error ){
+		    	
+		    	// forbiden overrides a 404
+		    	// unsupported browser	
+		    	case 100:
+			    	require $this->params['error_100'];
+		    		break;
+		    		
+		    	case 403:
+			    	require $this->params['error_403'];
+		    		break;
+		    		
+		    	// page not found	
+		    	case 404:
+			    	require $this->params['error_404'];
+		    		break;
+		    		
+		    	// service error and unspecified errors
+		    	case 500:
+		    	default:
+			    	require $this->params['error_500'];
+		    	
+	    	} // end swich
+	    	
+	    } else {
+		    
+		    if( $this->params['preprocess'] ){
+			    
+			    if( is_array( $this->content ) && count( $this->content ) > 0 ){ 
+				    foreach( $this->content as $value ){
+						    echo $value;
+				    } // end foreach
+			    } else {
+				    	require $this->params['error_404'];
+			    } // end if
+			    
+		    } else {
+			    foreach( $this->content as $key => $value ){
+			    	if( !is_dir( $value ) && file_exists( $value )){
+					    require $value;
+			    	} else {
+				    	require $this->params['error_404'];
+			    	}
+			    } // end foreach
+		    }
+	    }// end if
+	    
 	    
 	    if( $this->contentFooter ) require $this->contentFooter;
 	    require $this->params['footer'];
@@ -439,11 +585,32 @@ class NerbPage
      */
     public function content( $content )
     {
- 		if( is_array( $content )){
-	 		$this->content = $content;
- 		} else {
-	 		$this->content[] = $content;
- 		}
+	    
+	    if( $this->preprocess ){
+		    
+		    // catch the output buffer
+		    ob_start();		    
+		    
+		    // include the content or produce 404 error
+	    	if( !is_dir( $content ) && file_exists( $content )){
+			    require $content;
+	    	} else {
+		    	require $this->params['error_404'];
+	    	}
+		    
+			// add contents of output buffer to content array 
+		    $this->content[] = ob_get_contents();
+		    
+		    // clear buffer
+		    ob_end_clean();
+		    
+	    } else {
+	 		if( is_array( $content )){
+		 		$this->content = $content;
+	 		} else {
+		 		$this->content[] = $content;
+	 		}
+	    }
  		
 		return $this;
 		
@@ -545,6 +712,58 @@ class NerbPage
     public function footer( string $file )
     {
  		$this->params['footer'] = $file;
+		return $this;
+	
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * error function (500 page error).
+     * 
+     * @access public
+     * @return void
+     */
+    public function error()
+    {
+ 		$this->error = 500;
+		return $this;
+	
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    /**
+     * pageNotFound function (404 page error).
+     * 
+     * @access public
+     * @return void
+     */
+    public function notFound()
+    {
+ 		$this->error = 404;
+		return $this;
+	
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    /**
+     * unauth function (403 error).
+     * 
+     * @access public
+     * @return void
+     */
+    public function unauth()
+    {
+ 		$this->error = 403;
 		return $this;
 	
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------

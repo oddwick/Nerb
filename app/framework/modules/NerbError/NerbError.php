@@ -139,7 +139,7 @@ class NerbError extends \Exception
 
             // builds the error body block
             $content = $this->header();
-            $content .=  $this->error();
+            $content .= $this->error();
             $content .= $this->trace();
             $content .= $this->footer();
 
@@ -200,7 +200,7 @@ class NerbError extends \Exception
                     if ( $count <= count( $this->trace ) ) {
                         $trace .= ' &mdash; '.$node['class'].$node['type'].$node['function'].'()</li>';
                     } else {
-                        $trace .= '<- error';
+                        $trace .= '<strong><- ERROR</strong>';
                     }// end if
                 }
 

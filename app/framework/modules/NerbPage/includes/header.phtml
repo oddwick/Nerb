@@ -23,7 +23,7 @@
 <?PHP 
 	foreach( $this->params["rel"] as $name =>  $url ){
 		if ($content){
-			echo "<link rel='".$name."' href='".$url."' />";
+			echo "<link rel='".$name."' href='".$url."' />\n";
 		}
 	}
 ?>
@@ -32,7 +32,7 @@
 <?PHP 
 	foreach( $this->params["meta"] as $name =>  $content ){
 		if ($content){
-			echo "<meta name='".$name."' content='".$content."' />";
+			echo "<meta name='".$name."' content='".$content."' />\n";
 		}
 	}
 ?>
@@ -43,7 +43,7 @@
 <?PHP 
 	foreach( $this->params["style"] as $link ){
 		if ($link){
-			echo "<link rel='stylesheet' type='text/css' href='".$link."' />";
+			echo "<link rel='stylesheet' type='text/css' href='".$link."' />\n";
 		}
 	}
 ?>
@@ -51,9 +51,11 @@
 
 <!-- Included Script Files -->
 <?PHP 
-	foreach( $this->params["script"] as $link ){
-		if ($link){
-			echo "<script type='text/javascript' src='".$link."'></script>\n";
+	if( $this->params['scripts_in_header'] ){
+		foreach( $this->params["script"] as $link ){
+			if ($link){
+				echo "<script ".( $this->params['asynch_scripts'] ? 'async ' : NULL )."type='text/javascript' src='".$link."'></script>\n";
+			}
 		}
 	}
 ?>

@@ -600,6 +600,23 @@ abstract class NerbController
 
 	
     /**
+    *   alias of defineStructure
+    *
+    *   @access     public
+    *   @param      array $params
+    *   @return     NerbRouter
+    */
+    public function mapNodes( array $structure ) :self
+    {
+		$this->defineStructure( $structure );
+		return $this;
+		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
     *   assigns a structure to the parsed url so that it can be called by name vs node#
     *
     *   @access     public

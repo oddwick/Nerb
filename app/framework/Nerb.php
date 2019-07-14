@@ -164,6 +164,25 @@ class Nerb
 
 
     /**
+     * stops execution of the Nerb framework 
+     *
+	 * @access public
+	 * @static
+	 * @param string $msg mesage to display in the event 
+	 * @return void
+	 */
+	public static function halt( string $msg = null )
+	{
+		ob_end_clean();
+		echo "<center><H1>Maintenance!</H1>";
+		echo "<p>Be back shortly...</p></center>";
+		die;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+		
+
+
+
+    /**
      * simple method for adding to log files
      *
 	 * @access public

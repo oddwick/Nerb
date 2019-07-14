@@ -177,7 +177,7 @@ class NerbDatabaseRow implements Iterator
     {
         // check to see if field exists
         if ( !array_key_exists( $field, $this->columns ) ) {
-            throw new NerbError( 'Column <code>$field</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
+            throw new NerbError( 'Column <code>'.$field.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
         }
         return $this->data[$field];
         
@@ -199,12 +199,12 @@ class NerbDatabaseRow implements Iterator
         // error checking
         // ensure the field is a valid column
         if ( !array_key_exists( $field, $this->columns ) ) {
-            throw new NerbError( 'Column <code>$field</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
+            throw new NerbError( 'Column <code>'.$field.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
         }
 
         // primary key cant be modified
         if ( $field == $this->table->primary && !$this->primary_key_lock ) {
-            throw new NerbError( 'Primary key <code>$field</code> value cannot be changed' );
+            throw new NerbError( 'Primary key <code>'.$field.'</code> value cannot be changed' );
         }
 
         // capture old value
@@ -468,7 +468,7 @@ class NerbDatabaseRow implements Iterator
 
         // check to see if table exists or throw an error
         if ( !$database->isTable( $insert_table ) ) {
-            throw new NerbError( 'Can not save row to table <code>$table</code> because table does not exist in database.' );
+            throw new NerbError( 'Can not save row to table <code>'.$table.'</code> because table does not exist in database.' );
         } // endif
 
         // check to see if table is open and registered

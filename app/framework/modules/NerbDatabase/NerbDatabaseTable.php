@@ -290,7 +290,7 @@ class NerbDatabaseTable
         // fetch database
 		$database = Nerb::fetch( $this->database );
 
-        return $database->queryString( $this ) > 0 ? true : false;
+        return $database->query( $query ) > 0 ? true : false;
     
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -557,7 +557,6 @@ class NerbDatabaseTable
     *   @access     public
     *   @param      mixed $key
     *   @return     NerbDatabaseRow
-    *   @throws     NerbError
     */
 	public function fetchFirstRow( string $where )
     {
@@ -581,7 +580,6 @@ class NerbDatabaseTable
     *   @access     public
     *   @param      string $where 
     *   @return     NerbDatabaseRowset
-    *   @throws     NerbError
     */
 	public function fetchAll( string $where = null )
     {
@@ -1001,17 +999,20 @@ class NerbDatabaseTable
         $query = 'UPDATE '.$this->name.' SET ';
         
         // check to see if column exists in the table and format a query string
+        $count = 0;
         foreach( $values as $column => $value ){
 	        if( !$this->columnExists( $column ) )
 	        	throw new NerbError( $this->_errorString( 'The column <code>['.$column.']</code> is not in the table.<br><code>[' ) );
-
-			$query .= $column.' = '.( is_string( $value ) ? '\''.$value.'\'' : $value ).' ';
+			// add a comma to end of query string
+			if( $count > 0) $query .= ', ';
+			$query .= '`'.$column.'` = '.( is_string( $value ) ? '\''.$value.'\'' : $value );
+			$count++;
         }
         
 		if( $where ){
 			$query .= ' WHERE '.$where;
 		}
-		
+
 		// run query
 		$result = $this->_query( $query );
 		
@@ -1029,6 +1030,7 @@ class NerbDatabaseTable
     *   @param      string $column
     *   @param      string $value
     *   @return     int rows affected
+    *   @throws     NerbError
     */
 	public function replace( string $column, string $value, string $where )
     {
@@ -1104,14 +1106,14 @@ class NerbDatabaseTable
 
 		// check to see if the keys are in the table
         if ( !$row_from = $this->fetchRow( $key_from ) ) {
+	        //throw new NerbError( 'The key <code>[$from]</code> is not in table ' );
             return false;
         }
-        //throw new NerbError( 'The key <code>[$from]</code> is not in table ' );
 
         if ( !$row_to = $this->fetchRow( $key_to ) ) {
+	        //throw new NerbError( 'The key <code>[$to]</code> is not in table ' );
             return false;
         }
-        //throw new NerbError( 'The key <code>[$to]</code> is not in table ' );
 
         // extract primary
         $primary = $this->primary;
@@ -1237,14 +1239,32 @@ class NerbDatabaseTable
     *   @return     int number of rows affected
     *   @throws     NerbError
     */
-	public function deleteRow( $key )
+	public function delete( $key )
     {
         // must have a primary key
         if ( !$this->primary ) {
             throw new NerbError( $this->_errorString( 'This table does not have a primary key defined' ));
         }
 
-        return $this->delete( '`'.$this->name.'`.`'.$this->primary.'` = \''.$key.'\' LIMIT 1' );
+        return $this->deleteRows( '`'.$this->name.'`.`'.$this->primary.'` = \''.$key.'\' LIMIT 1' );
+                
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+    *   alias of delete
+    *
+    *   @access     public
+    *   @param      mixed $key primary key value
+    *   @return     int number of rows affected
+    */
+	public function deleteRow( $key )
+    {
+
+        // call delete method
+        return $this->delete( $key );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1257,9 +1277,8 @@ class NerbDatabaseTable
     *   @access     public
     *   @param      string $where WHERE clause to filter by
     *   @return     int number of rows affected
-    *   @throws     NerbError
     */
-	public function delete( $where )
+	public function deleteRows( $where )
     {
         $query = 'DELETE FROM `'.$this->name.'` WHERE '.$where;
 
@@ -1279,7 +1298,6 @@ class NerbDatabaseTable
     *   empties the table data
     *
     *   @access     public
-    *   @throws     NerbError
     *   @return     int rows affected
     */
 	public function deleteAllRows()
@@ -1376,7 +1394,6 @@ class NerbDatabaseTable
     *
     *   @access     public
     *   @param      string $where WHERE clause to filter by
-    *   @throws     NerbError
     *   @return     int
     */
 	public function count( string $where = null ): int
@@ -1403,14 +1420,13 @@ class NerbDatabaseTable
     *
     *   @access     public
     *   @param      string $where WHERE clause to filter by
-    *   @throws     NerbError
     *   @return     int
     */
 	public function sum( string $column, string $where = null )
     {
 
 		// !current
-		// error check to make sure that a sum anc be performed on this column
+		// build where statement
         if ( $where ) {
             $where = 'WHERE '.$where;
         }

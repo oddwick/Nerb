@@ -71,6 +71,26 @@ class NerbSqli extends mysqli
  *
  * @todo
  *
+ *  usage -----\
+ *
+ *	$search1 = "test1"; 
+ *	$search2 = "test2"; 
+ * 	
+ *	$_db = new db("host","user","pass","database"); 
+ *	$query = "SELECT name FROM table WHERE col1=? AND col2=?"; 
+ *	$stmt = $_db->prepare($query); 
+ *	
+ *	$stmt->mbind_param('s',$search1); 
+ *	//this second call is the cool thing!!! 
+ *	$stmt->mbind_param('s',$search2); 
+ *	
+ *	$stmt->execute(); 
+ *	
+ *	//this would still work! 
+ *	//$search1 = "test1changed"; 
+ *	//$search2 = "test2changed"; 
+ *	//$stmt->execute(); 
+ *
  */
 
 class NerbStatement extends mysqli_stmt

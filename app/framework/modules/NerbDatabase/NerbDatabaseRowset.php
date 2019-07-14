@@ -101,7 +101,7 @@ class NerbDatabaseRowset implements Iterator
             $this->rows[] = $row;
             return $this;
         } else {
-            throw new NerbError( '$row must be an instance of Row object' );
+            throw new NerbError( '<code>$row</code> must be an instance of Row object' );
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------

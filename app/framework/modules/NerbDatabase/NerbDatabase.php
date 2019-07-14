@@ -181,11 +181,14 @@ class NerbDatabase
             $this->params['connection']['socket']
 	    );
 			
-		if ( $this->database->connect_error ) {
+		if ( mysqli_connect_error( $this->database ) ) {
+			$error = mysqli_connect_error( $this->database );
+			$errno = mysqli_connect_errno( $this->database );
+			
             throw new NerbError(
-            	'Could not connect to Database host <strong>'.$this->params['connection']['host'].'</strong>. Database said:<br>'.
-            	$this->database->connect_errno.' - '.
-            	$this->database->connect_error
+            	'<p>Could not connect to Database host <strong>'.$this->params['connection']['host'].'</strong>. Database said:</p>'
+            	.'<p>'.$error.'</p>'
+            	.'<p>Error #'.$errno.'</p>'
             );
 		}
 			
@@ -288,7 +291,8 @@ class NerbDatabase
         // fetch result
         if ( !$result = $this->database->query( $query )) {
 	        $error = mysqli_error( $this->database );
-            throw new NerbError('<p>'.$error.'</p><p><code>['.$query.']</code></p>');
+	        $error_no = mysqli_errno( $this->database );
+            throw new NerbError('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
         }
         
         //insert debugging profile into array
@@ -330,7 +334,7 @@ class NerbDatabase
             if ( method_exists( $query, '__toString' ) ) { 
                 $query = $query->__toString();
             } else {
-                throw new NerbError( 'Invalid object passed.  $query object does not contain a <CODE>__toString()</CODE> method' );
+                throw new NerbError( 'Invalid object passed.  <code>$query</code> object does not contain a <code>__toString()</code> method' );
             }// end if method_exists
         }// end if is_object
 

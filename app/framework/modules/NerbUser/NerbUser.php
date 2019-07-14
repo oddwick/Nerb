@@ -229,6 +229,7 @@ class NerbUser
 		$_SESSION['auth'] = $selector;
 		$_SESSION['token'] = $validator;
 		$_SESSION[ $this->params['uid'] ] = $user_id;
+		$_SESSION[ 'uid'] = $user_id;
 		$_SESSION['begin'] = time();
 
 		// return session_id
@@ -254,7 +255,7 @@ class NerbUser
 		// create session table
 		$sessions = new NerbDatabaseTable( $database, TOKEN_TABLE );
 		
-		$sessions->delete( '`selector` = \''.$_SESSION['auth'].'\'' );
+		$sessions->deleteRows( "`selector` = '".$_SESSION['auth']."'" );
 		
 		
 		// unset the cookies
@@ -447,7 +448,7 @@ class NerbUser
 
 
 	/**
-	*	The pages called here are public and can be seen by anyone
+	*	logs a user out
 	*
 	*	@access		protected
 	*	@return		string
