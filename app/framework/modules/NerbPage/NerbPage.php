@@ -25,16 +25,19 @@
 
 class NerbPage
 {
-
     /**
      * params
      * 
      * (default value: array(
      * 	    'browser_check' => false,
      * 	    'use_error_pages' => false,
-     * 	    'cache_control' => public,  // public | private | private_no_expire | nocache
+     * 	    'cache_control' => "public", 
+     * 		'page_caching' => false,
+     * 		'cache_dir' => '/temp',
+     * 		'cache_ttl' => 3600,
      * 	    'asynch_scripts' => false,
-     * 	    'scripts_in_header' => true,   
+     * 	    'scripts_in_header' => true,
+     * 	    'preprocess' => false,   
      * 	    'header' => MODULES.'/NerbPage/includes/header.phtml',    
      * 	    'footer' => MODULES.'/NerbPage/includes/footer.phtml',    
      * 	    'error_100' => MODULES.'/NerbPage/includes/100.phtml',    
@@ -85,16 +88,18 @@ class NerbPage
      * 	    'style' => array(),
      * 	    'base' => null,	        
      * 	    'alternate' => array(),
-     * 
      *     ))
      * 
-     * @var array
+     * @var string
      * @access protected
      */
     protected $params = array(
 	    'browser_check' => false,
 	    'use_error_pages' => false,
 	    'cache_control' => "public", 
+		'page_caching' => false,
+		'cache_dir' => '/temp',
+		'cache_ttl' => 3600,
 	    'asynch_scripts' => false,
 	    'scripts_in_header' => true,
 	    'preprocess' => false,   
@@ -211,18 +216,42 @@ class NerbPage
 	protected $error = null;
 	
 
+	/**
+	 * cache (holds the cached page)
+	 * 
+	 * (default value: null)
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $cache = null;
+
+	
+	/**
+	 * filename (name of file used for caching)
+	 * 
+	 * (default value: null)
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $filename = null;
+	
+
     /**
-     *  Constructor initiates Page object
+     * __construct function.
+     * 
+     * Constructor initiates Page object
      *
      * @access public
      * @param string $ini
      * @param string $path
      * @param array $params (default: array())
+     * @throws NerbError
      * @return void
      */
     public function __construct( string $ini = '', array $params = array() )
     {
-        
         
         // error checking to make sure file exists
         // if the full path is given...
@@ -233,7 +262,7 @@ class NerbPage
         } else if( file_exists( APP_PATH . $ini ) ){
         	$ini_file = APP_PATH . $ini;
         	
-        // blew it
+        // you blew it
 	    } else {
             throw new NerbError( 'Could not locate given configuration file <code>'.$ini.'</code>' );
         }
@@ -243,7 +272,7 @@ class NerbPage
         try {
             // if the config.ini file is read, it loads the values into the params
             $data = parse_ini_file( $ini_file, false );
-            $data = $this->parse( $data );
+            $data = $this->_parse( $data );
             $this->params = array_merge( $this->params, $data );
             
         } catch ( Exception $e ) {
@@ -268,10 +297,9 @@ class NerbPage
             } // end if is array
         } // end if empty array
 
-        // for debugging
-        //Nerb::inspect(  $this->params[ $this->params_key ], true  );
-        
-        
+		// check browser if necessary
+		// Warning, this method is a bit slow and 
+		// the server must be configured for it to work properly
         if( $this->params['browser_check'] ){
 	        $this->browserCheck();
         }
@@ -280,14 +308,33 @@ class NerbPage
 	    // must revalidate.  this is best for pages that one must be logged in to view
 	    if( $this->params['cache_control'] ){
 		    session_cache_limiter( $this->params['cache_control'] );
+		    
+		    // -- alternate method --
 		    //header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
 			//header("Pragma: no-cache"); // HTTP 1.0.
 			//header("Expires: 0"); // Proxies.
 		}
 
-	    
-	    
-
+	    // if page caching is used and page is cached, 
+	    // then return cached content, otherwise procede with rendering
+	    if( $this->page_caching ){
+		    
+			// the filename is a md5 hash of the full url of the page.
+		    // this makes it easier to store the full path of the url
+		    // and obfuscates the page in the cache directory and if
+		    // multiple sites are using the same temp dir, prevents 
+		    // cross site scripting
+		    $this->filename = md5( $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] ).'.cache';
+		    
+		    // check to see if the page is cached
+		    // if it is, then fetch the cache and exit
+		    if( $this->_isCached() ){
+			    if( $this->_fetchCache() ){
+			    exit;
+			    }
+		    }
+		    
+	    } // end if page caching
         
         return $this;
         
@@ -301,15 +348,17 @@ class NerbPage
      * 
      * @access protected
      * @param array $data
-     * @return void
+     * @return array
      */
-    protected function parse( array $data )
+    protected function _parse( array $data ) : array
     {
+		// initialize array
 		$array = array();
 		
+		// cycle through data and seperate . notation into key/value pairs
 		foreach( $data as $path => $value ) {
 		    $temp = &$array;
-		    foreach(explode('.', $path) as $key) {
+		    foreach( explode('.', $path) as $key ) {
 		        $temp =& $temp[$key];
 		    }
 		    $temp = $value;
@@ -346,6 +395,7 @@ class NerbPage
 		} elseif( $_SESSION['browser_check'] == 'fail' && $this->params['browser_fail'] == 'error' ){
 			// set error to serve bad browser page
 			$this->error = 100;
+			return;
 			
 	    } else {
 		    // get browser information
@@ -369,6 +419,7 @@ class NerbPage
 			$_SESSION['browser_version'] = $browser->version;
 			$_SESSION['browser_device'] = $browser->device;
 			$_SESSION['browser_platform'] = $browser->platform;
+			return;
 			
 	    } // end if
 	    
@@ -385,7 +436,7 @@ class NerbPage
      *  @param mixed $value
      *  @return old
      */
-    public function __set( string $key, string $value ): string
+    public function __set( string $key, string $value ) : string
     {
         // get original value
         $old = $this->params[$key];
@@ -408,7 +459,7 @@ class NerbPage
      *  @param string $key
      *  @return mixed
      */
-    public function __get( $key )
+    public function __get( string $key )
     {
         // returns value
         return $this->params[ $key ];
@@ -419,13 +470,15 @@ class NerbPage
 
 
     /**
-    *   Get all parameters at once
-    *
-    *   @access     public
-    *   @param      string $section
-    *   @return     array (the entire parameter array is returned)
-    */
-    public function dump( $section = null ): array
+     * dump function.
+     * 
+     *   Get all parameters at once
+     *
+     * @access public
+     * @param string $section (default: null)
+     * @return array (the entire parameter array is returned)
+     */
+    public function dump( string $section = null )
     {
         // if section is given
         if ( $section ) {
@@ -458,36 +511,40 @@ class NerbPage
     public function render()
     {
 	    
+	    // if page caching is used, add meta 'cached' tag so that page can be identified as cached content
+	    if( $this->page_caching ){
+		    $meta = array( 
+		    		'cached' => date("F d, Y - h:i:s a"),
+		    		'cached_url' => $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'],
+				);
+		    $this->meta( $meta , true );
+		}
+		
 	    // clear any buffers
 	    ob_end_clean();
-
 	    ob_start();
 	    
-	    // include header
-/*
-	    $file = file_get_contents( $this->params['header'] );
-	    
-	    echo htmlentities( $file );
-	    
-	    $file = file_get_contents( $this->params['footer'] );
-	    
-	    echo htmlentities( $file );
-	    
-*/
+	    // include page header
 	    require $this->params['header'];
 	    
+	    // if the page has a content header, include it
 	    if( $this->contentHeader ) require $this->contentHeader;
 	    
+	    // if there is an error or there is no content, then include the error page 
 	    if( $this->error || ( empty( $this->content ) && $this->params['use_error_pages'] )){
 	    	
 	    	switch( $this->error ){
 		    	
-		    	// forbiden overrides a 404
 		    	// unsupported browser	
 		    	case 100:
 			    	require $this->params['error_100'];
 		    		break;
 		    		
+		    	// bad request
+		    	case 400:
+		    	// unauthorized
+		    	case 401:
+		    	// forbiden
 		    	case 403:
 			    	require $this->params['error_403'];
 		    		break;
@@ -499,6 +556,8 @@ class NerbPage
 		    		
 		    	// service error and unspecified errors
 		    	case 500:
+		    	// service unavailable
+		    	case 503:
 		    	default:
 			    	require $this->params['error_500'];
 		    	
@@ -510,10 +569,10 @@ class NerbPage
 			    
 			    if( is_array( $this->content ) && count( $this->content ) > 0 ){ 
 				    foreach( $this->content as $value ){
-						    echo $value;
+						echo $value;
 				    } // end foreach
 			    } else {
-				    	require $this->params['error_404'];
+				    require $this->params['error_404'];
 			    } // end if
 			    
 		    } else {
@@ -531,6 +590,15 @@ class NerbPage
 	    if( $this->contentFooter ) require $this->contentFooter;
 	    require $this->params['footer'];
         //Nerb::inspect( $this->params, true, '' );
+        
+        
+		// if page caching is used, capture content an cache it
+	    if( $this->page_caching ){
+			$this->cache = ob_get_contents();
+			$this->_cache();
+	    }
+	    
+        // output contents of buffer and clear
         ob_flush();
         ob_end_clean();
 	    
@@ -539,34 +607,224 @@ class NerbPage
 
 
 
+    #################################################################
+
+    //      !Caching
+
+    #################################################################
+
+
+
+
     /**
      * cache function.
+     *
+     * This method turns on caching for the page.
+     *
+     * DO NOT USE ON AUTHENTICATED PAGES!!
      * 
-     * @access public
-     * @return void
+     * Pages that are cached can not be user authenticated
+     *
+     * @access protected
+     * @return NerbPage
      */
-    public function cache()
+    public function cache() : NerbPage
     {
+        $page->page_caching = true;
+	    return $this;
+	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * write function.
+     * nocache function.
+     *
+     * This method turns off caching for the page.
+     * This method MUST be used in controllers that require a login or validated data
      * 
-     * @access public
-     * @param string $filename
-     * @param bool $overwrite (default: true)
-     * @return void
+     * CACHED PAGES CAN NOT BE USER AUTHENTICATED!
+     *
+     * This means that any user can see a cached page INCLUDING accounts, etc.
+     * 
+     * @access protected
+     * @return NerbPage
      */
-    public function write( string $filename, bool $overwrite = true )
+    public function nocache() : NerbPage
     {
+        $this->page_caching = false;
+	    return $this;
+	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
+    /**
+     * display_cache function.
+     *
+     * returns the contents of the page cache
+     * 
+     * @access public
+     * @return string
+     */
+    public function displayCache() : string
+    {
+	   return $this->cache;
+	   
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * clear_cache function.
+     *
+     * This clears all cached pages in cache directory
+     * 
+     * @access public
+     * @return bool
+     */
+    public function clearCache() : bool
+    {
+	    // find all files with *.cache 
+	    $files = glob( $this->cache_dir.'/*.cache', GLOB_BRACE );
+	    
+	    // loop through and delete files
+	    foreach( $files as $file ){
+	    	if( !$status = @unlink( $file ) ) $error = true;
+	    } // end foreach
+	    
+	    return $error ? false : true;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * uncache function.
+     * 
+     * clears the current page from cache
+     *	
+     * @access public
+     * @return bool
+     */
+    public function uncache() : bool
+    {
+	    if( file_exists( $this->cache_dir.'/'.$this->filename ) ){
+		    @unlink( $this->cache_dir.'/'.$this->filename );
+		    return true;
+	    }
+	    
+	    return false;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * cache function.
+     *
+     * writes out the contents of the page cache to a file
+     * 
+     * @access protected
+     * @throws NerbError
+     * @return bool
+     */
+    protected function _cache(): bool
+    {
+	    // ignore user abort to make sure that the cache is fully written to
+	    // prevent corrupted cache or code injection
+	    ignore_user_abort( true );
+	    
+	    // error checking
+	    if( !is_dir( $this->cache_dir ) ){
+		    throw new NerbError( 'Cache directory <code>'.$this->cache_dir.'<code> does not exist' );
+	    } elseif( !$this->filename ){
+		    throw new NerbError( 'Invalid file name given' );
+	    }
+	    
+	    // write contents to directory	    
+	    return $status = @file_put_contents( $this->cache_dir.'/'.$this->filename, $this->cache );
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * _is_cached function.
+     *
+     * checks to see if the current page is cached and returns true if it is
+     * if the page is expired, it will try and remove the page from the cache directory for housekeeping
+     * 
+     * @access protected
+     * @return bool
+     */
+    protected function _isCached() : bool
+    {
+	    // get file name
+	    $file = $this->cache_dir.'/'.$this->filename;
+	    
+	    // file must exist and mod time must be greater than current time - ttl for cache to be active
+	    if( file_exists( $file ) && filemtime( $file ) > ( time() - $this->cache_ttl ) ) {
+	    	return true;			
+	    } // end if
+	    
+	    // housekeeping
+	    // clean up expired cache files
+	    $this->uncache();
+	    
+	    return false;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * _fetch_cache function.
+     *
+     * reads the contents of the cache file int output buffer and returns false on fail
+     * 
+     * @access protected
+     * @return bool
+     */
+    protected function _fetchCache() : bool
+    {
+	    $file = $this->cache_dir.'/'.$this->filename;
+	    
+	    // check to see if the file exists and read it to the output buffer
+	    if( file_exists( $file ) ){
+		    
+		    // send header
+		    header('Content-Type: text/html');
+			
+			// clear output buffer and start new buffer
+			ob_end_clean();
+		    ob_start();
+		    
+		    // get file contents. readfile is more secure than include, prevents 
+		    // any embeded php from getting processed
+			readfile( $file );
+			
+			//output buffer and clear
+			ob_flush();
+			ob_end_clean();
+			return true;		    
+	    }
+	    
+	    // return false if the page was not read 
+	    return false;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+	
     #################################################################
 
     //      !Content
@@ -579,11 +837,15 @@ class NerbPage
     /**
      * content function.
      * 
+	 * Adds content to the page.
+	 * if preprocess flag is true, then the content is processed immediately
+	 * otherwise the content will be processed during render
+	 * 
      * @access public
      * @param mixed $content
-     * @return void
+     * @return NerbPage
      */
-    public function content( $content )
+    public function content( $content ) : NerbPage
     {
 	    
 	    if( $this->preprocess ){
@@ -624,9 +886,9 @@ class NerbPage
      * 
      * @access public
      * @param string $content
-     * @return void
+     * @return NerbPage
      */
-    public function contentHeader( string $content )
+    public function contentHeader( string $content ) : NerbPage
     {
  		$this->contentHeader = $content;
 		return $this;
@@ -641,9 +903,9 @@ class NerbPage
      * 
      * @access public
      * @param string $content
-     * @return void
+     * @return NerbPage
      */
-    public function contentFooter( string $content )
+    public function contentFooter( string $content ) : NerbPage
     {
  		$this->contentFooter = $content;
 		return $this;
@@ -658,9 +920,9 @@ class NerbPage
 	 * 
 	 * @access public
 	 * @param array $data
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function data( $data, string $value = '' )
+	public function data( $data, string $value = '' ) : NerbPage
 	{
 		if( is_scalar( $data ) ){
 			$this->data[$data] = $value;
@@ -689,9 +951,9 @@ class NerbPage
      * 
      * @access public
      * @param string $file
-     * @return void
+     * @return NerbPage
      */
-    public function header( string $file )
+    public function header( string $file ) : NerbPage
     {
  		$this->params['header'] = $file;
 		return $this;
@@ -707,9 +969,9 @@ class NerbPage
      * 
      * @access public
      * @param string $file
-     * @return void
+     * @return NerbPage
      */
-    public function footer( string $file )
+    public function footer( string $file ) : NerbPage
     {
  		$this->params['footer'] = $file;
 		return $this;
@@ -720,10 +982,10 @@ class NerbPage
 
 
     /**
-     * error function (500 page error).
+     * error function (default is 500 page error).
      * 
      * @access public
-     * @return void
+     * @return NerbPage
      */
     public function error()
     {
@@ -741,9 +1003,9 @@ class NerbPage
      * pageNotFound function (404 page error).
      * 
      * @access public
-     * @return void
+     * @return NerbPage
      */
-    public function notFound()
+    public function notFound() : NerbPage
     {
  		$this->error = 404;
 		return $this;
@@ -759,9 +1021,9 @@ class NerbPage
      * unauth function (403 error).
      * 
      * @access public
-     * @return void
+     * @return NerbPage
      */
-    public function unauth()
+    public function unauth() : NerbPage
     {
  		$this->error = 403;
 		return $this;
@@ -787,9 +1049,9 @@ class NerbPage
 	 * 
 	 * @access public
 	 * @param string $title
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function title( string $title )
+	public function title( string $title ) : NerbPage
 	{
 		$this->params['title'] = $title;
 		return $this;
@@ -804,9 +1066,9 @@ class NerbPage
 	 * 
 	 * @access public
 	 * @param string $charset
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function charset( string $charset )
+	public function charset( string $charset ) : NerbPage
 	{
 		$this->params['charset'] = $charset;
 		return $this;
@@ -821,9 +1083,9 @@ class NerbPage
 	 * 
 	 * @access public
 	 * @param string $lang
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function lang( string $lang )
+	public function lang( string $lang ) : NerbPage
 	{
 		$this->params['lang'] = $lang;
 		return $this;
@@ -838,9 +1100,9 @@ class NerbPage
      * 
      * @access public
      * @param string $icon
-     * @return void
+     * @return NerbPage
      */
-    public function icon( string $icon )
+    public function icon( string $icon ) : NerbPage
     {
 	    $this->params['icon'] = $icon;
 	    return $this;
@@ -856,9 +1118,9 @@ class NerbPage
      * @access public
      * @param string $title
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function equiv( string $title, string $value )
+    public function equiv( string $title, string $value ) : NerbPage
     {
 	    $this->params['http-equiv'][$title] = $value;
 	    return $this;
@@ -874,9 +1136,9 @@ class NerbPage
      * @access public
      * @param array $meta
      * @param bool $merge (default: false)
-     * @return void
+     * @return NerbPage
      */
-    public function meta( array $meta, bool $merge = false )
+    public function meta( array $meta, bool $merge = false ) : NerbPage
     {
 	    if( $merge ){
 		    $this->params['meta'] = array_merge( $this->params['meta'], $meta );
@@ -895,9 +1157,9 @@ class NerbPage
      * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function viewport( string $value )
+    public function viewport( string $value ) : NerbPage
     {
 	    $this->params['viewport'] = $value;
 	    return $this;
@@ -912,9 +1174,9 @@ class NerbPage
      * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function description( string $value )
+    public function description( string $value ) : NerbPage
     {
 	    $this->params['meta']['description'] = $value;
 	    return $this;
@@ -927,12 +1189,14 @@ class NerbPage
 	/**
 	 * keywords function.
 	 * 
+	 * Add or merge keyword array to meta keywords
+	 * 
 	 * @access public
 	 * @param array $values
 	 * @param bool $merge (default: true)
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function keywords( array $values, bool $merge = true )
+	public function keywords( array $values, bool $merge = true ) : NerbPage
     {
 	    if( $merge ){
 		    $this->params['meta']['keywords'] = array_merge( $this->params['meta']['keywords'], $values );
@@ -948,12 +1212,14 @@ class NerbPage
 
 	/**
 	 * keyword function.
+	 *
+	 * Add single keyword to meta keyword
 	 * 
 	 * @access public
 	 * @param mixed $value
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function keyword( $value )
+	public function keyword( $value ) : NerbPage
     {
 		$this->params['meta']['keywords'][] = $value;
 	    return $this;
@@ -963,14 +1229,16 @@ class NerbPage
 
 
 
-   /**
-    * author function.
-    * 
-    * @access public
-    * @param string $value
-    * @return void
-    */
-   public function author( string $value )
+    /**
+     * author function.
+     * 
+	 * Add author value to meta author
+	 * 
+     * @access public
+     * @param string $value
+     * @return NerbPage
+     */
+   public function author( string $value ) : NerbPage
     {
 	    $this->params['meta']['author'] = $value;
 	    return $this;
@@ -983,11 +1251,13 @@ class NerbPage
     /**
      * copyright function.
      * 
+	 * Add copyright to meta copyright
+	 * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function copyright( string $value )
+    public function copyright( string $value ) : NerbPage
     {
 	    $this->params['meta']['copyright'] = $value;
 	    return $this;
@@ -1000,11 +1270,13 @@ class NerbPage
     /**
      * robots function.
      * 
+	 * Add robots text to meta robots
+	 * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function robots( string $value )
+    public function robots( string $value ) : NerbPage
     {
 	    $this->params['meta']['robots'] = $value;
 	    return $this;
@@ -1017,11 +1289,13 @@ class NerbPage
     /**
      * appname function.
      * 
+	 * Add meta application-name value 
+	 * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function appname( string $value )
+    public function appname( string $value ) : NerbPage
     {
 	    $this->params['meta']['application-name'] = $value;
 	    return $this;
@@ -1034,11 +1308,13 @@ class NerbPage
     /**
      * generator function.
      * 
+	 * Add meta generator value
+	 * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function generator( string $value )
+    public function generator( string $value ) : NerbPage
     {
 	    $this->params['meta']['generator'] = $value;
 	    return $this;
@@ -1051,11 +1327,13 @@ class NerbPage
     /**
      * publisher function.
      * 
+	 * Add meta publisher value
+	 * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function publisher( string $value )
+    public function publisher( string $value ) : NerbPage
     {
 	    $this->params['meta']['publisher'] = $value;
 	    return $this;
@@ -1068,11 +1346,13 @@ class NerbPage
     /**
      * creator function.
      * 
+	 * Add meta creator value
+	 * 
      * @access public
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function creator( string $value )
+    public function creator( string $value ) : NerbPage
     {
 	    $this->params['meta']['creator'] = $value;
 	    return $this;
@@ -1085,12 +1365,14 @@ class NerbPage
     /**
      * alt function.
      * 
+	 * Add adds alt value
+	 * 
      * @access public
      * @param string $title
      * @param string $value
-     * @return void
+     * @return NerbPage
      */
-    public function alt( string $title, string $value )
+    public function alt( string $title, string $value ) : NerbPage
     {
 	    $this->params['alt'][$title] = $value;
 	    return $this;
@@ -1103,11 +1385,13 @@ class NerbPage
     /**
      * style function.
      * 
+	 * Add stylesheet url to header
+	 * 
      * @access public
-     * @param string $style
-     * @return void
+     * @param string $style (url of stylesheet)
+     * @return NerbPage
      */
-    public function style( string $style )
+    public function style( string $style ) : NerbPage
     {
 	    $this->params['style'][] = $style;
 	    return $this;
@@ -1120,11 +1404,13 @@ class NerbPage
     /**
      * styles function.
      * 
+	 * Same as style() but allows array of styles to be added
+	 * 
      * @access public
      * @param array $style
-     * @return void
+     * @return NerbPage
      */
-    public function styles( array $style )
+    public function styles( array $style ) : NerbPage
     {
 	    $this->params['style'] = $style;
 	    return $this;
@@ -1137,11 +1423,13 @@ class NerbPage
 	/**
 	 * script function.
 	 * 
+	 * Add script url to header
+	 * 
 	 * @access public
 	 * @param string $script
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function script( string $script )
+	public function script( string $script ) : NerbPage
 	{
 		$this->params['script'][] = $script;
 		return $this;
@@ -1154,11 +1442,13 @@ class NerbPage
 	/**
 	 * scripts function.
 	 * 
+	 * Same as stript(), but allows array of scripts to be added 
+	 * 
 	 * @access public
 	 * @param array $script
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function scripts( array $script )
+	public function scripts( array $script ) : NerbPage
 	{
 		$this->params['script'] = $script;
 		return $this;
@@ -1171,12 +1461,14 @@ class NerbPage
 	/**
 	 * rel function.
 	 * 
+	 * Alias of link()
+	 * 
 	 * @access public
 	 * @param string $title
 	 * @param string $link
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function rel( string $title, string $link )
+	public function rel( string $title, string $link ) : NerbPage
 	{
 		$this->link( $title, $link );
 		return $this;
@@ -1189,12 +1481,14 @@ class NerbPage
 	/**
 	 * link function.
 	 * 
+	 * Add link rel statement to header
+	 * 
 	 * @access public
 	 * @param string $title
 	 * @param string $link
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function link( string $title, string $link )
+	public function link( string $title, string $link ) : NerbPage
 	{
 		$this->params['rel'][$title] = $link;
 		return $this;
@@ -1207,11 +1501,13 @@ class NerbPage
 	/**
 	 * base function.
 	 * 
+	 * Add base statment to header
+	 * 
 	 * @access public
 	 * @param string $url
-	 * @return void
+	 * @return NerbPage
 	 */
-	public function base( string $url )
+	public function base( string $url ) : NerbPage
 	{
 		$this->params['base'] = $url;
 		return $this;

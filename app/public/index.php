@@ -2,7 +2,7 @@
 	/*
 	*
 	*
-	*	Stamp Album Pro Bootstrap file
+	*	Nerb Framework Bootstrap file
 	*	(c) 2017 Dexter Oddwick
 	*
 	*	script begin
@@ -15,12 +15,14 @@
 	 *
 	 *
 	*/
-	//echo 'Unauthorized access';
-	//die;
-	
-	ini_set( 'display_errors', 'On' );	
-	error_reporting( E_ERROR | E_WARNING | E_PARSE );
-	//error_reporting(E_ALL );
+
+	// set error reporting
+	// disable for production site
+	/*
+		ini_set( 'display_errors', 'On' );	
+		error_reporting( E_ERROR | E_WARNING | E_PARSE );
+		error_reporting(E_ALL );
+	*/
 	
 	// begin session
 	session_start();
@@ -59,9 +61,6 @@
 	Nerb::register( new NerbDatabaseTable( $db, 'log_change' ), 'log_change' );
 	
 	
-	// create a page object with an ini file
-	Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );
-	
 	// create and register user data
 	$user_data = array( 
 		'table' => 'user_table', 
@@ -71,6 +70,9 @@
 	);
 	
 	Nerb::register( $user = new NerbUser( $user_data ), 'user' );
+	
+	// create a page object with an ini file
+	Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );
 	
 	// set the token and parse the url from html strings
 	$options = array(
@@ -86,10 +88,6 @@
 	// display the page
 	$page->render();
 	
-	
-	//echo '<pre>';
-	//print_r( $_SESSION );
-	//print_r($_COOKIE);
 	exit();
 
 ?>
