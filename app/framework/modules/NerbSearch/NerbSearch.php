@@ -24,7 +24,8 @@
 
 /**
  *
- * Class for generating sql search statements and cleaning up search data
+ * Class for generating sql search statements and cleaning up search data using a  
+ * PHP search class created by GitFr33 as a starting point
  *
  */
 class NerbSearch
@@ -34,6 +35,10 @@ class NerbSearch
      * params
      * 
      * (default value: array(
+     * 	    'greedy' => true,
+     * 	    'phonetic' => false, // set to true to use metaphone() searching
+     * 	    'minLength' => 3,
+     * 	    'html' => true, // allows html chars in search -- setting to false will also kill wildcard chars
      *     ))
      * 
      * @var array
@@ -41,10 +46,11 @@ class NerbSearch
      */
     protected $params = array(
 	    'greedy' => true,
-	    'phonetic' => false,
+	    'phonetic' => false, // set to true to use metaphone() searching
 	    'minLength' => 3,
 	    'html' => true, // allows html chars in search -- setting to false will also kill wildcard chars
     );
+    
     
 	/**
 	 * stop_words  list of common words not to be searched
@@ -152,26 +158,21 @@ class NerbSearch
 
 
 	/**
-	 * __construct function.  if a table is not given, only a where statement is returned
+	 * __construct function.  
+	 *
+	 * if a table is not given, only a where statement is returned
 	 * 
 	 * @access public
-	 * @param string $keywords
-	 * @param array $search_fields
-	 * @param string $table (default: NULL)
+	 * @param string $table (default: NULL) name of the table searched
 	 * @return void
 	 */
-	public function __construct( array $search_fields, string $table = NULL )
+	public function __construct( string $table = NULL )
 	{
-	    
-	    $this->table = $table;
-	    if( $search_fields ){ 
-		    $this->search_fields = $search_fields; // Array of DB field names to look in
-		}   	    
-		
 	    if( $table ){ 
 		    $this->table = $table; // table name to search in
 		}   	    
 		
+		return void;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -270,7 +271,7 @@ class NerbSearch
      * @param string $dir (default: 'DESC')
      * @return NerbSearch
      */
-    public function sort( string $field, string $dir = 'DESC'): NerbSearch
+    public function sort( string $field, string $dir = 'DESC') : NerbSearch
     {
         $this->sort_field[ $field ] = $dir;
         return $this;
@@ -281,16 +282,38 @@ class NerbSearch
 
 
     /**
-     * where function.  sets the required conditons of the search
+     * where function.  
+     *
+     * sets the required conditons of the search
      * 
      * @access public
      * @param string $field
-     * @param mixed $dir (default: 'DESC')
+     * @param string $condition
      * @return NerbSearch
      */
-    public function where( string $field, $condition ): NerbSearch
+    public function where( string $field, string $condition ) : NerbSearch
     {
         $this->conditions[ $field ] = $condition;
+        return $this;
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * where function.  
+     *
+     * sets the required conditons of the search
+     * 
+     * @access public
+     * @param string $field
+     * @param string $datatype (default: 'string')
+     * @return NerbSearch
+     */
+    public function searchField( string $field, string $datatype = 'string' ) : NerbSearch
+    {
+        $this->search_fields[ $field ] = $datatype;
         return $this;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -305,22 +328,23 @@ class NerbSearch
      * @param string $search_string
      * @return NerbSearch
      */
-    public function find( string $search_string ): NerbSearch
+    public function find( string $search_string ) : NerbSearch
     {
 	    // trim off spaces from search string
 	    $this->search_string = trim( $search_string );
 	    
 	    // split keywords
-	    $this->keywords = $this->split_keywords( $search_string );
+	    $this->keywords = $this->_splitKeywords( $search_string );
         
 	    // catch html special characters if not allowed
 	    if( $this->params['html'] == false ){
-		    $this->keywords = $this->html_chars( $this->keywords );
+		    $this->keywords = $this->_htmlChars( $this->keywords );
 	    }
 	    
         return $this;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -343,13 +367,13 @@ class NerbSearch
 		}
 
 	    // strip stop words	    
-	    $this->keywords = $this->strip_stop_words( $this->keywords );
+	    $this->keywords = $this->_stripStopWords( $this->keywords );
 	    
 	    // create database terms
-	    $keywords_db = $this->escape_db( $this->keywords );
+	    $keywords_db = $this->_escapeDb( $this->keywords );
 	    
 	    // create regex terms
-	    $keywords_rx = $this->escape_regex( $keywords_db );
+	    $keywords_rx = $this->_escapeRegex( $keywords_db );
 	    
 	    
 	    $hold = array();
@@ -357,7 +381,8 @@ class NerbSearch
 	    // Greedy search (match any keywords)
 	    if( $this->params['greedy'] ){
 	        foreach( $keywords_db as $keyword_db ){
-	            foreach( $this->search_fields as $field ){
+	           
+	            foreach( $this->search_fields as $field => $datatype ){
 	              $hold[] = "`".$field."` RLIKE '".$keyword_db."'";
 	            }
 	        }
@@ -369,7 +394,7 @@ class NerbSearch
 	        
 	        foreach( $keywords_db as $keyword_db ){
 	            
-	            foreach($this->search_fields as $field){
+	            foreach($this->search_fields as $field => $datatype ){
 	                $hold[] = $intermed." `".$field."` RLIKE '".$keyword_db."'";
 	                $intermed = ' OR';
 	            }
@@ -382,24 +407,25 @@ class NerbSearch
 	    if( $this->conditions ){
 	       
 	       	if(!$this->keywords){
-				// if there is no keywords but there is a required condition then delete the $hold and query just based on required conditions
+				// if there is no keywords but there is a required condition then 
+				// delete the $hold and query just based on required conditions
 	            unset( $hold );
 	            unset( $and_parts );
 	            foreach( $this->conditions as $field => $value ){
 					// If there are multipuls VALUES of a conditions loop it with an sql OR
 	                if( is_array($value) ){
-	                    //testit('the RC value is an array', $value);
 	                    foreach( $value as $key => $value ){
-	                        $value = '[[:<:]]'.AddSlashes( $this->escape_rlike( $value ) ).'[[:>:]]';
+	                        $value = '[[:<:]]'.AddSlashes( $this->_escapeRlike( $value ) ).'[[:>:]]';
 	                        $hold =" $hold $or `$field` RLIKE '$value'";
 	                        $or = "OR";
-	                    }
+	                    }// end foreach
+	                    
 	                }else{
-	                    $value = '[[:<:]]'.AddSlashes( $this->escape_rlike( $value ) ).'[[:>:]]';
-	                    $hold = "`$field` RLIKE '$value' $and_parts";
-	                    $and_parts = "AND ($hold)";
+	                    $value = '[[:<:]]'.AddSlashes( $this->_escapeRlike( $value ) ).'[[:>:]]';
+	                    $hold = '`'.$field."` RLIKE '".$value."' ".$and_parts;
+	                    $and_parts = 'AND ('.$hold.')';
 	                }
-	            }
+	            } // end foreach
 	            
 	        }else{
 	        
@@ -410,7 +436,7 @@ class NerbSearch
 	                if( is_array($value) ){
 
 	                    foreach( $value as $key => $value ){
-	                        //$value = '[[:<:]]'.AddSlashes($this->escape_rlike($value)).'[[:>:]]';
+	                        //$value = '[[:<:]]'.AddSlashes($this->_escapeRlike($value)).'[[:>:]]';
 	                        $rc_or .= "`".$field."` RLIKE '".$value."' AND (".$hold.") ".$or;
 	                        $or = "OR";
 	                    }
@@ -418,7 +444,7 @@ class NerbSearch
 	                }else{
 	                    if( $value != "" ){
 	                        //testit(' $rc[$value] in if($this->keywords){}',$value);
-	                        $value = '[[:<:]]'.AddSlashes($this->escape_rlike($value)).'[[:>:]]';
+	                        $value = '[[:<:]]'.AddSlashes($this->_escapeRlike($value)).'[[:>:]]';
 	                        $hold = "`$field` RLIKE '$value' AND ($hold)";
 	                    }
 	                }
@@ -431,7 +457,7 @@ class NerbSearch
 	    
 	    // if a table is given, returns a full sql statement, otherwise just the where clause
 	    if( $this->error ){
-		    return true;
+		    return false;
 		} elseif( $this->table ){
 	    	$sql .= "SELECT * FROM `".$this->table."` WHERE ";
 	    }
@@ -442,6 +468,7 @@ class NerbSearch
 	    }
 
 	    $this->sql = $sql;
+	    return true;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -452,10 +479,10 @@ class NerbSearch
 	/**
 	 * set_sort function.
 	 * 
-	 * @access private
+	 * @access protected
 	 * @return string
 	 */
-	private function _set_sort() : string
+	protected function _set_sort() : string
 	{
         // initialize temp array
 	    $hold = array();
@@ -529,35 +556,15 @@ class NerbSearch
 
 
 	/**
-	 * phonetics function.
+	 * phonetic function.
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param array $keywords
 	 * @return array
 	 */
-	private function phonetics( array $keywords ) : array
+	protected function phonetic( array $keywords ) : array
 	{
-	    // Replace * with %
-	    $search_string = str_replace('*', '%' , $search_string);
-	    
-	    // Send anything between quotes to transform() which replaces commas and whitespace with {PLACEHOLDERS}
-	    $search_string = preg_replace_callback("~\"(.*?)\"~", "search::transform", $search_string);
-	    
-	    // Split $this->keywords by spaces and commas and Populate $this->keywords with parts
-	    $keywords = preg_split("/\s+|,/", $search_string );
-	   
-	    // convert the {COMMA} and {WHITESPACE} back within each row of $this->keywords
-	    foreach( $keywords as $key => $keyword ){
-	        $keyword = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function ( $stuff ) { return chr($stuff[1]);}, $keyword );
-	        $keyword = preg_replace("/\{COMMA\}/", ",", $keyword);
-	        $keywords[$key] = $keyword;
-	    }
-	    
-	    
-	    // convert the {COMMA} and {WHITESPACE} back in $this->keywords
-	    $keywords = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function ( $stuff ) { return chr($stuff[1]);}, $keywords );
-	    $keywords = preg_replace("/\{COMMA\}/", ",", $keywords);
-	    
+			    
 	    return $keywords;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -567,19 +574,40 @@ class NerbSearch
 	
 	
 	/**
-	 * split_keywords function.
+	 * datatype function.
 	 * 
-	 * @access private
+	 * @access protected
+	 * @param string keyword
+	 * @param string datatype
+	 * @return string
+	 */
+	protected function _datatype( string $keyword, string $datatype ) : string
+	{
+		echo $keyword." - ";
+		echo $datatype;
+	    die;
+	    return $keyword;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	
+	
+	
+	/**
+	 * _splitKeywords function.
+	 * 
+	 * @access protected
 	 * @param string $search_string
 	 * @return array
 	 */
-	private function split_keywords( string $search_string ) : array
+	protected function _splitKeywords( string $search_string ) : array
 	{
 	    // Replace * with %
 	    $search_string = str_replace('*', '%' , $search_string);
 	    
 	    // Send anything between quotes to transform() which replaces commas and whitespace with {PLACEHOLDERS}
-	    $search_string = preg_replace_callback("~\"(.*?)\"~", "search::transform", $search_string);
+	    $search_string = preg_replace_callback( "~\"(.*?)\"~", "NerbSearch::transform", $search_string);
 	    
 	    // Split $this->keywords by spaces and commas and Populate $this->keywords with parts
 	    $keywords = preg_split("/\s+|,/", $search_string );
@@ -605,13 +633,13 @@ class NerbSearch
 	
 	
 	/**
-	 * strip_stop_words function.
+	 * _stripStopWords function.
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param array $keywords
 	 * @return array
 	 */
-	private function strip_stop_words( array $keywords ) : array
+	protected function _stripStopWords( array $keywords ) : array
 	{
 		// loop through each keyword and kill common words 
 	    foreach( $keywords as $key => $value ){
@@ -640,11 +668,11 @@ class NerbSearch
 	 *
 	 * replaces commas and whitespace with {PLACEHOLDERS}
 	 * 
-	 * @access private
-	 * @param string $keyword
+	 * @access protected
+	 * @param array $keyword
 	 * @return void
 	 */
-	private function transform( string $keyword ) : string
+	protected static function transform( array $keyword ) : string
 	{
 	  	// replace commas and whitespace with {PLACEHOLDERS}
 	    $keyword[1] = preg_replace_callback("~(\s)~", function($match) { return '{WHITESPACE-'.ord($match[1]).'}';}, $keyword[1]);
@@ -658,13 +686,13 @@ class NerbSearch
 	
 	
 	/**
-	 * escape_rlike function.
+	 * _escapeRlike function.
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param string $keyword
 	 * @return string
 	 */
-	private function escape_rlike( string $keyword ) : string
+	protected function _escapeRlike( string $keyword ) : string
 	{
 	    return preg_replace("~([.\[\]*^\$])~", '\\\$1', $keyword);
 	    
@@ -674,16 +702,16 @@ class NerbSearch
 	
 	
 	/**
-	 * escape_db function.
+	 * _escapeDb function.
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param array $keywords
 	 * @return array
 	 */
-	private function escape_db( array $keywords ) : array
+	protected function _escapeDb( array $keywords ) : array
 	{
 	    foreach($keywords as $keyword){ 
-	        $out[] = str_replace( '%[[:>:]]', '', str_replace( '[[:<:]]%', '', '[[:<:]]'.AddSlashes( $this->escape_rlike( $keyword ) ).'[[:>:]]' ));
+	        $out[] = str_replace( '%[[:>:]]', '', str_replace( '[[:<:]]%', '', '[[:<:]]'.AddSlashes( $this->_escapeRlike( $keyword ) ).'[[:>:]]' ));
 	    }
 	    return $out;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -692,13 +720,13 @@ class NerbSearch
 	
 	
 	/**
-	 * escape_regex function.
+	 * _escapeRegex function.
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param array $keywords
 	 * @return array
 	 */
-	private function escape_regex( array $keywords ) : array
+	protected function _escapeRegex( array $keywords ) : array
 	{
 	    $out = array();
 	    foreach($keywords as $keyword){
@@ -711,13 +739,13 @@ class NerbSearch
 		
 	
 	/**
-	 * html_chars function.
+	 * _htmlChars function.
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param array $search_array
 	 * @return array
 	 */
-	private function html_chars( array $search_array ) : array
+	protected function _htmlChars( array $search_array ) : array
 	{
 	    
 	    $out = array();
@@ -726,9 +754,9 @@ class NerbSearch
 	        $keyword = str_replace('%', '*', $keyword);
 	        
 	        if ( preg_match( "/\s|,/", $keyword ) ){
-	            $out[] = '"'.HtmlSpecialChars( $keyword ).'"';
+	            $out[] = '"'.htmlspecialchars( $keyword ).'"';
 	        }else{
-	            $out[] = HtmlSpecialChars($keyword);
+	            $out[] = htmlspecialchars($keyword);
 	        }
 	    }
 	    return $out;
