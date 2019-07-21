@@ -335,10 +335,10 @@ class NerbUser
 			 
 			// insert log			 
 			$log->insert( $data );	
-
 				 
-		} elseif ( LOG_ATTEMPTS == 'file' || LOG_ATTEMPTS == 'both'  ){
-			
+		} 
+		
+		if ( LOG_ATTEMPTS == 'file' || LOG_ATTEMPTS == 'both'  ){
 			if( !$status ) $msg = 'FAIL '.$msg;
 			$msg .= '; uid='.$user_id.' uname='.$user_name.' ['.$_SERVER['REMOTE_ADDR'].']';
 			$status = Nerb::log( ACCESS_LOG, $msg );
@@ -346,6 +346,7 @@ class NerbUser
 		return;
 			
 	}// end function		
+
 
 
 
