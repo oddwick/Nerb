@@ -257,7 +257,6 @@ class NerbUser
 		
 		$sessions->deleteRows( "`selector` = '".$_SESSION['auth']."'" );
 		
-		
 		// unset the cookies
 		setcookie('token', '', time() - 3600, '/'); 
 		setcookie('auth', '', time() -3600, '/');
@@ -273,10 +272,11 @@ class NerbUser
 
 
 	/**
-	 * createSessionTable function.
+	 * isSessionActive function.
 	 * 
-	 * @access public
+	 * @access protected
 	 * @return void
+	 * @todo
 	 */
 	protected function isSessionActive()
 	{
@@ -291,9 +291,9 @@ class NerbUser
 	 * 
 	 * @access protected
 	 * @param int $length (default: 20)
-	 * @return void
+	 * @return string
 	 */
-	protected function generateToken( int $length = 20 )
+	protected function generateToken( int $length = 20 ) : string
 	{
 	    return bin2hex( random_bytes( $length ) );
 	    
@@ -308,13 +308,13 @@ class NerbUser
 	*	logs all login attempts to the database
 	*
 	*	@access		protected
-	*	@param 		string user_id
+	*	@param 		int user_id
 	*	@param 		string userName
 	*	@param 		string msg
 	*	@param 		bool status default is false
-	*	@return		string
+	*	@return		void
 	*/
-	protected function logAttempt( $user_id, $user_name, $msg, $status = false )
+	protected function logAttempt( int $user_id, string $user_name, string $msg, bool $status = false )
 	{
 		if( LOG_ATTEMPTS == 'db' || LOG_ATTEMPTS == 'both' ){
 			// fetch database and bind to userlog table
@@ -343,6 +343,7 @@ class NerbUser
 			$msg .= '; uid='.$user_id.' uname='.$user_name.' ['.$_SERVER['REMOTE_ADDR'].']';
 			$status = Nerb::log( ACCESS_LOG, $msg );
 		}
+		
 		return;
 			
 	}// end function		
@@ -351,13 +352,16 @@ class NerbUser
 
 
 	/**
-	*	The pages called here are public and can be seen by anyone
-	*
-	*	@access		protected
-	*	@param		array $data
-	*	@return		array
-	*/
-	public function authenticate( $user_name, $user_pass )
+	 * authenticate function.
+	 * 
+	 * Authenticates the user against the user table and logs authentication attempt
+	 *
+	 * @access public
+	 * @param string $user_name
+	 * @param string $user_pass
+	 * @return array
+	 */
+	public function authenticate( string $user_name, string $user_pass ) : array
 	{
 		
 		// inport table data
@@ -407,11 +411,12 @@ class NerbUser
 
 
 	/**
-	*	The pages called here are public and can be seen by anyone
-	*
-	*	@access		protected
-	*	@return		string
-	*/
+	 * authorize function.
+	 * 
+	 * @access public
+	 * @return void
+	 * @todo
+	 */
 	public function authorize()
 	{
 
@@ -426,23 +431,18 @@ class NerbUser
 	 * @access public
 	 * @return bool
 	 */
-	public function verify()//: bool
+	public function verify() : bool
 	{
-		// find and unset session in database
 		// fetch database
 		$database = Nerb::fetch( $this->params['database'] );
 		
 		// create session table
 		$sessions = new NerbDatabaseTable( $database, TOKEN_TABLE );
 		
+		// fetch session data from table
 		$session = $sessions->fetchFirstRow( '`selector` = \''.$_SESSION['auth'].'\'' );
 
-		if( $session->expires > time() && hash_equals( $session->hash, hash( 'sha256', $_COOKIE['token'] ))){
-			return true;
-		} else {
-			return false;
-		}
-		
+		return $session->expires > time() && hash_equals( $session->hash, hash( 'sha256', $_COOKIE['token'] )) ? true : false;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -454,7 +454,7 @@ class NerbUser
 	*	@access		protected
 	*	@return		string
 	*/
-	public function logout()
+	public function logout() : string
 	{
 		session_unset($_SESSION);
 		setcookie('token', 0, time()-3600, '/');
