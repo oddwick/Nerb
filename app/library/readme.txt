@@ -1,0 +1,1 @@
+This folder is where all of the user defined classes specific to the application reside.
