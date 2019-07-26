@@ -15,8 +15,8 @@
  * @class           NerbController
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019
+ * @license         https://www.github.com/oddwick/nerb
  *
  *
  */
@@ -408,7 +408,7 @@ abstract class NerbController
     *   @param      int node
     *   @return     this
     */
-    public function setNodeIndex( int $node ) :self
+    public function setNodeIndex( int $node ) : self
     {
         $this->node_index = $node;
         return $this;
@@ -503,7 +503,7 @@ abstract class NerbController
     *   @param      string node
     *   @return     object self
     */
-    public function setNode( string $node ) :self
+    public function setNode( string $node ) : self
     {
         $this->node = $node;
         return $this;
@@ -520,7 +520,7 @@ abstract class NerbController
     *   @param      string action
     *   @return     object self
     */
-    public function setAction( string $action ) :self
+    public function setAction( string $action ) : self
     {
         $this->action = $action;
         return $this;
@@ -537,7 +537,7 @@ abstract class NerbController
     *   @param      array $params
     *   @return     NerbRouter
     */
-    public function setParams( array $params ) :self
+    public function setParams( array $params ) : self
     {
 #TODO: finish setParams @Dexter Oddwick [1/21/18]
 /*
@@ -606,7 +606,7 @@ abstract class NerbController
     *   @param      array $params
     *   @return     NerbRouter
     */
-    public function mapNodes( array $structure ) :self
+    public function mapNodes( array $structure ) : self
     {
 		$this->defineStructure( $structure );
 		return $this;
@@ -623,7 +623,7 @@ abstract class NerbController
     *   @param      array $params
     *   @return     NerbRouter
     */
-    public function defineStructure( array $structure ) :self
+    public function defineStructure( array $structure ) : self
     {
 		//add additional index so that params can be accessed by index and name
 		for( $i = 0;  $i < count( $structure); $i++ ){
@@ -644,8 +644,11 @@ abstract class NerbController
     *   @param      array $params
     *   @return     NerbRouter
     */
-    public function urlReady( array $input ):array
+    public function urlReady( array $input ) : array
     {
+        $output = array();
+        
+        // loop through input and replace spaces with keyword separator
         foreach ( $input as $key => $value ) {
             $output[ $key ] = str_replace( ' ', KEYWORD_SEPARATOR, $value );
         }

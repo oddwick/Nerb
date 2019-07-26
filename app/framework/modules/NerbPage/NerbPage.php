@@ -15,8 +15,8 @@
  * @class           NerbPage
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019
+ * @license         https://www.github.com/oddwick/nerb
  *
  * @todo
  *
@@ -300,9 +300,7 @@ class NerbPage
 		// check browser if necessary
 		// Warning, this method is a bit slow and 
 		// the server must be configured for it to work properly
-        if( $this->params['browser_check'] ){
-	        $this->browserCheck();
-        }
+        if( $this->params['browser_check'] ) $this->browserCheck();
         
 		// this sends header commands to prevent the browser from caching contents and 
 	    // must revalidate.  this is best for pages that one must be logged in to view
@@ -329,12 +327,15 @@ class NerbPage
 		    // check to see if the page is cached
 		    // if it is, then fetch the cache and exit
 		    if( $this->_isCached() ){
-			    if( $this->_fetchCache() ){
-			    exit;
-			    }
+			    if( $this->_fetchCache( $this->filename ) ) exit;
 		    }
 		    
 	    } // end if page caching
+	    
+		// auto add content headers and content footer to page
+		if( $this->params['content_header'] ) $this->contentHeader( $this->params['content_header'] );
+		if( $this->params['content_footer'] ) $this->contentFooter( $this->params['content_footer'] );
+	   
         
         return $this;
         
@@ -432,12 +433,18 @@ class NerbPage
      *  setter function.
      *
      *  @access public
-     *  @param mixed $key
-     *  @param mixed $value
-     *  @return old
+     *  @param string $key
+     *  @param string $value
+     *  @return string old value
+     *  @throws NerbError
      */
-    public function __set( string $key, string $value ) : string
+    public function __set(string $key, string $value) : string
     {
+        // error checking to ensure key exists
+        if (!array_key_exists($key, $this->params)){
+	        throw new NerbError( 'The key <code>['.$key.']</code> is not a valid parameter' );
+        } // end if
+        
         // get original value
         $old = $this->params[$key];
 
@@ -446,7 +453,6 @@ class NerbPage
 
         // return old value
         return $old;
-        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -472,7 +478,7 @@ class NerbPage
     /**
      * dump function.
      * 
-     *   Get all parameters at once
+     * Get all parameters at once
      *
      * @access public
      * @param string $section (default: null)
@@ -501,7 +507,6 @@ class NerbPage
 
 
 
-
     /**
     *   actually produces the page from the parameters
     *
@@ -510,7 +515,6 @@ class NerbPage
     */
     public function render()
     {
-	    
 	    // if page caching is used, add meta 'cached' tag so that page can be identified as cached content
 	    if( $this->page_caching ){
 		    $meta = array( 
@@ -616,6 +620,7 @@ class NerbPage
 
 
 
+
     /**
      * cache function.
      *
@@ -693,7 +698,11 @@ class NerbPage
 	    
 	    // loop through and delete files
 	    foreach( $files as $file ){
-	    	if( !$status = @unlink( $file ) ) $error = true;
+		    $status = @unlink( $file );
+	    	if( !$status ){
+		    	Nerb::log( ERROR_LOG, 'Could not delete cache file: '.$file, 'ERROR' );
+		    	$error = true;
+		    }
 	    } // end foreach
 	    
 	    return $error ? false : true;
@@ -713,11 +722,18 @@ class NerbPage
      */
     public function uncache() : bool
     {
-	    if( file_exists( $this->cache_dir.'/'.$this->filename ) ){
-		    @unlink( $this->cache_dir.'/'.$this->filename );
-		    return true;
+	    $file = $this->cache_dir.'/'.$this->filename;
+	    
+	    if( file_exists( $file ) ){
+		    if ( @unlink( $file ) ){
+			    return true;
+		    } else {
+		    	Nerb::log( ERROR_LOG, 'Could not delete cache file: '.$file, 'ERROR' );
+			    return false;
+		    }
 	    }
 	    
+	    // return false if file does not exist
 	    return false;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -747,8 +763,16 @@ class NerbPage
 		    throw new NerbError( 'Invalid file name given' );
 	    }
 	    
+	    $file = $this->cache_dir.'/'.$this->filename;
+	    
 	    // write contents to directory	    
-	    return $status = @file_put_contents( $this->cache_dir.'/'.$this->filename, $this->cache );
+	    $status = @file_put_contents( $file, $this->cache );
+	    if( $status ){
+		    return true;
+	    } else {
+		    Nerb:log( ERROR_LOG, 'Could not write to cache file: '.$file, 'ERROR' );
+		    return false;
+	    }
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -770,12 +794,16 @@ class NerbPage
 	    $file = $this->cache_dir.'/'.$this->filename;
 	    
 	    // file must exist and mod time must be greater than current time - ttl for cache to be active
-	    if( file_exists( $file ) && filemtime( $file ) > ( time() - $this->cache_ttl ) ) {
+	    // or if cache_ttl = -1 (permenant caching)
+	    if( 
+	    	( file_exists( $file ) && $this->cache_ttl == -1 ) || 
+			( file_exists( $file ) && filemtime( $file ) > ( time() - $this->cache_ttl ) ) 
+		){
 	    	return true;			
 	    } // end if
 	    
-	    // housekeeping
-	    // clean up expired cache files
+	    // housekeeping --
+	    // clean up expired cache files if past time
 	    $this->uncache();
 	    
 	    return false;
@@ -795,10 +823,10 @@ class NerbPage
      */
     protected function _fetchCache() : bool
     {
-	    $file = $this->cache_dir.'/'.$this->filename;
+	    $filename = $this->cache_dir.'/'.$this->filename;
 	    
 	    // check to see if the file exists and read it to the output buffer
-	    if( file_exists( $file ) ){
+	    if( file_exists( $filename ) ){
 		    
 		    // send header
 		    header('Content-Type: text/html');
@@ -809,7 +837,7 @@ class NerbPage
 		    
 		    // get file contents. readfile is more secure than include, prevents 
 		    // any embeded php from getting processed
-			readfile( $file );
+			readfile( $filename );
 			
 			//output buffer and clear
 			ob_flush();
@@ -842,10 +870,10 @@ class NerbPage
 	 * otherwise the content will be processed during render
 	 * 
      * @access public
-     * @param mixed $content
+     * @param string $content
      * @return NerbPage
      */
-    public function content( $content ) : NerbPage
+    public function content( string $content ) : NerbPage
     {
 	    
 	    if( $this->preprocess ){
@@ -854,6 +882,8 @@ class NerbPage
 		    ob_start();		    
 		    
 		    // include the content or produce 404 error
+		    // this is so that the page has the opprotunity to die
+		    // gracefully.  other files will throw errors
 	    	if( !is_dir( $content ) && file_exists( $content )){
 			    require $content;
 	    	} else {
@@ -867,11 +897,9 @@ class NerbPage
 		    ob_end_clean();
 		    
 	    } else {
-	 		if( is_array( $content )){
-		 		$this->content = $content;
-	 		} else {
-		 		$this->content[] = $content;
-	 		}
+	    	// add to the content array, which will be processed
+	    	// in the order that was added
+		 	$this->content[] = $content;
 	    }
  		
 		return $this;
@@ -883,15 +911,28 @@ class NerbPage
 
     /**
      * contentHeader function.
+     *
+     * This adds the site header to the page.  This should not be confused with
+     * the html header which includes styles and scripts.  this is for sites with structure like:
+     * 	HTML header
+     *    header - (content header)
+     *	  content
+     *	  footer - (content footer)
+     *	HTML footer
      * 
      * @access public
-     * @param string $content
+     * @param string $filename
+     * @throws NerbError
      * @return NerbPage
      */
-    public function contentHeader( string $content ) : NerbPage
+    public function contentHeader( string $filename ) : NerbPage
     {
- 		$this->contentHeader = $content;
-		return $this;
+		if( file_exists($filename) ){
+			$this->contentHeader = $filename;
+			return $this;
+		} else {
+			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
+		}
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -899,16 +940,22 @@ class NerbPage
     
     
     /**
-     * contentFooter function.
+     * contentFooter function. (see contentHeader)
      * 
      * @access public
-     * @param string $content
+     * @param string $filename
+     * @throws NerbError
      * @return NerbPage
+     * @see contentHeader
      */
-    public function contentFooter( string $content ) : NerbPage
+    public function contentFooter( string $filename ) : NerbPage
     {
- 		$this->contentFooter = $content;
-		return $this;
+		if( file_exists($filename) ){
+			$this->contentFooter = $filename;
+			return $this;
+		} else {
+			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
+		}
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -919,7 +966,7 @@ class NerbPage
 	 * data function.
 	 * 
 	 * @access public
-	 * @param array $data
+     * @throws NerbError
 	 * @return NerbPage
 	 */
 	public function data( $data, string $value = '' ) : NerbPage
@@ -950,16 +997,20 @@ class NerbPage
      * header function.
      * 
      * @access public
-     * @param string $file
+     * @param string $filename
+     * @throws NerbError
      * @return NerbPage
      */
-    public function header( string $file ) : NerbPage
+    public function header( string $filename ) : NerbPage
     {
- 		$this->params['header'] = $file;
-		return $this;
+		if( file_exists($filename) ){
+	 		$this->params['header'] = $filename;
+			return $this;
+		} else {
+			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
+		}
 	
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
@@ -968,13 +1019,18 @@ class NerbPage
      * footer function.
      * 
      * @access public
-     * @param string $file
+     * @param string $filename
+     * @throws NerbError
      * @return NerbPage
      */
-    public function footer( string $file ) : NerbPage
+    public function footer( string $filename ) : NerbPage
     {
- 		$this->params['footer'] = $file;
-		return $this;
+		if( file_exists($filename) ){
+	 		$this->params['footer'] = $filename;
+			return $this;
+		} else {
+			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
+		}
 	
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1040,7 +1096,12 @@ class NerbPage
     //      !Attributes
 
     #################################################################
-
+	
+	/**
+	  The following functions add HTML attributes to the page
+	  they can all be set in the page.ini file and any subsequent calls
+	  will be APPENDED to those set in  page.ini
+	 */
 
 
 

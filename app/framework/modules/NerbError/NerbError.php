@@ -13,8 +13,7 @@
  * @class           NerbError
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019
  *
  * @todo
  *
@@ -142,7 +141,8 @@ class NerbError extends \Exception
 
             // builds the error body block
             $content = $this->header();
-            $content .= $this->error();
+            $content .= $this->msg();
+            $content .= $this->code();
             $content .= $this->trace();
             $content .= $this->footer();
 
@@ -170,12 +170,26 @@ class NerbError extends \Exception
      * @access     protected
      * @return     string
      */
-    protected function error() : string
+    protected function msg() : string
     {
         // encapsulate and return error message
-        $error = '<h2>Message</h2><p>'.$this->message.'</p>';
+        return '<h2>Message</h2><p>'.$this->message.'</p>';        
         
-        
+    }// end function
+
+
+
+
+	/**
+     * code function.
+     * 
+     * returns formatted  code
+     *
+     * @access     protected
+     * @return     string
+     */
+    protected function code() : string
+    {
         // if show error line is true, then display the 
         // actual line that caused the error
         if( SHOW_ERROR_LINE && ERROR_LEVEL > 0 ){
@@ -183,7 +197,7 @@ class NerbError extends \Exception
         	$error .= '<h2>Details</h2>';
         	
         	if( ERROR_LEVEL == 1 ){
-    		$trace = end( $this->trace );
+    			$trace = end( $this->trace );
 	        	$file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
 				$error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
 				$error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
@@ -196,9 +210,14 @@ class NerbError extends \Exception
 	        	foreach( $this->trace as $trace){
 		        	// read offending file into an array
 		        	$file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
-					$error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
-					$error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
-				 	
+		        	
+		        	// because if an error was thrown, technically it is the previous line
+		        	// that caused the error, so this only shows code line if it is not a 
+		        	// thrown error.  makes the code list a little easier to see real error
+		        	if( !stristr( $file[ $trace['line']-1 ], "throw" ) ){
+						$error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
+						$error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
+		        	}
 				 	// housekeeping for large array
 				 	unset( $file );
 		        	
@@ -211,7 +230,6 @@ class NerbError extends \Exception
         return $error;
         
     }// end function
-
 
 
 

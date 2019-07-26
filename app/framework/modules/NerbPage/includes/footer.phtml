@@ -3,7 +3,7 @@
 	if( !$this->params['scripts_in_header'] ){
 		foreach( $this->params["script"] as $link ){
 			if ($link){
-				echo "<script ".( $this->params['asynch_scripts'] ? 'async ' : NULL )."type='text/javascript' src='".$link."'></script>\n";
+				echo "<script ".( $this->params['asynch_scripts'] ? 'async ' : NULL )."type='text/javascript' src='".$link."'></script>'.PHP_EOL";
 			}
 		}
 	}

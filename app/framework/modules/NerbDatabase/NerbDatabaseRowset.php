@@ -12,8 +12,7 @@
  * @implements      Iterator
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright (c) 2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019 
  * @see             NerbDatabase
  * @see             NerbDatabaseTable
  * @see             NerbDatabaseRow

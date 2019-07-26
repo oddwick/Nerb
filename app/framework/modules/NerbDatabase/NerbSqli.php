@@ -22,8 +22,7 @@
  * @class           Nerb_Sqli
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019
  *
  * @todo
  *
@@ -66,9 +65,8 @@ class NerbSqli extends mysqli
  * @class           Nerb_Statement
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
- *
+ * @copyright       Copyright (c)2019
+Copyright (c)2019 *
  * @todo
  *
  *  usage -----\

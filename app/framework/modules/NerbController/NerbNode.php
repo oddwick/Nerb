@@ -15,8 +15,8 @@
  * @class           NerbNode
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019
+ * @license         https://www.github.com/oddwick/nerb
  *
  * @todo
  *

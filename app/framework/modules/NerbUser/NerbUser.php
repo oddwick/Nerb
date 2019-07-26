@@ -13,8 +13,9 @@
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2017
- * @license         https://www.oddwick.com
- *
+Copyright (c)2019 *
+ * @requires NerbError
+ * @requires NerbDatabase
  * @todo
  *
  */
@@ -31,35 +32,104 @@ class NerbUser
     /**
      * params
      * 
-     * (default value: array(
-     * 	    'table' => '',
-     * 		'user'  => '',
-     * 		'pass'  => '',
-     * 		'uid'   => '',
-     *     ))
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $params = array();
+    
+    /**
+     * database
+     * 
+     * (default value: '')
      * 
      * @var string
      * @access protected
      */
-    protected $params = array(
-	    'database' => '',
-	    'table' => '',
-		'user'  => '',
-		'pass'  => '',
-		'uid'   => '',
-    );
+    protected $database = '';
+	
+	/**
+	 * table
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $table = '';
+	
+	/**
+	 * user_name_field
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $user_name_field = '';
+	
+	/**
+	 * pass_field
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $pass_field = '';
+	
+	/**
+	 * id_field
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $id_field = '';
 
 
     /**
      * __construct function.
      * 
      * @access public
+     * @param string $table
+     * @param string $id_field
+     * @param string $user_name_field
+     * @param string $pass_field
      * @param array $params (default: array())
      * @return void
      */
-    public function __construct( array $params = array() )
+    public function __construct( string $table, string $id_field, string $user_name_field, string $pass_field, array $params = array() )
 	{
 		
+		// error checking
+		if ($table){
+			$this->table = $table;
+		} else {
+			throw new NerbError('Required parameter <code>{string $table}</code> not defined.');
+		}
+		
+		if($id_field){
+			$this->id_field = $id_field;
+		} else{
+			throw new NerbError('Required parameter <code>{string $id_field}</code> not defined.');
+		}
+		
+		if($user_name_field){
+			$this->user_name_field = $user_name_field;
+		} else{
+			throw new NerbError('Required parameter <code>{string $user_name_field}</code> not defined.');
+		}
+		
+		if($pass_field){
+			$this->pass_field = $pass_field;
+		} else {
+			throw new NerbError('Required parameter <code>{string $pass_field}</code> not defined.');
+		}
+
+
 		// add params if given
 		if( $params ){
 			$this->params = array_merge( $this->params, $params);
@@ -67,7 +137,7 @@ class NerbUser
 		
 		// check to see if a database is registered
 		if( $database = Nerb::isClassRegistered( 'NerbDatabase' ) ){
-			$this->params['database'] = $database;
+			$this->database = $database;
 		} else {
 			throw new NerbError( 'Could not find a registered database' );
 		}
@@ -102,10 +172,10 @@ class NerbUser
 	 */
 	public function setTable( array $table_data )
 	{
-		$this->params['table'] = $table_data['table'];
-		$this->params['user'] = $table_data['user'];
-		$this->params['pass'] = $table_data['pass'];
-		$this->params['uid'] = $table_data['uid'];
+		$this->table = $table_data['table'];
+		$this->user_name_field = $table_data['user'];
+		$this->pass_field = $table_data['pass'];
+		$this->id_field = $table_data['uid'];
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,7 +209,7 @@ class NerbUser
 			    PRIMARY KEY (`session_id`)
 			)';
 			
-		$database = Nerb::fetch( $this->params['database'] );
+		$database = Nerb::fetch( $this->database );
 		$database->query( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -169,7 +239,7 @@ class NerbUser
 			    PRIMARY KEY (`log_id`)
 			)';
 			
-		$database = Nerb::fetch( $this->params['database'] );
+		$database = Nerb::fetch( $this->database );
 		$database->query( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -195,7 +265,7 @@ class NerbUser
 	protected function createSession( $user_id )
 	{
 		// fetch database
-		$database = Nerb::fetch( $this->params['database'] );
+		$database = Nerb::fetch( $this->database );
 		
 		// create session table
 		$sessions = new NerbDatabaseTable( $database, TOKEN_TABLE );
@@ -228,7 +298,7 @@ class NerbUser
 		// set session variables
 		$_SESSION['auth'] = $selector;
 		$_SESSION['token'] = $validator;
-		$_SESSION[ $this->params['uid'] ] = $user_id;
+		$_SESSION[ $this->id_field ] = $user_id;
 		$_SESSION[ 'uid'] = $user_id;
 		$_SESSION['begin'] = time();
 
@@ -250,7 +320,7 @@ class NerbUser
 	{
 		// find and unset session in database
 		// fetch database
-		$database = Nerb::fetch( $this->params['database'] );
+		$database = Nerb::fetch( $this->database );
 		
 		// create session table
 		$sessions = new NerbDatabaseTable( $database, TOKEN_TABLE );
@@ -318,7 +388,7 @@ class NerbUser
 	{
 		if( LOG_ATTEMPTS == 'db' || LOG_ATTEMPTS == 'both' ){
 			// fetch database and bind to userlog table
-			$database = Nerb::fetch( $this->params['database'] );
+			$database = Nerb::fetch( $this->database );
 			$log = new NerbDatabaseTable( $database, ACCESS_LOG_TABLE );
 			
 			// setup log array
@@ -434,7 +504,7 @@ class NerbUser
 	public function verify() : bool
 	{
 		// fetch database
-		$database = Nerb::fetch( $this->params['database'] );
+		$database = Nerb::fetch( $this->database );
 		
 		// create session table
 		$sessions = new NerbDatabaseTable( $database, TOKEN_TABLE );

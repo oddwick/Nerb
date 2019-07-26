@@ -8,6 +8,7 @@
  * @category    	Database
  * @package     	Nerb
  * @subpackage  	NerbDatabase
+ * @class  			NerbDatabaseJoin
  * @access      	public
  * @version         1.0
  * @author      	Derrick Haggerty <dhaggerty@gnert.com>
@@ -177,9 +178,8 @@ class NerbDatabaseJoin
  * @class 			
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
- * @see         	NerbDatabase
+ * @copyright       Copyright (c)2019
+Copyright (c)2019 * @see         	NerbDatabase
  * @see         	NerbDatabaseTable
  *
  * @todo
@@ -655,9 +655,8 @@ class NerbDatabaseSelect
  * @class 			
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
- * @see    			NerbDatabase
+ * @copyright       Copyright (c)2019
+Copyright (c)2019 * @see    			NerbDatabase
  * @see    			NerbDatabaseTable
  *
  * @todo
@@ -1282,9 +1281,8 @@ class NerbDatabaseStructure extends NerbDatabaseTable{
  * @access      	public
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
- * @see         	NerbDatabase
+ * @copyright       Copyright (c)2019
+Copyright (c)2019 * @see         	NerbDatabase
  * @see         	NerbDatabaseTable
  *
  * @todo
@@ -1433,9 +1431,8 @@ class NerbDatabaseUpdate
  * @access			public
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
- * @see    			NerbDatabase
+ * @copyright       Copyright (c)2019
+Copyright (c)2019 * @see    			NerbDatabase
  * @see    			NerbDatabaseTable
  *
  * @todo

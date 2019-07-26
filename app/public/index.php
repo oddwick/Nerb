@@ -3,7 +3,7 @@
 	*
 	*
 	*	Nerb Framework Bootstrap file
-	*	(c) 2017 Dexter Oddwick
+	*	(c) 2009-2019 Dexter Oddwick
 	*
 	*	script begin
 	*/
@@ -13,11 +13,11 @@
 	 *
 	 *  Debugging block
 	 *
+	 *  set error reporting
+	 *  disable for production site
 	 *
 	*/
 
-	// set error reporting
-	// disable for production site
 	/*
 		ini_set( 'display_errors', 'On' );	
 		error_reporting( E_ERROR | E_WARNING | E_PARSE );
@@ -42,34 +42,12 @@
 	Nerb::init();
 	Nerb::addConfig( 'app.ini', '/config' );
 	
-	//load base classes	
-	Nerb::loadclass( 'NerbDatabase' );
-	Nerb::loadclass( 'NerbUser' );
-	Nerb::loadclass( 'NerbNode' );
-	Nerb::loadclass( 'NerbPage' );
-	Nerb::loadclass( 'NerbParams' );
-	
 	// connect to the database
 	// initialize & register tables
-	Nerb::register( $db = new NerbDatabase( 'database', $DB ), 'data' );
-	Nerb::register( new NerbDatabaseTable( $db, 'users' ), 'user_table' );
-	Nerb::register( new NerbDatabaseTable( $db, 'stamps' ), 'stamp_table' );
-	Nerb::register( new NerbDatabaseTable( $db, 'variants' ), 'variant_table' );
-	Nerb::register( new NerbDatabaseTable( $db, 'images' ), 'image_table' );
-	Nerb::register( new NerbDatabaseTable( $db, 'countries' ), 'country_table' );
-	Nerb::register( new NerbDatabaseTable( $db, 'classes' ), 'class_table' );
-	Nerb::register( new NerbDatabaseTable( $db, 'log_change' ), 'log_change' );
+	//Nerb::register( $db = new NerbDatabase( 'database', $DB ), 'data' );
+	//Nerb::register( new NerbDatabaseTable( $db, 'users' ), 'user_table' );
 	
-	
-	// create and register user data
-	$user_data = array( 
-		'table' => 'user_table', 
-		'user' => 'user_name', 
-		'pass' => 'user_pass', 
-		'uid' => 'user_id' 
-	);
-	
-	Nerb::register( $user = new NerbUser( $user_data ), 'user' );
+	//Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'user' );
 	
 	// create a page object with an ini file
 	Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );

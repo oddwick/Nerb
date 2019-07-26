@@ -12,12 +12,10 @@
  * @category        Nerb
  * @package         Nerb
  * @subpackage      NerbDatabase
- * @class           NerbDatabase
+ * @class           NerbDatabaseDebug
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c ) 2017
- * @license         https://www.oddwick.com
- *
+ * @copyright       Copyright (c)2019
  * @todo
  *
  */

@@ -1,245 +1,200 @@
-<?php  /* 
+<?php  /*
 
 /**
- *	Base class for the Stamp album professional that generates high quality pdf
- *	pages for stamp albums
+ * 	Simple router controller for managing users
  *
  *
- * @package    		Stamp Album Pro Admin
+ * @package    		Nerb Application Framework
  * @class    		UserController
  * @extends    		NerbController
  * @version			1.0
  * @author			Dexter Oddwick <dexter@oddwick.com>
  * @copyright  		Copyright (c)2017
- * @license    		http://www.oddwick.com
+ * @license         https://www.github.com/oddwick/nerb
  *
  *
- * @todo    		
+ * @todo
  *
  */
- 
- 
 
-class UserController extends NerbController {
+
+class UserController extends NerbController
+{
+
+	/**
+	 * title
+	 *
+	 * This is the default value for the page title
+	 * 
+	 * (default value: 'Nerb Application Framework')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $title = 'Nerb Application Framework';
+	
+	
+	
+    /**
+    *   Container function for executing domain logic for this module
+    *
+    *   @access		public
+    */
+    public function route()
+    {
+        // this is a public controller
+        $title = '';
+        
+        $this->defineStructure( array( 'page' ));
+        
+        // action calls
+        if ( $this->action ) $this->action(); 
+                
+		// fetch user object
+		$user = Nerb::fetch( 'user' );
 		
-		/**
-		*	Container function for executing domain logic for this module
-		*
-		*	@access		public
-		*/
-		public function route(){
+		// if user is logged in, allow access to private sections, 
+		// otherwise kick out to registration page
+		if( !$user->verify() ) 
+		{
+            $content = $this->publicPages();
+        } else {
+            $nav = true;
+            $content = $this->privatePages();
+        }
+        
+        $content = $this->publicPages();
+
+        // fetch page object and add content to it
+        $page = Nerb::fetch( 'Page' );
+        $page->title( $this->title );
+        $page->content( PAGES.'/'.$content );
+        
+        return $this;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * The pages called here require the user to be logged in to view them
+     *
+     * @access         protected
+     * @return         string
+     */
+    protected function privatePages() : string
+    {
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * The pages called here are public and can be seen by anyone
+     * 
+     * @access protected
+     * @return void
+     */
+    protected function publicPages() : string
+    {
+        switch ( $this->page ) {
+            case 'forgotPass':
+            default:
+                $page = $this->module.'/login.php';
+        }// end switch
+        return $page;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * This is where actions are performed. a jump is performed on the completion of an action
+     * 
+     * @access protected
+     * @return void
+     */
+    protected function action()
+    {
+        switch ( $this->action ) {
+            case 'login':
+		        $page = $this->login($_POST['user_name'], $_POST['user_pass']);
+				break;
+            
+            
+            case 'logout':
+		        $this->logout();
+            
+            default:
+                $page = '/';
+        }// end switch
+        
+        // jump to action endpoint
+        Nerb::jump( $content );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    #####################################################################
+	
+    //		!USER DEFINED FUNCTIONS
+    
+    #####################################################################
+
+
+
+
+	/**
+	 * login function.
+	 * 
+	 * @access protected
+	 * @param mixed $user_name
+	 * @param mixed $user_pass
+	 * @return void
+	 */
+	protected function login( string $user_name, string $user_pass ): string
+	{
 		
-				// if user is logged in, allow access to private sections, otherwise kick out
-				// and send user to login page
-				if( !$this->isLogged() ){
-					Nerb::jump("/");
-					
-				}elseif( $this->params["action"] ){
-					$this->actions();
-					
-				} else {
-					$page = $this->privatePages();
-					include PAGES."/header.php";
-					include PAGES."/user/".$page;
-					include PAGES."/footer.php";
-				}
-		}// end function		
-
-
-
-
-		/**
-		*	The pages called here require the user to be logged in to view them
-		*
-		*	@access		protected
-		*	@return		string
-		*/
-		protected function privatePages(){
-				
-				
-				
-				// process request
-				switch( $this->params["page"] ){
-						
-				case 'userDetail':
-/*
-					if($_GET['user_id']){
-						Nerb::jump("/user/userDetail/user_id/".$_GET['user_id']);
-					}
-*/
-					$page = "userDetail.php";
-					break;
-							
-				case 'addAdmin':
-					$user = $Users->fetchRow($_POST['user_id']);
-					$user->account_type = 2;
-					$user->save();					
-					Nerb::jump("/user");
-					break;
-							
-				default:
-					$page = "userList.php";
-							
-
-				}// end switch
-					
-				return $page;
-		}// end function		
-
-
-
-
-		/**
-		*	The pages called here are public and can be seen by anyone
-		*
-		*	@access		protected
-		*	@return		string
-		*/
-		protected function publicPages(){
-			return "login.php";
-		}// end function	
+		$user = Nerb::fetch( 'user' );
 		
+		// authenticate user
+		$status =  $user->authenticate( $user_name, $user_pass );
 		
+		// sucessful authentication
+		if( $status[0] == true ){
+			$page = '/?msg='.urlencode( 'Welcome Back' );
+		} 
 		
-		/**
-		*	these are where the action calls are performed
-		*
-		*	@access		protected
-		*	@return		string
-		*/
-		protected function actions(){
-			
-			// process request
-			switch( $this->params["action"] ){
-				
-				
-				// !data calls
-				// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-				case 'setFilter':
-					$_SESSION['filter']['letter'] = $this->params['letter'];
-					$page = "/user";
-					break;
-							
-				case 'saveUser':
-					$this->_saveUser( $this->params['user_id'], $_POST );					
-					$page = "/user?msg=".urlencode("User has been saved");
-					break;
-							
-					
-				case 'deleteUser':
-					$this->_deleteUser( $this->params['user_id'] );					
-					$page = "/user?msg=".urlencode("User has been deleted");
-					break;
-							
-					
-				case 'logout':
-					$this->logout();
-					$page = "/?msg=".urlencode("You have been logged out");
-					break;
-							
-				// default action sends back to stamps page
-				default:
-				$page = "/users";
-
-			}// end switch
-				
-			Nerb::jump( $page );
+		// failed authentication
+		else {
+			$page = $this->return_page.'?error='.urlencode( $status[1] );
 		}
 		
+		return $page;	
+				
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+	/**
+	*	logs the user out by destroying their session
+	*
+	*	@access		protected
+	*	@return		string
+	*/
+	public function logout(): string
+	{
+		$user = Nerb::fetch( 'user' );
+		$user->destroySession();
+		session_unset($_SESSION);
+		return( '/?msg=You+have+been+logged+out' );
 		
-		
-			
-		/**
-		*	logs the user out
-		*
-		*	@access		protected
-		*	@return		string
-		*/
-		protected function logout(){
-				session_unset($_SESSION);
-				setcookie('token', 0, time()-3600, "/");
-				return( '/?msg=You+have+been+logged+out' );
-		}// end function		
+	}// end function		
 
 
-
-		
-		/**
-		 * _saveUser function.  saves user data
-		 * 
-		 * @access protected
-		 * @param int $user_id
-		 * @param int $account_type (default: 0)
-		 * @return void
-		 */
-		protected function _saveUser( $user_id, $data ){
-			
-
-			# get required databases 
-			$Users = Nerb::fetch('users');
-			
-			#fetch user data
-			$user = $Users->fetchRow( $user_id );
-			
-			//
-			#save variables
-			foreach( $data as $key => $value ){
-				$user->$key = $value;
-			} // end foreach
-			
-			#save user
-			$user->save();	
-			
-			return;				
-
-		}// end function		
-
-
-
-
-
-		/**
-		 * _deleteUser function.  deletes a user
-		 * 
-		 * @access protected
-		 * @param int $user_id
-		 * @return void
-		 */
-		protected function _deleteUser( $user_id ){
-			
-
-			# get required databases 
-			$Users = Nerb::fetch('users');
-			
-			#fetch user data
-			$Users->deleteRow( $user_id );
-			
-			return;				
-
-		}// end function		
-
-
-
-
-
-		/** 
-		*	determines if user is logged in and authorized to see page
-		*
-		*	@access		public
-		*	@return 	bool
-		*/
-		public function isLogged(){
-			
-			#	check to see that the token matches user_id decoded and hashed
-			return ( $_COOKIE["token"]  && $_COOKIE["token"] == sha1( base64_decode( $_COOKIE["user_id"] ) ) ) ? true : false;
-			
-		} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-		
-
-		
-
-	} /* end class */
-?>
+} /* end class */

@@ -14,8 +14,7 @@
  * @class 			NerbDatabaseTable
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019
  *
  * @todo
  *
@@ -1287,7 +1286,9 @@ class NerbDatabaseTable
 
         $result = $database->query( $query );
         
-        return mysqli_num_rows( $result ); // number of rows deleted
+        //Nerb::inspect( $result, true, "result" );
+
+        return $database->affected_rows(); // number of rows deleted
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1311,7 +1312,7 @@ class NerbDatabaseTable
 
         $result = $database->query( $query );
         
-        return mysqli_num_rows( $result );
+        return $database->affected_rows();
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

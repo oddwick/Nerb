@@ -9,12 +9,11 @@
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Nerb
+ * @class           NerbUtility
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
- *
+ * @copyright       Copyright (c)2019
+Copyright (c)2019 *
  * @todo
  * @requires        ~/config.ini
  * @requires        ~/lib

@@ -7,29 +7,38 @@ standard site
 
 */
 
+ul li{
+	list-style: none;
+}
+
+code{
+	display: block;
+	padding: 0.5rem 2rem !important;
+}
+
 
 /* ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	!error and msg bars
    ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 .msg-bar, .error-bar{
 	width: 100%;
-	height: 40px;
-	line-height: 40px;
-	padding: 0 40px;
+	height: 3rem;
+	line-height: 3rem;
+	padding: 0 3rem;
 }
 
 .msg-bar p, .error-bar p{
 	color: #fff !important;
-	line-height: 40px;
+	line-height: 3rem;
 	font-weight:bold;
 }
 
 .msg-bar{
-	background-color: rgb(43, 166, 203);
+	background-color: rgba(43, 166, 203, 1);
 }
 
 .error-bar{
-	background-color: #C00;
+	background-color: rgba(200, 0, 0, 1);
 }
 
 
@@ -41,23 +50,56 @@ input:focus:invalid {
 }
 
 input[type=text], 
+input[type=email], 
+input[type=tel],
 input[type=number], 
 input[type=input], 
-input[type=email], 
 input[type=password], 
 input[type=search],
+input[type=date],
+input[type=datetime],
 select, 
 textarea{
-	border-radius: 0;
+	border-radius: 5px;
 	border: 1px solid rgba(0, 0, 0, 0.2);
-	font-size: 15pt;
+	font-size: 13pt;
 	font-weight: normal;
 	-webkit-transition: box-shadow 0.6s;
 	transition: box-shadow 0.6s;
-	padding: 1rem;
+	/* padding: 1rem; */
 	height: auto;
+	min-height: 1.5rem;
+	/* box-shadow: inset 1px 1px 5px 1px rgba(0, 0, 0, 0.2); */
 }
 
+/* get rid of spinboxes */
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+
+.currency {
+    display:inline-block;
+	position: relative;
+}
+
+.currency input{
+    padding-left: 2rem !important;
+}
+
+.currency:before {
+  position: absolute;
+  content: "$";
+  left:5px;
+  top:2px;
+}
+
+/*
 input:focus,
 select:focus,
 textarea:focus,
@@ -65,6 +107,7 @@ button:focus {
 	outline: none;
 	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
+*/
 
 
 optgroup{
@@ -82,28 +125,28 @@ textarea
    resize: vertical;
 }
 
+input::placeholder,
 ::-webkit-input-placeholder{
 	color: #ccc;
 	font-weight:lighter;
 	font-style: italic;
 }
 
-input::placeholder,
--webkit-input-placeholder,
--moz-placeholder, 
--moz-placeholder,
--ms-input-placeholder,
-{
-	color: red;
-}
-
 
 label,
 fieldset legend{
-	display: block;
+	display: inline-block;
+	line-height: 2rem;
+	text-transform: uppercase;
+	/*
 	font-size: 0.75rem;
 	font-weight: normal !important;
-	margin-bottom: 0.25rem;
+	margin-bottom: 0.25rem;*/
+}
+
+.label-right{
+	/*float: right;*/
+	text-align: right;
 }
 
 fieldset , legend{ 
@@ -120,6 +163,8 @@ fieldset.stacked{
 	margin-right: 5rem;
 	vertical-align: top;
 }
+
+
 
 /* checkboxes and radio buttons */
 input.checkbox, 
@@ -187,6 +232,96 @@ input[type=radio]:disabled + label:before {
 
 
 
+/* sliders and toggle switches 
+
+the HTML
+
+<!-- Rounded switch -->
+<label class="switch">
+  <input type="checkbox">
+  <span class="slider round"></span>
+</label>
+
+*/
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:disabled + .slider {
+  background-color: #aaa !important;
+  cursor: default;
+}
+
+input:disabled + .slider.round:before {
+  background-color: #ccc !important;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.slider-label {
+  height: 26px;
+  margin-left: 80px;
+  font-size: 1rem;
+  vertical-align: middle;
+  padding: .5rem 0;
+}
 
 
 
@@ -245,6 +380,10 @@ input[type=radio]:disabled + label:before {
 	!utility classes
    ------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+.anchor{
+	cursor: pointer !important;
+}
+
 .no-bullet{
 }
 
@@ -271,6 +410,10 @@ input[type=radio]:disabled + label:before {
 
 .note{ font-style:italic; }
 
+.tiny-text{
+	font-size: 0.75rem;
+}
+
 
 .center{ text-align:center!important; }
 
@@ -283,7 +426,18 @@ input[type=radio]:disabled + label:before {
 	background: url('/img/lock-icon.png') no-repeat left center !important;
 }
 
+.restricted-gray{
+	padding-left: 20px;
+	background: url('/img/lock-icon-gray.png') no-repeat left center !important;
+}
+
 .restricted.white{
 	background: url('/img/lock-icon-white.png') no-repeat left center !important;
 	color: #fff;
+}
+
+.vr,
+.vert-rule,
+.v-rule{
+	border-right: 1px solid #ccc;
 }

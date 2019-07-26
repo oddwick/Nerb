@@ -18,8 +18,7 @@
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright ( c ) 2017
- * @license         https://www.oddwick.com
- *
+Copyright (c)2019 *
  * @todo
  *
  */
@@ -245,6 +244,25 @@ class NerbDatabase
 
 
     /**
+     * affected_rows function.
+     *
+     * returns the number of affected rows from the last database operation
+     * this function is a workaround because sometimes mysqli_affected_rows interprets
+     * the returned result as bool if 0 or 1 rows were affected
+     * 
+     * @access public
+     * @return int
+     */
+    public function affected_rows() : int
+    {
+        return mysqli_affected_rows( $this->database );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
     *   this will convert a sqli result to an array for manipulation and free results
     *
     *   @access     protected
@@ -300,6 +318,7 @@ class NerbDatabase
         $this->profile[] = $profile; 
       
         // returns mysqli_result object
+        
         return $result;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -341,6 +360,59 @@ class NerbDatabase
         // returns mysqli_result object
         return $this->_query( $query );
         
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * sql function.
+     *
+     * allows the execution of raw sql file or sql dump
+     * 
+     * @access public
+     * @param string $sql_file
+     * @return bool
+     * @throws NerbError
+     */
+    public function sql( string $sql_file ) : bool
+    {
+    	// error checking
+    	if( !file_exists($sql_file) ){
+	    	throw new NerbError('File <code>'.$sql_file.'</code> does not exist');
+    	}
+    	
+    	// read file to variable
+    	$sql = readfile($sql_file);
+    	
+    	// execute result and return true on sucess, throw error on fail
+    	if( $result = $this->database->mysqli_multi_query( $sql )){
+	    	return true;
+    	} else {
+	        $error = mysqli_error( $this->database );
+	        $error_no = mysqli_errno( $this->database );
+            throw new NerbError('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
+    	}
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * backup function.
+     *
+     * allows the execution of raw sql file or sql dump
+     * 
+     * @access public
+     * @param string $filename
+     * @param array $tables
+     * @return string
+     * @throws NerbError
+     * @todo 
+     */
+    public function backup( string $filename, array $tables )
+    {
+	    // !todo
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -415,11 +487,12 @@ class NerbDatabase
 
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    #################################################################
 
-    //              !PREPARED STATEMENTS
+    //      !PREPARED STATEMENTS
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    #################################################################
+
 
 
     /**

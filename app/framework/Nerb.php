@@ -13,8 +13,8 @@
  * @class           Nerb
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright ( c )2017
- * @license         https://www.oddwick.com
+ * @copyright       Copyright (c)2019
+ * @license         https://www.github.com/oddwick/nerb
  *
  * @todo
  * @requires        ~/config.ini
@@ -28,7 +28,11 @@ define( 'SOFTWARE', 'Nerb Application Framework' );
 define( 'VERSION', '1.0' );
 define( 'COPYRIGHT', 'Copyright &copy;2001-'.date( 'Y' ).' Oddwick Ltd.' );
 define( 'LICENSE', 'https://www.oddwick.com/docs/license' );
+define( 'GIT', 'https://github.com/oddwick/Nerb');
+define( 'AUTHOR', 'Dexter Atom Oddwick');
 
+//for debuging
+define( 'RENDER', microtime());
 
 /**
  *
@@ -84,15 +88,13 @@ class Nerb
     /**
     * Singleton Pattern prevents multiple instances of Nerb.  all calls must be made statically e.g. Nerb::function(  args  );
     *
-    *   @access     public
+    *   @access     protected
 	* 	@final
     *   @return     void
     */
-    final private function __construct()
+    final protected function __construct()
 	{
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 
     /**
@@ -102,10 +104,9 @@ class Nerb
     *
     *   @access     public
 	* 	@static
-    *   @param      array $params
     *   @return     void
     */
-    public static function init( array  $params = array()  )
+    public static function init()
     {
 		
 		//load configuration file
@@ -114,8 +115,10 @@ class Nerb
         // add directories to the path
         self::$path['root'] = FRAMEWORK;
 		self::$path['modules'] = MODULES;
-        $files = scandir( MODULES );
-		
+		self::$path['library'] = LIBRARY;
+        
+        // scan for available modules
+        $files = scandir( MODULES );		
 
 		// set include paths
         foreach( $files as $file ){
@@ -133,7 +136,7 @@ class Nerb
 		
         
         // set the current url and path root
-        self::$url = $params['URL'] ?? $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].(  str_replace( $_SERVER['DOCUMENT_ROOT'], '', self::$path['root'] )  );
+        self::$url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].(  str_replace( $_SERVER['DOCUMENT_ROOT'], '', self::$path['root'] )  );
         
         
         // Load required classes
@@ -206,9 +209,9 @@ class Nerb
 	 * @param mixed $log_file
 	 * @param mixed $message
 	 * @param mixed $prefix (default: null)
-	 * @return void
+	 * @return bool
 	 */
-	public static function log( string $log_file, string $message, string $prefix = null )
+	public static function log( string $log_file, string $message, string $prefix = null ) : bool
 	{
 		
 		// clean up message
@@ -226,6 +229,7 @@ class Nerb
 		$status = file_put_contents ( $log_file , $entry , FILE_APPEND | LOCK_EX );
 		if ( !$status ) 
 			throw new NerbError( 'Unable to add entry to log');
+		
 		return $status;
 			
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -344,6 +348,10 @@ class Nerb
 		    throw new NerbError( $error['message'], $error['trace'] );
 	        die;
 	    }
+	    
+	    if( DEBUG ){
+		    echo 'Rendered in '.(microtime()-RENDER).'ms';
+	    }
 	}
 
 
@@ -396,6 +404,28 @@ class Nerb
 
 
     /**
+    *   listRegistered function.
+    * 
+    *   returns a list of registered classes in the registry
+    *
+    *   @access     public
+	* 	@static
+    *   @return     array
+    */
+    public static function listRegistered() : array
+    {
+        foreach ( self::$registry as $handle => $object ) {
+            $reg[] = get_class( $object ); 
+        }
+
+        return $reg;
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
     *   isRegistered function.
     * 
     *   determines if an object has been placed in the registry
@@ -408,7 +438,7 @@ class Nerb
     public static function isRegistered( string $handle ) : bool
     {
         return array_key_exists( $handle, self::$registry ) ? true : false;
-        
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -564,13 +594,13 @@ class Nerb
     *
     *   @access     public
 	* 	@static
-    *   @param      string $className
+    *   @param      string $class
     *   @return     void
     *	@see		loadClass()
     */
-    public static function autoload( string $name )
+    public static function autoload( string $class )
     {
-        self::loadClass( $name );
+        self::loadClass( $class );
                
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -720,7 +750,7 @@ class Nerb
 
         // check to see if the path is a valid directory
         if ( !is_dir( $path ) )
-            throw new NerbError( 'Set path error -- <code>[$path]</code> is not a valid path.' );
+            throw new NerbError( 'Set path error -- <code>['.$path.']</code> is not a valid path.' );
         
         self::$path[$alias] = $path;
         
@@ -842,10 +872,54 @@ class Nerb
 
 
     /**
+    *   Returns the current configuration of Nerb and lists current constants
+    *
+    *   @access     protected
+    *   @return     string
+    */
+    public static function status() : array
+    {
+    	$config = array();
+    	$const = get_defined_constants( true );
+    	foreach( $const['user'] as $key => $value){
+	    	$config[$key] =  str_replace( APP_PATH, '..', $value );
+		}
+    	return $config;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	    
+
+    /**
+    *   Returns a list of the currently loaded modules
+    *
+    *   @access     protected
+    *   @return     string
+    */
+    public static function modules() : array
+    {
+    	$modules = array();
+    	// get loaded classes
+    	$classes = get_declared_classes();
+    	foreach( $classes as $key => $value ){
+    		if( stristr($value, 'Nerb') )
+    			$modules[] = $value;
+    	} // end foreach
+    	
+    	// sort them in alphabetical order
+    	sort($modules);
+    	
+    	return $modules;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	    
+
+    /**
     *   Debugging function will dump the value of a formatted variable and dies if needed
     *
     *   @access     protected
-    *   @param      mixed $var
+    *   @param      mixed $var variable to be inspected
     *   @param      bool $die (if true, then kills the script after printing varible)
     *   @param      string $title (name to display if using multiple inspections)
     *   @return     void
