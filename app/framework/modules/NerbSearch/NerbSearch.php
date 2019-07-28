@@ -43,10 +43,10 @@ class NerbSearch
      * @access protected
      */
     protected $params = array(
-        'greedy_search' => GREEDY_SEARCH,
-        'keyword_min_length' => KEYWORD_MIN_LENGTH,
-        'allow_html' => ALLOW_HTML, // allows html chars in search -- setting to false will also kill wildcard chars
-        'use_datatyping' => USE_DATATYPING, // this forces strict use_datatyping for keywords
+        'greedy_search' => true,
+        'keyword_min_length' => 3,
+        'allow_html' => false, // allows html chars in search -- setting to false will also kill wildcard chars
+        'use_datatyping' => true, // this forces strict use_datatyping for keywords
     );
 
 
@@ -55,7 +55,7 @@ class NerbSearch
      *
      * (default value: array('a','an','are','as','at','be','by','com','for','from','how','in','is','it','of','on','or','that','the','this','to','was','what','when','who','with','the'))
      *
-     * @var string
+     * @var array
      * @access protected
      */
     protected $excluded_words =  array(
@@ -72,7 +72,7 @@ class NerbSearch
      *      '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']','{', '}',':', '<', '>', '|',
      *  ))
      *
-     * @var string
+     * @var array
      * @access protected
      */
     protected $invalid_char = array(
@@ -178,6 +178,12 @@ class NerbSearch
      */
     public function __construct(string $search_string, string $table = null)
     {
+        //transfer globals
+		$this->params['greedy_search'] = GREEDY_SEARCH;
+		$this->params['keyword_min_length'] = KEYWORD_MIN_LENGTH;
+		$this->params['allow_html'] = ALLOW_HTML;
+		$this->params['use_datatyping'] = USE_DATATYPING;
+       
         // process search_string
         // trim off spaces from search string
         $this->search_string = trim($search_string);
@@ -195,7 +201,7 @@ class NerbSearch
             $this->table = $table;
         }
 
-        return void;
+        return;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -243,12 +249,17 @@ class NerbSearch
      *
      *  @access public
      *  @param string $key
+     *  @property bool greedy_search
+     *  @property int keyword_min_length
+     *  @property bool allow_html
+     *  @property bool use_datatyping
      *  @return mixed
      */
     public function __get(string $key)
     {
         // returns value
         return $this->params[ $key ];
+       
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -332,10 +343,10 @@ class NerbSearch
     {
         if ($replace) {
             // replace existing list
-            $this->invalid_char = $this->invalid_chars;
+            $this->invalid_char = $chars;
         } else {
             // merge to existing list
-            $this->invalid_char = array_merge($chars, $this->invalid_chars);
+            $this->invalid_char = array_merge($chars, $this->invalid_char);
         }
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -389,25 +400,6 @@ class NerbSearch
     public function sort(string $field, string $dir = 'DESC') : NerbSearch
     {
         $this->sort_field[ $field ] = $dir;
-        return $this;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * page function.
-     *
-     * creates the mysql limit result for pagination.
-     * LIMIT ( max_results * page, page )
-     *
-     * @access public
-     * @param int $page
-     * @return NerbSearch
-     */
-    public function page(int $page) : NerbSearch
-    {
-        $this->page = $page;
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -485,7 +477,8 @@ class NerbSearch
         $search = $this->_formatSearch($this->keywords);
 
         // this sets the conditions, eg if a search field or other match must be made
-        if ($this->conditions) {
+        if ( !empty($this->conditions) ) {
+	        $conditon = '';
             // If there are keyword(s) AND required condition(s)
             foreach ($this->conditions as $field => $value) {
                 if (!empty($value)) {
@@ -505,7 +498,7 @@ class NerbSearch
         }
 
         // append sort field if given
-        if ($this->sort_field) {
+        if ( !empty($this->sort_field) ) {
             $sql .= $this->_orderBy();
         }
 
@@ -597,15 +590,26 @@ class NerbSearch
 
 
 
-    protected function _formatSearch(array $keywords) : string
+    /**
+     * _formatSearch function.
+     * 
+     * @access protected
+     * @param array $keywords
+     * @return mixed
+     */
+    protected function _formatSearch(array $keywords)
     {
         // Greedy search (match any keywords)
         // note boolean NOT will not work with greedy searches, otherwise
         // ALL possible results will be returned, so NOT keywords will be eliminated
         // from search parameters
 
+		$search = array();
+		
         // loop through search fields
         foreach ($this->search_fields as $field => $datatype) {
+            
+            $hold = array();
             // loop through keywords
             foreach ($keywords as $keyword) {
                 // datatype the keyword
@@ -621,6 +625,7 @@ class NerbSearch
 
             // implode the remaining results
             $search[] = implode($this->greedy_search?' OR ':' AND ', $hold);
+            
             unset($hold);
         }// end foreach keywords
 
@@ -631,6 +636,7 @@ class NerbSearch
 
         // group fields together with implode and return
         return '( '.implode(') OR ( ', $search).' )';
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -668,6 +674,10 @@ class NerbSearch
      */
     protected function _datatype(string $keyword, string $datatype) : string
     {
+        // initialize
+        $wildcard = NULL;
+        $bool = NULL;
+        
         // if use_datatyping is not used, then escape the keyword and return
         if (!$this->use_datatyping) {
             return $this->_escapeDB($keyword);
