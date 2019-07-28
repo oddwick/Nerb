@@ -135,7 +135,7 @@ class NerbDatabaseTable
 
 
 	/**
-	*   returns the current query string
+	*   returns the last query string
     *
 	*   @access     public
 	*   @return     string the last element of the query array
@@ -143,7 +143,7 @@ class NerbDatabaseTable
 	public function __toString(): string
     {
         //return the last element of the query array
-        return $this->query[count( $this->query )-1];
+        return end( $this->query );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -171,6 +171,37 @@ class NerbDatabaseTable
     //                !BINDING & MAPPING METHODS
 
     #################################################################
+
+
+
+
+    /**
+    *   returns an array of table field names and descriptions
+    *
+    *   @access     public
+    *   @return     array
+    */
+    public function info() : array
+    {
+		// fetch database
+		$database = Nerb::fetch( $this->database );
+
+        // get table data from database
+        $result = $database->resultsToArray( $database->query( 'SHOW COLUMNS FROM `'.$this->name.'` ' ));
+
+        // iterate and pass data with a little better formatting and lower case names
+        // to the info array
+        foreach ( $result as $columns ) {
+	        // change key case
+	        $columns = array_change_key_case( $columns );
+            $info[ $columns['field'] ] = $columns;
+	        $info[ $columns['field'] ]['full_name'] = $table.'.'.$columns['field'];
+	        $info[ $columns['field'] ]['null'] = $columns['Null']=='NO'?'NOT NULL':'';
+        }// end foreach
+
+        return $info;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -245,12 +276,11 @@ class NerbDatabaseTable
 	*/
 	protected function map()
     {
-
 		// fetch database
 		$database = Nerb::fetch( $this->database );
 
         // profile the table
-        $this->attribs = $database->info( $this->name );
+        $this->attribs = $this->info();
         
         // extract columns
         $this->columns = array_keys( $this->attribs );
@@ -354,132 +384,6 @@ class NerbDatabaseTable
 
 
 
-    /**
-    *   performs a direct query on the database and returns a mysqli result
-    *
-    *   @access     protected
-    *   @param      string $query
-    *   @return     mysqli_result
-    *   @throws     NerbError
-    */
-	protected function _query( string $query )
-    {
-        // ensure that a table is selected
-        if ( !$query ) {
-            throw new NerbError( '<code>[$query]</code> is empty.  Expecting string or Select object' );
-        }
-        
-		// fetch database
-		$database = Nerb::fetch( $this->database );
-        
-        // return result set
-        return $database->query( $query );
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   converts a mysql result to a populated array
-    *
-    *   @access     protected
-    *   @param      mysqli_result $result
-    *   @param      string $column
-    *   @return     mysqli_result
-    */
-	protected function _query2array( $result, string $column = null ): array
-    {
-		// transfer the result to a temp array to free results
-		while( $row = mysqli_fetch_assoc( $result ) ){
-			
-			// if a column has been declared, then just that element, otherwise the whole array will be added
-			if( $val = $column ? $row[ $column ] : $row ) 
-				$array[] = $val;
-		}
-
-		// release results
-		mysqli_free_result( $result );
-
-        // return first result as array
-        return $array;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   returns an array form a query
-    *
-    *   @access     protected
-    *   @param      string $query
-    *   @return     mysqli_result
-    */
-	protected function _queryArray( string $query ): array
-    {
-		// perform a query
-		$result = $this->_query( $query );
-		
-		// fetch row from result
-		$row = mysqli_fetch_assoc( $result );
-
-		// release results
-		mysqli_free_result( $result );
-
-        // return first result as array
-        return $row;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   retrieves values from a table and returns as a NerbDatabaseRowset object
-    *
-    *   @access     protected
-    *   @param      string $query (sql query string)
-    *   @return     NerbDatabaseRowset
-    *   @throws     NerbError
-    */
-	protected function _fetch( string $query )
-    {
-        // ensure that a table is selected
-        if ( !$query ) {
-            throw new NerbError( '<code>[$query]</code> is empty.  Expecting string or Select object' );
-        }
-        
-			// fetch database
-		$database = Nerb::fetch( $this->database );
-        
-        	// add query to list for polling and replay
-        $this->query[] = $query;
-        
-        	// query the database
-        $result =  $database->query( $query );
-       
-        	// maps the fields as (field=>table.field) for multiple table select statements
-        $column_list = mysqli_fetch_fields( $result );
-        
-			//prepare column list	
-        foreach ( $column_list as $column ) {
-            $columns[ $column->name ] = $column->table.'.'.$column->name;
-        }
-
-			// instantiate new rowset with mapped fields
-        $rows = new NerbDatabaseRowset();
-        
-        while ( $resultRow = mysqli_fetch_assoc($result) ) {
-            $rows->add( new NerbDatabaseRow( $this->database, $this->name, $columns, $resultRow ) );
-        }
-		
-        return $rows;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 
     /**
     *   returns a Rowset containing multiple Rows specified by a select clause
@@ -498,7 +402,11 @@ class NerbDatabaseTable
             throw new NerbError(  $this->_errorString( 'Table <code>['.$this->name.']</code> has no primary key' ));
         }
         $query = 'SELECT * FROM `'.$this->name.'` WHERE '.$where.( $limit > 0 ? ' LIMIT $limit' : null ).( $offset > 0 ? ' OFFSET $offset' : null );
-        return $this->_fetch( $query );
+
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
+        return $database->fetchRows( $query );
     
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -522,29 +430,15 @@ class NerbDatabaseTable
         
         //build query strin and execute
         $query = 'SELECT * FROM `'.$this->name.'` WHERE '.$this->primary.' = \''.$key.'\' LIMIT 1';
-        $rows = $this->_fetch( $query );
+       
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+        
+        $rows = $database->fetchRows( $query );
         
         // return first row of the rowset
         return $rows->current();
    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-   /**
-    *   alias of fetch
-    *
-    *   @access     public
-    *   @param      string $where
-    *   @param      int $limit
-    *   @param      int $offset
-    *   @return     NerbDatabaseRowset
-    */
-	public function fetchRows( string $where, int $limit = null, int $offset = null )
-    {
-        return $this->fetch( $where, $limit, $offset );
-    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -562,8 +456,11 @@ class NerbDatabaseTable
         // build query string with forced limit of 1
         $query = 'SELECT * FROM `'.$this->name.'` WHERE '.$where.' LIMIT 1';
         
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
         // execute query
-        $rows = $this->_fetch( $query );
+        $rows = $database->fetchRows( $query );
         
         // return first result
         return $rows->current();
@@ -585,7 +482,10 @@ class NerbDatabaseTable
         // build query string
         $query = 'SELECT * FROM `'.$this->name.'`'.( $where ? ' WHERE ' . $where : ' ' );
         
-        return $this->_fetch( $query );
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
+        return $database->fetchRows( $query );
     
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -605,8 +505,11 @@ class NerbDatabaseTable
         // build query string
         $query = 'SELECT * FROM `'.$this->name.'` WHERE `'.$column.'` = \''.$value.'\' LIMIT 1 ';
         
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
         // fetch
-        $rows = $this->_fetch( $query );
+        $rows = $database->fetchRows( $query );
         
         // return first row
         return $rows->current();
@@ -633,7 +536,11 @@ class NerbDatabaseTable
         
         // build query string
         $query = 'SELECT * FROM `'.$this->name.'` WHERE '.$this->primary.' = \''.$key.'\' LIMIT 1';
-        $result = $this->_query( $query );
+
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
+        $result = $tdatabase->query( $query );
 
 		// transfer the result to a temp array to free results
 		$array = mysqli_fetch_assoc( $result );
@@ -667,9 +574,12 @@ class NerbDatabaseTable
         
         // build query string
         $query ='SELECT '.$column.' FROM '.$this->name.( $where ? ' WHERE '.$where : ' ' ).( $limit ? ' LIMIT '.$limit : ' ' );
-        
+  
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+      
         // execute query string return array
-        return $this->_query2array( $this->_query( $query ), $column );
+        return $database->resultsToArray( $database->query( $query ) );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -688,15 +598,17 @@ class NerbDatabaseTable
     */
 	public function fetchUnique( string $column, string $where = null, string $order = 'ASC' ): array
     {
-
         // make sure the table has a primary key defined
         if ( !in_array( $column, $this->columns ) ) {
             throw new NerbError( $this->_errorString('The column <code>['.$column.']</code> is not in table <code>['.$this->name.']</code><p>' ));
         }
         $query = 'SELECT DISTINCT ' . $column . ' FROM ' . $this->name . ( $where ? ' WHERE '.$where : null ).( $order ? ' ORDER BY ' . $column . ' ' . $order : null );
 
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
         // execute query string return array
-        return $this->_query2array( $this->_query( $query ), $column );
+        return $database->queryArray( $database->query( $query ) );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -722,47 +634,13 @@ class NerbDatabaseTable
         // define query
         $query = 'SELECT * FROM '.$this->name.$where.' LIMIT '.$limit.' OFFSET ' . $start;
 
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
         // query and return
-		return $this->_fetch( $query );
+		return $database->fetchRows( $query );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   alias of fetch Block
-    *
-    *   @access     public
-    *   @param      int $start (sql offset)
-    *   @param      int $limit
-    *   @param      string $where
-    *   @return     NerbDatabaseRowset
-    */
-	public function fetchPage( int $start, int $limit, $where = null )
-    {
-	    return $this->fetchBlock( $start, $limit, $where );
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   alias of fetch Block
-    *
-    *   @access     public
-    *   @param      int $start (sql offset)
-    *   @param      int $limit
-    *   @param      string $where
-    *   @return     NerbDatabaseRowset
-    */
-	public function page( int $start, int $limit, $where = null )
-    {
-	    return $this->fetchBlock( $start, $limit, $where );
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
@@ -778,7 +656,6 @@ class NerbDatabaseTable
     */
 	public function fetchJoinedRows( $table, $column, $where = null )
     {
-
         // error checking block
        if ( !$table || !$column ) {
             throw new NerbError( 'Table and Column to join are required' );
@@ -801,7 +678,7 @@ class NerbDatabaseTable
 
     #################################################################
 
-    //              !INSERTION & SAVING METHODS
+    //              !PREPARED STATEMENTS
 
     #################################################################
 
@@ -853,7 +730,6 @@ class NerbDatabaseTable
 	*/
 	protected function execute( NerbStatement $statement, array $values )
     {
-
 		// iterate trhrough the $values array 
 		foreach( $values as $key => $value ){
 			
@@ -893,6 +769,13 @@ class NerbDatabaseTable
 
 
 
+    #################################################################
+
+    //              !INSERTION & SAVING METHODS
+
+    #################################################################
+
+
     /**
     *   creates an Update object and saves an array of data into a table
     *
@@ -905,7 +788,6 @@ class NerbDatabaseTable
     */
 	protected function _save( array $values, $mode = 'REPLACE' )
     {
-
         // must be an array
         if ( !is_array( $values ) ) {
             throw new NerbError( '<code>[NerbDatabaseTable::save()]</code> requires an array to be passed to it' );
@@ -923,8 +805,10 @@ class NerbDatabaseTable
         // create a new prepared statement
         $query_string = $this->prepare( $values,  $mode );
         
+        // pass the statement to the proper database adaptor
         $statement = $database->prepare( $query_string );
         
+        // execute
         $this->execute( $statement, $values );
         
         return $statement;
@@ -943,7 +827,6 @@ class NerbDatabaseTable
     */
 	public function save( array $values )
     {
-
         $statement = $this->_save( $values, 'REPLACE' );
         
         $affected_rows = $statement->affected_rows;
@@ -965,7 +848,7 @@ class NerbDatabaseTable
     *   @param      array $values values as array( field=>value )
     *   @return     int (insert_id)
     */
-	public function insert( array $values ): int
+	public function insert( array $values ) : int
     {
         $statement = $this->_save( $values, 'INSERT' );
         
@@ -992,33 +875,40 @@ class NerbDatabaseTable
     *   @throws     NerbError
     *   @return     int rows affected
     */
-	public function update( array $values, string $where = '' ): int
+	public function update( array $values, string $where = '' ) : int
     {
 		// build initial query string
         $query = 'UPDATE '.$this->name.' SET ';
         
         // check to see if column exists in the table and format a query string
-        $count = 0;
+        $hold = array();
         foreach( $values as $column => $value ){
 	        if( !$this->columnExists( $column ) )
 	        	throw new NerbError( $this->_errorString( 'The column <code>['.$column.']</code> is not in the table.<br><code>[' ) );
-			// add a comma to end of query string
-			if( $count > 0) $query .= ', ';
-			$query .= '`'.$column.'` = '.( is_string( $value ) ? '\''.$value.'\'' : $value );
-			$count++;
+			
+			// create a column statement
+			$hold[] = '`'.$column.'` = '.( is_string( $value ) ? "'".$value."'" : $value );
         }
+        
+        // glue parts together
+        $query .= implode(', ', $hold );
         
 		if( $where ){
 			$query .= ' WHERE '.$where;
 		}
 
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
 		// run query
-		$result = $this->_query( $query );
+		$result = $database->query( $query );
 		
         // return number of rows changed
         return $result->affected_rows ? $result->affected_rows : 0;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
     /**
@@ -1033,7 +923,6 @@ class NerbDatabaseTable
     */
 	public function replace( string $column, string $value, string $where )
     {
-
 		// build initial query string
         $query = 'UPDATE '.$this->name.' SET ';
         
@@ -1045,8 +934,11 @@ class NerbDatabaseTable
         
 		$query .= ' WHERE '.$where;
 		
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
 		// run query
-		$result = $this->_query( $query );
+		$result = $database->query( $query );
 
         // return number of rows changed
         return $result->affected_rows;
@@ -1102,7 +994,6 @@ class NerbDatabaseTable
     */
 	public function swap( $key_from, $key_to ): bool
     {
-
 		// check to see if the keys are in the table
         if ( !$row_from = $this->fetchRow( $key_from ) ) {
 	        //throw new NerbError( 'The key <code>[$from]</code> is not in table ' );
@@ -1178,17 +1069,23 @@ class NerbDatabaseTable
     */
 	public function searchReplace( $column, $find, $replace, int $limit = null )
     {
-
+		// increase memory limit
         ini_set( 'memory_limit', '128M' );
+        
         // error checking block
 
         $rows = $this->search( $column, $find, $limit );
+        
         foreach ( $rows as $row ) {
             $row->$column = str_replace( $find, $replace, $row->$column );
             $row->save();
         }
-
-        return $rows->count();
+        
+        $count = $rows->count();
+		
+		unset( $rows );
+		
+        return $count;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1211,9 +1108,9 @@ class NerbDatabaseTable
         // merge arrays by key
         $map = array_intersect_key( $data, $map );
         // kill null / empty fields
-//			foreach( $map as $key => $value ){
-//				if( empty( $value ) ) unset( $map[$key] );
-//			}
+		// foreach( $map as $key => $value ){
+		// 		if( empty( $value ) ) unset( $map[$key] );
+		// }
         return $map;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1238,7 +1135,7 @@ class NerbDatabaseTable
     *   @return     int number of rows affected
     *   @throws     NerbError
     */
-	public function delete( $key )
+	public function deleteRow( $key )
     {
         // must have a primary key
         if ( !$this->primary ) {
@@ -1247,24 +1144,6 @@ class NerbDatabaseTable
 
         return $this->deleteRows( '`'.$this->name.'`.`'.$this->primary.'` = \''.$key.'\' LIMIT 1' );
                 
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   alias of delete
-    *
-    *   @access     public
-    *   @param      mixed $key primary key value
-    *   @return     int number of rows affected
-    */
-	public function deleteRow( $key )
-    {
-
-        // call delete method
-        return $this->delete( $key );
-        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -1286,8 +1165,6 @@ class NerbDatabaseTable
 
         $result = $database->query( $query );
         
-        //Nerb::inspect( $result, true, "result" );
-
         return $database->affected_rows(); // number of rows deleted
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1306,7 +1183,6 @@ class NerbDatabaseTable
         // sets query string
         $query = 'TRUNCATE `$this->name`';
         
-
         // fetch database
 		$database = Nerb::fetch( $this->database );
 
@@ -1399,14 +1275,16 @@ class NerbDatabaseTable
     */
 	public function count( string $where = null ): int
     {
-
 		// create where statement	
         if ( $where ) $where = ' WHERE '.$where;
 		$query = 'SELECT COUNT( * ) FROM '.$this->name.$where; 
 
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
 		// fetch result	
-        $result = $this->_query( $query  );
-        $count = mysqli_fetch_array($result);
+        $result = $database->count( $query  );
+        $count = mysqli_fetch_array( $result );
 
         // return count value
         return $count[0];
@@ -1425,17 +1303,13 @@ class NerbDatabaseTable
     */
 	public function sum( string $column, string $where = null )
     {
-
-		// !current
 		// build where statement
-        if ( $where ) {
-            $where = 'WHERE '.$where;
-        }
-
+        if ( $where ) $where = 'WHERE '.$where;
+        
         // fetch database
 		$database = Nerb::fetch( $this->database );
 
-        return $database->queryString( 'SELECT SUM( `$col` ) FROM `$this->name` $where' );
+        return $database->queryString( 'SELECT SUM( `$col` ) FROM `$this->name` '.$where );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1453,8 +1327,11 @@ class NerbDatabaseTable
 		// build query
         $query = 'SHOW TABLE STATUS LIKE \''.$this->name.'\'';
 
+        // fetch database
+		$database = Nerb::fetch( $this->database );
+
         // fetch result
-        $result = $this->_queryArray( $query );
+        $result = $database( $query );
         
       
         return $result['Auto_increment'];

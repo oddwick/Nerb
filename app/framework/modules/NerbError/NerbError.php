@@ -398,7 +398,7 @@ class NerbError extends \Exception
     {
         // footer
         $footer = '<footer>'
-        . '<p><strong>'.SOFTWARE.' v'.VERSION.'</strong></p>'
+        . '<p><strong>'.SOFTWARE.' v'.VERSION.' (build '.BUILD.')</strong></p>'
         . '<p><em>'.COPYRIGHT.'</em>&nbsp;&nbsp;&nbsp;<a href="https://www.github.com/oddwick/nerb" target="_blank">https://www.github.com/oddwick/nerb</a></p>'
         . '</footer>';
         return $footer;

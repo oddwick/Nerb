@@ -22,17 +22,7 @@
  *
  */
 
-
-// defines the software constants
-define( 'SOFTWARE', 'Nerb Application Framework' );
-define( 'VERSION', '1.0' );
-define( 'COPYRIGHT', 'Copyright &copy;2001-'.date( 'Y' ).' Oddwick Ltd.' );
-define( 'LICENSE', 'https://www.oddwick.com/docs/license' );
-define( 'GIT', 'https://github.com/oddwick/Nerb');
-define( 'AUTHOR', 'Dexter Atom Oddwick');
-
-//for debuging
-define( 'RENDER', microtime());
+require_once( APP_PATH.'/framework/const.php' );
 
 /**
  *
@@ -100,7 +90,7 @@ class Nerb
     /**
     *   init function.
     * 
-    *   Initializes the framework and is essentially a constructor
+    *   Initializes the framework and is essentially the constructor
     *
     *   @access     public
 	* 	@static
@@ -112,10 +102,17 @@ class Nerb
 		//load configuration file
 		self::loadConfig();
 
-        // add directories to the path
+        // add the reqired directories to the path
         self::$path['root'] = FRAMEWORK;
 		self::$path['modules'] = MODULES;
 		self::$path['library'] = LIBRARY;
+		
+		// error check make sure path is valid
+		foreach( self::$path as $key => $path ){
+			if( !is_dir($path) ){
+				self::halt( 'Framework Initialization Error <br>Path <code>{'.$path.'}</code> defined as <code>['.$key.']</code> is not a valid location.' );
+			}
+		} // end foreach
         
         // scan for available modules
         $files = scandir( MODULES );		
@@ -185,62 +182,22 @@ class Nerb
 	public static function halt( string $msg = null ) : void
 	{
 		ob_end_clean();
-		echo '<center><H1>Site Powered by Nerb Engine</H1>';
+		echo '<H1>Nerb Application Framework</H1>';
 		echo '<p>'.$msg.'</p>';
-		echo '<hr />';
-		echo '<p>'.SOFTWARE.' v'.VERSION.'</p>';
-		echo '<p>'.COPYRIGHT.'</p>';
-		echo '<p>'.$msg.'</p>';
-		echo '</center>';
-		die;
+		echo '<br />';
+		echo '<p>'.SOFTWARE.' v'.VERSION.'<br/>';
+		echo COPYRIGHT.'</p>';
+		exit;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 		
-
-
-
-    /**
-     * log function.
-     * 
-     * simple method for adding to log files
-     *
-	 * @access public
-	 * @static
-	 * @param mixed $log_file
-	 * @param mixed $message
-	 * @param mixed $prefix (default: null)
-	 * @return bool
-	 */
-	public static function log( string $log_file, string $message, string $prefix = null ) : bool
-	{
-		
-		// clean up message
-		$message = html_entity_decode( strip_tags( $message ));
-		
-		// create timestamp object with microtime
-		$micro = microtime( true );
-		$formated = sprintf( '%06d',( $micro - floor( $micro )) * 1000000 );
-		$timestamp = new DateTime( date( 'Y-m-d H:i:s.'. $formated , $micro ) );
-		
-		// build entry string with prefix if given
-		$entry = ( $prefix ? $prefix.' ' : null ).'['.$timestamp->format( 'D M d H:i:s.u Y' ).'] '.$message.PHP_EOL;
-		
-		// append contents to file
-		$status = file_put_contents ( $log_file , $entry , FILE_APPEND | LOCK_EX );
-		if ( !$status ) 
-			throw new NerbError( 'Unable to add entry to log');
-		
-		return $status;
-			
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
     /**
     *   error_handler function.
     * 
-    *   class for logging or supressing errors - extends php error_handler
+    *   class for supressing errors - extends php error_handler
     *
     *   @access     public
 	* 	@static
@@ -292,8 +249,10 @@ class Nerb
 			// WARNING | ERROR | NOTICE [date] file (line) string
 			$error = $errfile . ' (' . $errline . ') -- ' .$errstr;
 			
+			
 			// log error to file
-			self::log( ERROR_LOG , $error , $prefix );
+			$log = new NerbLog( ERROR_LOG );
+			$log->write( $error , $prefix );
 			
 		} // end if
 				
@@ -643,7 +602,7 @@ class Nerb
 		define( 'FRAMEWORK', realpath(__DIR__) );
 		
 		if( !is_file( FRAMEWORK.'/config.ini'  )){
-			echo 'Execution terminated -<br>A required configuration file could not be found.';
+			self::halt( 'Framework Initialization Error <br><code>[config.ini]</code> could not be found.' );
 			exit;
 		}
 
@@ -651,7 +610,7 @@ class Nerb
 		$data = parse_ini_file( FRAMEWORK.'/config.ini', false, INI_SCANNER_TYPED );
 		
 		if ( !is_array( $data )){
-			echo 'Execution terminated -<br>Invalid file given for configuration.';
+			self::halt( 'Framework Initialization Error <br>Invalid configuration file given.' );
 			exit;
 		}
 		

@@ -34,7 +34,6 @@ class NerbPage
      * 	    'cache_control' => "public", 
      * 		'page_caching' => false,
      * 		'cache_dir' => '/temp',
-     * 		'cache_ttl' => 3600,
      * 	    'asynch_scripts' => false,
      * 	    'scripts_in_header' => true,
      * 	    'preprocess' => false,   
@@ -99,7 +98,6 @@ class NerbPage
 	    'cache_control' => "public", 
 		'page_caching' => false,
 		'cache_dir' => '/temp',
-		'cache_ttl' => 3600,
 	    'asynch_scripts' => false,
 	    'scripts_in_header' => true,
 	    'preprocess' => false,   
@@ -221,10 +219,10 @@ class NerbPage
 	 * 
 	 * (default value: null)
 	 * 
-	 * @var string
+	 * @var NerbCache
 	 * @access protected
 	 */
-	protected $cache = null;
+	protected $cache;
 
 	
 	/**
@@ -245,7 +243,6 @@ class NerbPage
      *
      * @access public
      * @param string $ini
-     * @param string $path
      * @param array $params (default: array())
      * @throws NerbError
      * @return void
@@ -315,8 +312,8 @@ class NerbPage
 
 	    // if page caching is used and page is cached, 
 	    // then return cached content, otherwise procede with rendering
-	    if( $this->page_caching ){
-		    
+	    if( PAGE_CACHING ){
+		    $this->page_caching = true;
 			// the filename is a md5 hash of the full url of the page.
 		    // this makes it easier to store the full path of the url
 		    // and obfuscates the page in the cache directory and if
@@ -324,12 +321,14 @@ class NerbPage
 		    // cross site scripting
 		    $this->filename = md5( $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] ).'.cache';
 		    
+		    $this->cache = new NerbPageCache( $this->filename );
+		    
 		    // check to see if the page is cached
 		    // if it is, then fetch the cache and exit
-		    if( $this->_isCached() ){
-			    if( $this->_fetchCache( $this->filename ) ) exit;
-		    }
-		    
+		    if( $this->cache->isCached() && $this->cache->fetchCache() ) {
+			    if( DEBUG ) echo 'Cached content';
+			    exit;
+			}
 	    } // end if page caching
 	    
 		// auto add content headers and content footer to page
@@ -501,6 +500,61 @@ class NerbPage
 
     #################################################################
 
+    //      !Cache control
+
+    #################################################################
+
+
+
+
+
+    /**
+     * cache function.
+     *
+     * This method turns on caching for the page.
+     *
+     * DO NOT USE ON AUTHENTICATED PAGES!!
+     * 
+     * Pages that are cached can not be user authenticated
+     *
+     * @access protected
+     * @return NerbPage
+     */
+    public function cache() : NerbPage
+    {
+        $page->page_caching = true;
+	    return $this;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * nocache function.
+     *
+     * This method turns off caching for the page.
+     * This method MUST be used in controllers that require a login or validated data
+     * 
+     * CACHED PAGES CAN NOT BE USER AUTHENTICATED!
+     *
+     * This means that any user can see a cached page INCLUDING accounts, etc.
+     * 
+     * @access protected
+     * @return NerbPage
+     */
+    public function nocache() : NerbPage
+    {
+        $this->page_caching = false;
+	    return $this;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    #################################################################
+
     //      !Page Building
 
     #################################################################
@@ -598,8 +652,7 @@ class NerbPage
         
 		// if page caching is used, capture content an cache it
 	    if( $this->page_caching ){
-			$this->cache = ob_get_contents();
-			$this->_cache();
+			$this->cache->write( ob_get_contents() );
 	    }
 	    
         // output contents of buffer and clear
@@ -611,248 +664,6 @@ class NerbPage
 
 
 
-    #################################################################
-
-    //      !Caching
-
-    #################################################################
-
-
-
-
-
-    /**
-     * cache function.
-     *
-     * This method turns on caching for the page.
-     *
-     * DO NOT USE ON AUTHENTICATED PAGES!!
-     * 
-     * Pages that are cached can not be user authenticated
-     *
-     * @access protected
-     * @return NerbPage
-     */
-    public function cache() : NerbPage
-    {
-        $page->page_caching = true;
-	    return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * nocache function.
-     *
-     * This method turns off caching for the page.
-     * This method MUST be used in controllers that require a login or validated data
-     * 
-     * CACHED PAGES CAN NOT BE USER AUTHENTICATED!
-     *
-     * This means that any user can see a cached page INCLUDING accounts, etc.
-     * 
-     * @access protected
-     * @return NerbPage
-     */
-    public function nocache() : NerbPage
-    {
-        $this->page_caching = false;
-	    return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * display_cache function.
-     *
-     * returns the contents of the page cache
-     * 
-     * @access public
-     * @return string
-     */
-    public function displayCache() : string
-    {
-	   return $this->cache;
-	   
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * clear_cache function.
-     *
-     * This clears all cached pages in cache directory
-     * 
-     * @access public
-     * @return bool
-     */
-    public function clearCache() : bool
-    {
-	    // find all files with *.cache 
-	    $files = glob( $this->cache_dir.'/*.cache', GLOB_BRACE );
-	    
-	    // loop through and delete files
-	    foreach( $files as $file ){
-		    $status = @unlink( $file );
-	    	if( !$status ){
-		    	Nerb::log( ERROR_LOG, 'Could not delete cache file: '.$file, 'ERROR' );
-		    	$error = true;
-		    }
-	    } // end foreach
-	    
-	    return $error ? false : true;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * uncache function.
-     * 
-     * clears the current page from cache
-     *	
-     * @access public
-     * @return bool
-     */
-    public function uncache() : bool
-    {
-	    $file = $this->cache_dir.'/'.$this->filename;
-	    
-	    if( file_exists( $file ) ){
-		    if ( @unlink( $file ) ){
-			    return true;
-		    } else {
-		    	Nerb::log( ERROR_LOG, 'Could not delete cache file: '.$file, 'ERROR' );
-			    return false;
-		    }
-	    }
-	    
-	    // return false if file does not exist
-	    return false;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * cache function.
-     *
-     * writes out the contents of the page cache to a file
-     * 
-     * @access protected
-     * @throws NerbError
-     * @return bool
-     */
-    protected function _cache(): bool
-    {
-	    // ignore user abort to make sure that the cache is fully written to
-	    // prevent corrupted cache or code injection
-	    ignore_user_abort( true );
-	    
-	    // error checking
-	    if( !is_dir( $this->cache_dir ) ){
-		    throw new NerbError( 'Cache directory <code>'.$this->cache_dir.'<code> does not exist' );
-	    } elseif( !$this->filename ){
-		    throw new NerbError( 'Invalid file name given' );
-	    }
-	    
-	    $file = $this->cache_dir.'/'.$this->filename;
-	    
-	    // write contents to directory	    
-	    $status = @file_put_contents( $file, $this->cache );
-	    if( $status ){
-		    return true;
-	    } else {
-		    Nerb:log( ERROR_LOG, 'Could not write to cache file: '.$file, 'ERROR' );
-		    return false;
-	    }
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * _is_cached function.
-     *
-     * checks to see if the current page is cached and returns true if it is
-     * if the page is expired, it will try and remove the page from the cache directory for housekeeping
-     * 
-     * @access protected
-     * @return bool
-     */
-    protected function _isCached() : bool
-    {
-	    // get file name
-	    $file = $this->cache_dir.'/'.$this->filename;
-	    
-	    // file must exist and mod time must be greater than current time - ttl for cache to be active
-	    // or if cache_ttl = -1 (permenant caching)
-	    if( 
-	    	( file_exists( $file ) && $this->cache_ttl == -1 ) || 
-			( file_exists( $file ) && filemtime( $file ) > ( time() - $this->cache_ttl ) ) 
-		){
-	    	return true;			
-	    } // end if
-	    
-	    // housekeeping --
-	    // clean up expired cache files if past time
-	    $this->uncache();
-	    
-	    return false;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * _fetch_cache function.
-     *
-     * reads the contents of the cache file int output buffer and returns false on fail
-     * 
-     * @access protected
-     * @return bool
-     */
-    protected function _fetchCache() : bool
-    {
-	    $filename = $this->cache_dir.'/'.$this->filename;
-	    
-	    // check to see if the file exists and read it to the output buffer
-	    if( file_exists( $filename ) ){
-		    
-		    // send header
-		    header('Content-Type: text/html');
-			
-			// clear output buffer and start new buffer
-			ob_end_clean();
-		    ob_start();
-		    
-		    // get file contents. readfile is more secure than include, prevents 
-		    // any embeded php from getting processed
-			readfile( $filename );
-			
-			//output buffer and clear
-			ob_flush();
-			ob_end_clean();
-			return true;		    
-	    }
-	    
-	    // return false if the page was not read 
-	    return false;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-	
     #################################################################
 
     //      !Content

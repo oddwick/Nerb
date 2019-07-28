@@ -68,17 +68,27 @@ class NerbDatabase
      * @var mysqli
      * @access protected
      */
-    protected $database;
+    protected $connection;
     
     /**
-     * database_handle
+     * database_name
      * 
      * (default value: '')
      * 
      * @var string
      * @access protected
      */
-    protected $database_handle = ''; // the name of the database for other classes to retrieve it
+    protected $name = ''; // the name of the database for other classes to retrieve it
+    
+    /**
+     * database_name
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $database_name = ''; // the name of the database for other classes to retrieve it
     
     /**
      * tables
@@ -104,29 +114,33 @@ class NerbDatabase
 
 
     /**
-    *   Constructor initiates database connection
-    *
-    *   @access     public
-    *   @param      array $params connection parameters [host|user|pass|name]
-    *   @return     void
-    */
-    public function __construct( $database_handle, $params )
+     * __construct function.
+     * 
+     * @access public
+     * @param string $name
+     * @param array $params connection parameters [host|user|pass|name]
+     * @return void
+     */
+    public function __construct( string $name, array $params )
     {
 	    // if debugging mode is on, then return a database_debug object which is the same as a 
 	    // database object, but with extended polling and debugging capacity.
 	    if( $params['debug'] == true ){
 			Nerb::loadClass('NerbDatabaseDebug');
-		    return new NerbDatabaseDebug( $database_handle, $params );
+		    return new NerbDatabaseDebug( $name, $params );
 	    }
 
         // set credentials for connecting
         $this->params['connection'] = $params;
 
-        // ofuscate password
+        // ofuscate password to prevent it from being accidentally displayed
         $this->params['connection']['pass'] =  base64_encode($this->params['connection']['pass']);
         
         // give this database connection a name for other classes to retrieve it
-        $this->database_handle = $database_handle;
+        $this->name = $name;
+
+        // give this database connection a name for other classes to retrieve it
+        $this->connection_name = $this->params['connection']['name'];
 
         // establish connection to the table
         $this->connect();
@@ -135,7 +149,7 @@ class NerbDatabase
         $this->tables = $this->tables();
         
         // register this database so that other classes can access it
-        Nerb::register( $this, $database_handle );
+        Nerb::register( $this, $name );
         
         return;
         
@@ -153,7 +167,7 @@ class NerbDatabase
     */
     public function __destruct()
     {
-        $this->database->close();
+        $this->connection->close();
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -164,14 +178,14 @@ class NerbDatabase
     *   Connection string, connects to database with credentials given
     *
     *   @access     public
-    *   @return     object self
+    *   @return     NerbDatabase
     *   @throws     NerbError
     */
-    protected function connect(): self
+    protected function connect() : self
     {
 
 		// error checking 
-		$this->database = new NerbSqli(
+		$this->connection = new NerbSqli(
             $this->params['connection']['host'],
             $this->params['connection']['user'],
             base64_decode( $this->params['connection']['pass'] ),
@@ -180,9 +194,9 @@ class NerbDatabase
             $this->params['connection']['socket']
 	    );
 			
-		if ( mysqli_connect_error( $this->database ) ) {
-			$error = mysqli_connect_error( $this->database );
-			$errno = mysqli_connect_errno( $this->database );
+		if ( mysqli_connect_error( $this->connection ) ) {
+			$error = mysqli_connect_error( $this->connection );
+			$errno = mysqli_connect_errno( $this->connection );
 			
             throw new NerbError(
             	'<p>Could not connect to Database host <strong>'.$this->params['connection']['host'].'</strong>. Database said:</p>'
@@ -204,9 +218,9 @@ class NerbDatabase
     *   @access     protected
     *   @return     void
     */
-    protected function disconnect(): void
+    protected function disconnect()
     {
-        $this->database->close();
+        $this->connection->close();
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -214,14 +228,14 @@ class NerbDatabase
 
 
     /**
-    *   returns this databases registerd name
+    *   returns name of database object in registry
     *
     *   @access     public
-    *   @return     void
+    *   @return     string
     */
-    public function handle(): string 
+    public function name() : string
     {
-        return $this->database_handle;
+        return $this->name;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -229,63 +243,25 @@ class NerbDatabase
 
 
     /**
-    *   alias of handle
+    *   returns name of current database being used
     *
     *   @access     public
-    *   @return     void
+    *   @return     string
     */
-    public function name(): string
+    public function use() : string
     {
-        return $this->handle();
+        return $this->connection_name;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
-    /**
-     * affected_rows function.
-     *
-     * returns the number of affected rows from the last database operation
-     * this function is a workaround because sometimes mysqli_affected_rows interprets
-     * the returned result as bool if 0 or 1 rows were affected
-     * 
-     * @access public
-     * @return int
-     */
-    public function affected_rows() : int
-    {
-        return mysqli_affected_rows( $this->database );
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+    #################################################################
 
+    //      !QUERIES
 
-
-
-    /**
-    *   this will convert a sqli result to an array for manipulation and free results
-    *
-    *   @access     protected
-    *   @param      mysqli_result $result 
-    *   @return     array
-    */
-    public function resultsToArray( $result ): array
-    {
-        
-        // initialize array
-        $data = array();
-      
-        // add table to array 
-		while ( $row = mysqli_fetch_assoc( $result) ) {
-			$data[] = $row;
-		}
-		
-		mysqli_free_result( $result );
-
-        return $data;
-
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
+    #################################################################
 
 
 
@@ -307,9 +283,9 @@ class NerbDatabase
         $profile = array('query' => $query, 'start' => microtime());
 
         // fetch result
-        if ( !$result = $this->database->query( $query )) {
-	        $error = mysqli_error( $this->database );
-	        $error_no = mysqli_errno( $this->database );
+        if ( !$result = $this->connection->query( $query )) {
+	        $error = mysqli_error( $this->connection );
+	        $error_no = mysqli_errno( $this->connection );
             throw new NerbError('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
         }
         
@@ -318,7 +294,6 @@ class NerbDatabase
         $this->profile[] = $profile; 
       
         // returns mysqli_result object
-        
         return $result;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -340,7 +315,6 @@ class NerbDatabase
     */
     public function query( $query )
     {
-
         // error checking
         // make sure that there is a query
         if ( empty( $query ) ) {
@@ -366,55 +340,202 @@ class NerbDatabase
 
 
     /**
-     * sql function.
-     *
-     * allows the execution of raw sql file or sql dump
-     * 
-     * @access public
-     * @param string $sql_file
-     * @return bool
-     * @throws NerbError
-     */
-    public function sql( string $sql_file ) : bool
+    *   performs a direct query on the database and returns a mysqli result
+    *
+    *   @access     public
+    *   @param      string $query
+    *   @return     mysqli_result
+    *   @throws     NerbError
+    */
+	public function querytable( string $query )
     {
-    	// error checking
-    	if( !file_exists($sql_file) ){
-	    	throw new NerbError('File <code>'.$sql_file.'</code> does not exist');
-    	}
-    	
-    	// read file to variable
-    	$sql = readfile($sql_file);
-    	
-    	// execute result and return true on sucess, throw error on fail
-    	if( $result = $this->database->mysqli_multi_query( $sql )){
-	    	return true;
-    	} else {
-	        $error = mysqli_error( $this->database );
-	        $error_no = mysqli_errno( $this->database );
-            throw new NerbError('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
-    	}
+        // ensure that a table is selected
+        if ( !$query ) {
+            throw new NerbError( '<code>[$query]</code> is empty.  Expecting string or Select object' );
+        }
+        
+		// fetch database
+		$connection = $this->connection;
+        
+        // return result set
+        return $connection->query( $query );
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * backup function.
-     *
-     * allows the execution of raw sql file or sql dump
-     * 
-     * @access public
-     * @param string $filename
-     * @param array $tables
-     * @return string
-     * @throws NerbError
-     * @todo 
-     */
-    public function backup( string $filename, array $tables )
+    *   returns an array form a query
+    *
+    *   @access     public
+    *   @param      string $query
+    *   @return     mysqli_result
+    */
+	public function queryArray( string $query ): array
     {
-	    // !todo
+		// perform a query
+		$result = $this->_query( $query );
+		
+		// fetch row from result
+		$row = mysqli_fetch_assoc( $result );
+
+		// release results
+		mysqli_free_result( $result );
+
+        // return first result as array
+        return $row;
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
+
+	
+	
+	/**
+	 * multiQuery function.
+	 *
+	 * this function can be a little fickle and is easy to throw errors in
+	 * and because of the security ramifications of using multi queries should only
+	 * be used on santitzed or trusted data, NEVER on user input.  This function
+	 * works well with SQL table dumps, etc. and is what it was intended for.
+	 * 
+	 * @access public
+	 * @param string $query
+	 * @return int - number of queries processed
+	 */
+	public function multiQuery( string $query ) : int
+	{
+		// get connection
+		$connection = $this->connection;
+		
+		// keep track of the number of lines processed
+		// this is the total queries processed including comments
+		$queries_processed = 0;
+		
+		// run the query		
+    	if ( mysqli_multi_query( $connection, $query )) {
+		   do {
+		       // process and free results 
+		       if ( $result = mysqli_store_result( $connection )) {
+		           mysqli_free_result( $result );
+		       }
+		       $queries_processed++;
+		   } while ( mysqli_next_result( $connection ) );
+		
+		}// end if
+	 			
+	 	// error catching block		
+        if ( $error = mysqli_error( $connection ) ) {
+	        $error_no = mysqli_errno( $this->connection );
+            throw new NerbError('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
+        } 
+        
+        return $queries_processed;
+		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+//!check-----
+    /**
+    *   retrieves values from a table and returns as a NerbDatabaseRowset object
+    *
+    *   @access     protected
+    *   @param      string $query (sql query string)
+    *   @return     NerbDatabaseRowset
+    *   @throws     NerbError
+    */
+	public function fetchRows( string $query )
+    {
+        // ensure that a table is selected
+        if ( !$query ) {
+            throw new NerbError( '<code>[$query]</code> is empty.  Expecting string or NerbDatabaseSelect object' );
+        }
+        
+		// fetch database
+		$connection = $this->connection;
+        
+        // add query to list for polling and replay
+        $this->query[] = $query;
+        
+        // query the database
+        $result =  $connection->query( $query );
+       
+        // maps the fields as (field=>table.field) for multiple table select statements
+        $column_list = mysqli_fetch_fields( $result );
+        
+		//prepare column list	
+        foreach ( $column_list as $column ) {
+            $columns[ $column->name ] = $column->table.'.'.$column->name;
+        }
+
+		// instantiate new rowset with mapped fields
+        $rows = new NerbDatabaseRowset();
+        
+        // add rows to dataset
+        while ( $resultRow = mysqli_fetch_assoc($result) ) {
+            $rows->add( new NerbDatabaseRow( &$this->connection, $this->name, $columns, $resultRow ) );
+        }
+		
+        return $rows;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+    *   this will convert a sqli result to an array for manipulation and free results
+    *
+    *   @access     protected
+    *   @param      mysqli_result $result 
+    *   @return     array
+    */
+    public function resultsToArray( $result ) : array
+    {
+        
+        // initialize array
+        $data = array();
+      
+        // add table to array 
+		while ( $row = mysqli_fetch_assoc( $result) ) {
+			$data[] = $row;
+		}
+		
+		mysqli_free_result( $result );
+
+        return $data;
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * affected_rows function.
+     *
+     * returns the number of affected rows from the last database operation
+     * this function is a workaround because sometimes mysqli_affected_rows interprets
+     * the returned result as bool if 0 or 1 rows were affected
+     * 
+     * @access public
+     * @return int
+     */
+    public function affected_rows() : int
+    {
+        return mysqli_affected_rows( $this->connection );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    #################################################################
+
+    //      !DATA FORMATING
+
+    #################################################################
 
 
 
@@ -425,29 +546,29 @@ class NerbDatabase
     *   @param      mixed $string
     *   @return     mixed same as original input
     */
-    public static function quote( $string ): string
+    public static function quote( $data ) : string
     {
 
         // if the value given is an array, quote it and return it
-        if ( is_array( $string )) {
-            for ( $i = 0; $i < count( $string ); $i++ ) {
-                // if the $string is a string, quote and slash it
-                if ( is_string($string[$i] )) {
-                    $string[$i] = "'".addslashes( $string[$i] )."'";
+        if ( is_array( $data )) {
+            for ( $i = 0; $i < count( $data ); $i++ ) {
+                // if the $data is a string, quote and slash it
+                if ( is_string($data[$i] )) {
+                    $data[$i] = "'".addslashes( $data[$i] )."'";
                 } // end if
 
                 // if the field is empty, null it
-                elseif ( empty( $string[$i] )) {
-                    $string[$i] = "''";
+                elseif ( empty( $data[$i] )) {
+                    $data[$i] = "''";
                 }// end elseif
             } // end foreach
 
             // returns the processed string
-            return implode( $string, ',' );
+            return implode( $data, ',' );
         } // end if
 
         // otherwise it returns the an individual slashed and quoted string
-        return "'".addslashes( $string )."'";
+        return "'".addslashes( $data )."'";
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -455,6 +576,24 @@ class NerbDatabase
 
 
     /**
+    *   quotes a value into a string replacing a '?' with a quoted string
+    *
+    *   @access     public
+    *   @param      string $string string to be quoted into
+    *   @param      string $value replacement value
+    *   @return     string
+    *   @example    $database->quoteInto('value = ?', 'new value') returns 'value = 'new value' '
+    */
+    public static function quoteInto( string $string, string $value ) : string
+    {
+        return str_replace('?', self::quote($value), $string);
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+   /**
     *   cleans and escapes data for insertion into database
     *	
     *	!! this method only provides BASIC cleaning of user submitted data.
@@ -465,7 +604,7 @@ class NerbDatabase
     *   @param     	array $data
     *   @return     array $data
     */
-	public function sanitize( array $data ): array
+	public function sanitize( array $data ) : array
     {
 		foreach( $data as $key => $value ){
 			
@@ -476,7 +615,7 @@ class NerbDatabase
 			$value = preg_replace('~[\x00\x0A\x0D\x1A\x22\x25\x27\x5C\x5F]~u', '\\\$0', $value);
 			
 			// escape sql characters
-			$data[$key] = $this->database->real_escape_string( $value );
+			$data[$key] = $this->connection->real_escape_string( $value );
 		}
 
 		return $data;
@@ -507,26 +646,8 @@ class NerbDatabase
     */
 	public function prepare( $query_string )
     {
-		return $this->database->prepare( $query_string );
+		return $this->connection->prepare( $query_string );
 			
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   quotes a value into a string replacing a '?' with a quoted string
-    *
-    *   @access     public
-    *   @param      mixed $string string to be quoted into
-    *   @param      string $value replacement value
-    *   @return     string
-    *   @example    $database->quoteInto('value = ?', 'new value') returns 'value = 'new value' '
-    */
-    public static function quoteInto( $string, $value )
-    {
-        return str_replace('?', self::quote($value), $string);
-        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -538,7 +659,7 @@ class NerbDatabase
     *   @access     public
     *   @return     array
     */
-    public function tables()
+    public function tables() : array
     {
         // build query string
         $query = 'SHOW TABLES FROM `'.$this->params['connection']['name'].'` ';
@@ -563,7 +684,7 @@ class NerbDatabase
     *   @param      string $table
     *   @return     bool
     */
-    public function isTable( $table )
+    public function isTable( string $table ) : bool
     {
         return in_array( $table, $this->tables ) ? true : false ;
         
@@ -578,41 +699,9 @@ class NerbDatabase
     *   @access     public
     *   @return     string
     */
-    public function getDatabaseName()
+    public function getDatabaseName() : string
     {
         return $this->_connection['name'];
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-    *   returns an array of table field names and descriptions
-    *
-    *   @access     public
-    *   @param      string $table table name
-    *   @return     array
-    */
-    public function info( $table )
-    {
-        // get tabel data from database
-        $result = $this->resultsToArray( $this->query( 'SHOW COLUMNS FROM `'.$table.'` ' ));
-
-        // iterate and pass data with a little better formatting and lower case names
-        // to the info array
-        foreach ( $result as $columns ) {
-            $info[$columns['Field']] = array(
-	            'name' => $columns['Field'],
-	            'full_name' => $table.'.'.$columns['Field'],
-	            'type' => $columns['Type'],
-	            'null' => $columns['Null']=='NO'?'NOT NULL':'',
-	            'default' => $columns['Default'],
-	            'extra' => $columns['Extra'],
-	            'key' => $columns['Key']
-            );
-        }
-
-        return $info;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
