@@ -18,6 +18,10 @@
  * @copyright       Copyright (c)2019
  * @license         https://www.github.com/oddwick/nerb
  *
+ * @property string MODULES
+ * @requires NerbError
+ * @requires NerbCache
+ * @requires page.ini
  * @todo
  *
  */
@@ -90,6 +94,7 @@ class NerbPage
      *     ))
      * 
      * @var array
+     * @property string MODULES
      * @access protected
      */
     protected $params = array(
