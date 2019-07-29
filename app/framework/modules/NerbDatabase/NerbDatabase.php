@@ -475,7 +475,7 @@ class NerbDatabase
         
         // add rows to dataset
         while ( $resultRow = mysqli_fetch_assoc($result) ) {
-            $rows->add( new NerbDatabaseRow( &$this->connection, $this->name, $columns, $resultRow ) );
+            $rows->add( new NerbDatabaseRow( $this->database, $this->name, $columns, $resultRow ) );
         }
 		
         return $rows;

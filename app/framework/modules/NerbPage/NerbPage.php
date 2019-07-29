@@ -89,7 +89,7 @@ class NerbPage
      * 	    'alternate' => array(),
      *     ))
      * 
-     * @var string
+     * @var array
      * @access protected
      */
     protected $params = array(
@@ -219,7 +219,7 @@ class NerbPage
 	 * 
 	 * (default value: null)
 	 * 
-	 * @var NerbCache
+	 * @var NerbCache $cache
 	 * @access protected
 	 */
 	protected $cache;
@@ -363,7 +363,7 @@ class NerbPage
 		    }
 		    $temp = $value;
 		}
-		return $config = $array;
+		return $array;
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -462,6 +462,8 @@ class NerbPage
      *
      *  @access public
      *  @param string $key
+     *  @property bool preprocess
+     *  @property bool page_caching
      *  @return mixed
      */
     public function __get( string $key )
@@ -483,7 +485,7 @@ class NerbPage
      * @param string $section (default: null)
      * @return array (the entire parameter array is returned)
      */
-    public function dump( string $section = null )
+    public function dump( string $section = null ) : array
     {
         // if section is given
         if ( $section ) {
@@ -522,7 +524,7 @@ class NerbPage
      */
     public function cache() : NerbPage
     {
-        $page->page_caching = true;
+        $this->page_caching = true;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -553,6 +555,29 @@ class NerbPage
 
 
 
+    /**
+     * metaCache function.
+     * 
+     * if page caching is used, add meta 'cached' tag so that 
+     * the page can be identified as cached content
+     *
+     * @access public
+     * @return void
+     */
+    public function metaCache()
+    {
+	    $meta = array( 
+	    		'cached' => date("F d, Y - h:i:s a"),
+	    		'cached_url' => $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'],
+			);
+	    $this->meta( $meta , true );
+	    return;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
     #################################################################
 
     //      !Page Building
@@ -569,14 +594,8 @@ class NerbPage
     */
     public function render()
     {
-	    // if page caching is used, add meta 'cached' tag so that page can be identified as cached content
-	    if( $this->page_caching ){
-		    $meta = array( 
-		    		'cached' => date("F d, Y - h:i:s a"),
-		    		'cached_url' => $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'],
-				);
-		    $this->meta( $meta , true );
-		}
+	    // add meta tags for cached content
+	    if( $this->page_caching ) $this->metaCache();
 		
 	    // clear any buffers
 	    ob_end_clean();
@@ -590,65 +609,24 @@ class NerbPage
 	    
 	    // if there is an error or there is no content, then include the error page 
 	    if( $this->error || ( empty( $this->content ) && $this->params['use_error_pages'] )){
-	    	
-	    	switch( $this->error ){
-		    	
-		    	// unsupported browser	
-		    	case 100:
-			    	require $this->params['error_100'];
-		    		break;
-		    		
-		    	// bad request
-		    	case 400:
-		    	// unauthorized
-		    	case 401:
-		    	// forbiden
-		    	case 403:
-			    	require $this->params['error_403'];
-		    		break;
-		    		
-		    	// page not found	
-		    	case 404:
-			    	require $this->params['error_404'];
-		    		break;
-		    		
-		    	// service error and unspecified errors
-		    	case 500:
-		    	// service unavailable
-		    	case 503:
-		    	default:
-			    	require $this->params['error_500'];
-		    	
-	    	} // end swich
-	    	
-	    } else {
-		    
-		    if( $this->params['preprocess'] ){
-			    
-			    if( is_array( $this->content ) && count( $this->content ) > 0 ){ 
-				    foreach( $this->content as $value ){
-						echo $value;
-				    } // end foreach
+	    	$this->errorPage();
+	    } else {   
+		    		    
+			foreach( $this->content as $value ){
+		    	if( $this->params['preprocess'] ){
+					echo $value;
 			    } else {
-				    require $this->params['error_404'];
+				    require $value;
 			    } // end if
-			    
-		    } else {
-			    foreach( $this->content as $key => $value ){
-			    	if( !is_dir( $value ) && file_exists( $value )){
-					    require $value;
-			    	} else {
-				    	require $this->params['error_404'];
-			    	}
-			    } // end foreach
-		    }
+			} // end foreach
+		    		    
 	    }// end if
 	    
-	    
+	    // add content footer
 	    if( $this->contentFooter ) require $this->contentFooter;
+	    
+	    // add html footer
 	    require $this->params['footer'];
-        //Nerb::inspect( $this->params, true, '' );
-        
         
 		// if page caching is used, capture content an cache it
 	    if( $this->page_caching ){
@@ -710,7 +688,11 @@ class NerbPage
 	    } else {
 	    	// add to the content array, which will be processed
 	    	// in the order that was added
-		 	$this->content[] = $content;
+	    	if( is_file( $content ) ){
+			 	$this->content[] = $content;
+	    	} else {
+		    	$this->error = 404;
+	    	}
 	    }
  		
 		return $this;
@@ -793,7 +775,47 @@ class NerbPage
 
 
 	
-
+	
+	/**
+	 * errorPage function.
+	 *
+	 * if an error is called, then an error page is included
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function errorPage(){
+	    	
+    	switch( $this->error ){
+	    	
+	    	// unsupported browser	
+	    	case 100:
+		    	require $this->params['error_100'];
+	    		break;
+	    		
+	    	// bad request
+	    	case 400:
+	    	// unauthorized
+	    	case 401:
+	    	// forbiden
+	    	case 403:
+		    	require $this->params['error_403'];
+	    		break;
+	    		
+	    	// page not found	
+	    	case 404:
+		    	require $this->params['error_404'];
+	    		break;
+	    		
+	    	// service error and unspecified errors
+	    	case 500:
+	    	// service unavailable
+	    	case 503:
+	    	default:
+		    	require $this->params['error_500'];
+    	} // end swich
+    	
+	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
     #################################################################
