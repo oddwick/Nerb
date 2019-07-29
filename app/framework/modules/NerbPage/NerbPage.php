@@ -247,58 +247,16 @@ class NerbPage
      * Constructor initiates Page object
      *
      * @access public
-     * @param string $ini
-     * @param array $params (default: array())
+     * @param string $ini_file
      * @throws NerbError
      * @return void
      */
-    public function __construct( string $ini = '', array $params = array() )
+    public function __construct( string $ini_file )
     {
+		// process the ini file and merge it to params array
+        $data = $this->parse( $ini_file );
+        $this->params = array_merge( $this->params, $data );
         
-        // error checking to make sure file exists
-        // if the full path is given...
-        if ( file_exists( $ini ) ) {
-        	$ini_file = $ini;
-        	
-        // if a relative path is given	
-        } else if( file_exists( APP_PATH . $ini ) ){
-        	$ini_file = APP_PATH . $ini;
-        	
-        // you blew it
-	    } else {
-            throw new NerbError( 'Could not locate given configuration file <code>'.$ini.'</code>' );
-        }
-
-        // load and parse ini file and distribute variables
-        // the user changeable variables will end up in $params and the defaults will be kept in $defaults
-        try {
-            // if the config.ini file is read, it loads the values into the params
-            $data = parse_ini_file( $ini_file, false );
-            $data = $this->_parse( $data );
-            $this->params = array_merge( $this->params, $data );
-            
-        } catch ( Exception $e ) {
-            throw new NerbError( 
-                'Could not parse page ini file <code>'.$ini.'</code>.<br /> 
-					Make that it is formatted properly and conforms to required standards. '
-             );
-        }// end try
-
-		
-
-        // auto loading array at construction
-        // -----------------------------------------------------------------------
-        // if an array is given during instantiation, once the ini has been parsed
-        // the array will be merged with the initial values
-        if ( !empty( $params ) ) {
-            if ( !is_array( $params ) ) {
-                throw new NerbError( 'Variable <code>[$array]</code> is expected to be Array, '.gettype( $params ).' given.' );
-            } else {
-                // pass the array along for injection
-                $this->add( $params );
-            } // end if is array
-        } // end if empty array
-
 		// check browser if necessary
 		// Warning, this method is a bit slow and 
 		// the server must be configured for it to work properly
@@ -326,6 +284,7 @@ class NerbPage
 		    // cross site scripting
 		    $this->filename = md5( $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] ).'.cache';
 		    
+		    // create the cache
 		    $this->cache = new NerbPageCache( $this->filename );
 		    
 		    // check to see if the page is cached
@@ -340,7 +299,6 @@ class NerbPage
 		if( $this->params['content_header'] ) $this->contentHeader( $this->params['content_header'] );
 		if( $this->params['content_footer'] ) $this->contentFooter( $this->params['content_footer'] );
 	   
-        
         return $this;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -350,13 +308,39 @@ class NerbPage
 
     /**
      * parse function.
+     *
+     * Processes ini file and turns it into an array and takes .(dot) notation and makes
+     * subkeys out of it
      * 
      * @access protected
-     * @param array $data
+     * @param string $ini_file
      * @return array
      */
-    protected function _parse( array $data ) : array
+    protected function parse( string $ini_file ) : array
     {
+		// error checking to make sure file exists
+		// if a relative path is given	
+		if( file_exists( APP_PATH . $ini_file ) ){
+			$ini_file = APP_PATH . $ini_file;
+		}
+        
+        // if the full path is given...
+        if ( !file_exists( $ini_file ) ) {
+            throw new NerbError( 'Could not locate given configuration file <code>'.$ini_file.'</code>' );
+        }
+
+        // load and parse ini file and distribute variables
+        // the user changeable variables will end up in $params and the defaults will be kept in $defaults
+        try {
+            // if the config.ini file is read, it loads the values into the params
+            $data = parse_ini_file( $ini_file, false );
+        } catch ( Exception $e ) {
+            throw new NerbError( 
+                'Could not parse page ini file <code>'.$ini_file.'</code>.<br /> 
+					Make that it is formatted properly and conforms to required standards. '
+             );
+        }// end try
+
 		// initialize array
 		$array = array();
 		
@@ -440,6 +424,7 @@ class NerbPage
      *  @param string $key
      *  @param string $value
      *  @return string old value
+     *  @property array $params
      *  @throws NerbError
      */
     public function __set(string $key, string $value) : string
@@ -467,8 +452,7 @@ class NerbPage
      *
      *  @access public
      *  @param string $key
-     *  @property bool preprocess
-     *  @property bool page_caching
+     *  @property array $params
      *  @return mixed
      */
     public function __get( string $key )
@@ -529,7 +513,7 @@ class NerbPage
      */
     public function cache() : NerbPage
     {
-        $this->page_caching = true;
+        $this->params['page_caching'] = true;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -552,7 +536,7 @@ class NerbPage
      */
     public function nocache() : NerbPage
     {
-        $this->page_caching = false;
+        $this->params['page_caching'] = false;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
