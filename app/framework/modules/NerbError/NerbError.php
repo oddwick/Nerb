@@ -357,7 +357,7 @@ class NerbError extends \Exception
      * @param string $path
      * @return string
      */
-    protected function cleanPath( string $path ) : string
+    protected function cleanPath( $path ) : string
     {
         return  str_replace( APP_PATH, '..', $path );
                     
