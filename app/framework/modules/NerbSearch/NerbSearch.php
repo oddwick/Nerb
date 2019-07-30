@@ -64,22 +64,6 @@ class NerbSearch
     );
 
     /**
-     * invalid_char
-     *
-     * list of characters to filter out of search keywords
-     *
-     * (default value: array(
-     *      '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']','{', '}',':', '<', '>', '|',
-     *  ))
-     *
-     * @var array
-     * @access protected
-     */
-    protected $invalid_char = array(
-        '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']','{', '}',':', '<', '>', '|',
-    );
-
-    /**
      * keywords_array
      *
      * (default value: array())
@@ -330,47 +314,6 @@ class NerbSearch
 
 
     /**
-     * invalidChars function.  adds user defined array of characters to exclude from search
-     * if replace is true, then the user list will replace the existing char list, otherwise
-     * it will be merged to existing
-     *
-     * @access public
-     * @param array $chars
-     * @param bool $replace (default: 'false')
-     * @return NerbSearch
-     */
-    public function invalidChars(array $chars, bool $replace = false) : NerbSearch
-    {
-        if ($replace) {
-            // replace existing list
-            $this->invalid_char = $chars;
-        } else {
-            // merge to existing list
-            $this->invalid_char = array_merge($chars, $this->invalid_char);
-        }
-        return $this;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * invalidChar function. appends single invalid character to list
-     *
-     * @access public
-     * @param string $char
-     * @return NerbSearch
-     */
-    public function invalidChar(string $char) : NerbSearch
-    {
-        $this->invalid_char[] = $char;
-        return $this;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
      * where function.
      *
      * sets search condition,  eg `field` > '[condition]'
@@ -411,40 +354,15 @@ class NerbSearch
      *
      * this is the actual field that is searched in.
      *
-     * $datatype must be string|alpha|alphanum|int|float|bool
-     * the keywords will be matched against datatypes and all non allowed characters will be stripped out
-     * disallowed characters are stored in invalid_char
-     *
-     * string - alphanum and certain special chars
-     * aplha - only a-z A-Z
-     * alpannum - A-Z a-z 0-9
-     * int - 0-9
-     * float - 0-9.
-     * phonetic - converts keyword to metaphone and ignores special characters
-     * bool - 0|1 true|false
-     *
      * @access public
      * @param string $field
      * @param string $datatype (default: 'string')
-     * @throws NerbError
      * @return NerbSearch
      */
     public function field(string $field, string $datatype = 'string') : NerbSearch
     {
         // force lowercase
         $datatype = strtolower($datatype);
-
-        if ($datatype != 'string' &&
-            $datatype != 'alpha' &&
-            $datatype != 'alphanum' &&
-            $datatype != 'int' &&
-            $datatype != 'float' &&
-            $datatype != 'phonetic' &&
-            $datatype != 'bool'
-         ) {
-             throw new NerbError("Invalid datatype.  Datatypes must be <code>[string|alpha|alphanum|int|float|bool]</code>");
-        }
-
         $this->search_fields[ $field ] = $datatype;
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -456,9 +374,9 @@ class NerbSearch
      * search function executes search.
      *
      * @access public
-     * @return string bool on error
+     * @return bool
      */
-    public function search()
+    public function search() : bool
     {
         // error checking
         // check to make sure search string is not empty
@@ -478,7 +396,7 @@ class NerbSearch
 
         // this sets the conditions, eg if a search field or other match must be made
         if ( !empty($this->conditions) ) {
-	        $conditon = '';
+	        $condition = '';
             // If there are keyword(s) AND required condition(s)
             foreach ($this->conditions as $field => $value) {
                 if (!empty($value)) {
@@ -694,43 +612,11 @@ class NerbSearch
             $keyword = preg_replace('/{\?}/', '', $keyword);
             $wildcard = '{?}';
         }
+        
+        // create datatyper
+        $type = new NerbDatatype( $datatype );
+        $keyword = $type->check( $keyword );
 
-        // switch datatype and run keyword through replacement regex
-        switch (strtolower($datatype)) {
-            case 'int':
-                // clears any non numeric character
-                $keyword = preg_replace('/([^0-9])/', '', $keyword);
-                break;
-
-            case 'alphanum':
-                // clears any non alphanumeric character
-                $keyword = preg_replace('/([^0-9a-zA-Z])/', '', $keyword);
-                break;
-
-            case 'alpha':
-                // clears any non alpha character
-                $keyword = preg_replace('/([^a-zA-Z])/', '', $keyword);
-                break;
-
-            case 'float':
-                // clears any non alpha character
-                $keyword = preg_replace('/([^0-9\.])/', '', $keyword);
-                break;
-
-            case 'phonetic':
-                // clears any non alpha character
-                $keyword = metaphone(preg_replace('/([^0-9a-zA-Z])/', '', $keyword));
-				// phonetic always searches with wild card operator
-				//$wildcard = '{?}';
-                break;
-
-            case 'string':
-            default:
-                // replace any invalid chars for searching
-                $replace = implode('\\', $this->invalid_char);
-                $keyword = preg_replace('/(['.$replace.'])/', '', $keyword);
-                break;
-        } // end switch
 
         if (empty($keyword)) {
             return $keyword;
