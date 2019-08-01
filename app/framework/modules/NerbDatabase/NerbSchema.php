@@ -39,6 +39,15 @@ class NerbSchema
      */
     protected $database;
     
+    /**
+     * tables
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $tables = '';
 
 
 
@@ -59,6 +68,8 @@ class NerbSchema
 		} else {
 	       	throw new NerbError( 'Database adaptor <code>[$database]</code> must be a <code>[NerbDatabase]</code> object.  <code>['.get_class( $database ).']</code> object was passed.' );
 		} // end if
+		
+		$this->tables = $this->showTables();
 
         return $this;
         
@@ -209,28 +220,28 @@ class NerbSchema
      * @param string $table
      * @param string $column
      * @param string $type
-     * @param string $length (default: NULL)
-     * @param string $default (default: NULL)
+     * @param string $length (default: null)
+     * @param string $default (default: null)
      * @param bool $null (default: true)
-     * @param string $after (default: NULL)
+     * @param string $after (default: null)
      * @return bool
      */
-    public function addColumn( string $table, string $column, string $type, $length = NULL, $default = NULL, bool $null = true, string $after = NULL ) : bool
+    public function addColumn( string $table, string $column, string $type, $length = null, $default = null, bool $null = true, string $after = null ) : bool
     {
 		// put parenthesis arount the length is specified
-		$length = $length ? "($length)" : NULL;
+		$length = $length ? "($length)" : null;
 		
 		// add DEFAULT keyword and quote 
-		$default = $default ? "DEFAULT '".addslashes($default)."' " : NULL;
+		$default = $default ? "DEFAULT '".addslashes($default)."' " : null;
 		
 		// create query
-		$query = "ALTER TABLE `$table` ADD COLUMN IF NOT EXISTS `$column` ".strtoupper( $type )."$length $default".($null?'':'NOT NULL');
+		$query = "ALTER TABLE `$table` ADD COLUMN IF NOT EXISTS `$column` ".strtoupper( $type )."$length $default".($null?'':'NOT null');
 		
 		// append AFTER if set
 		$query .= $after ? " AFTER `$after`" : '';
 
 		// execute and return
-		$result = $this->database->query( $query );
+		$result = $this->database->execute( $query );
 		
 		return $result ? true : false;
 
@@ -250,7 +261,7 @@ class NerbSchema
     public function dropColumn( string $table, string $column ) : bool
     {
 		// execute and return
-		$result = $this->database->query( "ALTER TABLE `$table` DROP `$column`" );
+		$result = $this->database->execute( "ALTER TABLE `$table` DROP `$column`" );
 		return $result ? true : false;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -273,7 +284,7 @@ class NerbSchema
 		$description =  $this->describeColumn( $table, $column );
 
 		// execute and return
-		$result = $this->database->query( "ALTER TABLE `$table` CHANGE COLUMN `$column` `$new_name` ".$description['type'].' '.$description['null'] );
+		$result = $this->database->execute( "ALTER TABLE `$table` CHANGE COLUMN `$column` `$new_name` ".$description['type'].' '.$description['null'] );
 		return $result ? true : false;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -292,7 +303,7 @@ class NerbSchema
     public function renameTable( string $table, string $new_name ) : bool
     {
 		// execute and return
-		$result = $this->database->query( "ALTER TABLE `$table` RENAME `$new_name`" );
+		$result = $this->database->execute( "ALTER TABLE `$table` RENAME `$new_name`" );
 		return $result ? true : false;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -310,8 +321,31 @@ class NerbSchema
     public function dropTable( string $table ) : bool
     {
 		// execute and return
-		$result = $this->database->query( "DROP TABLE IF EXISTS $table" );
+		$result = $this->database->execute( "DROP TABLE IF EXISTS $table" );
 		return $result ? true : false;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+	/**
+	 * emptyTable function.
+	 * 
+	 *   empties the table data
+	 *
+	 * @access public
+	 * @param string $table
+	 * @return int rows affected
+	 */
+	public function emptyTable( string $table ) : int
+    {
+        // sets query string
+        $query = "TRUNCATE `$table`";
+        
+        $result = $this->database->execute( $query );
+        
+        return $this->database->affected_rows();
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -324,11 +358,11 @@ class NerbSchema
      * @param string $table
      * @param string $index
      * @param string $column
-     * @param string $type (default: NULL)
-     * @param string $using (default: NULL)
+     * @param string $type (default: null)
+     * @param string $using (default: null)
      * @return bool
      */
-    public function addIndex( string $table, string $index, string $column, string $type = NULL, string $using = NULL ) : bool
+    public function addIndex( string $table, string $index, string $column, string $type = null, string $using = null ) : bool
     {
 		// make uppercase keywords
 		$type = strtoupper($type); 
@@ -344,7 +378,7 @@ class NerbSchema
 		}
 		
 		// execute and return
-		$result = $this->database->query( "CREATE $type INDEX `$index` ".($using ? "USING $using" : NULL)." ON $table($column)" );
+		$result = $this->database->execute( "CREATE $type INDEX `$index` ".($using ? "USING $using" : null)." ON $table($column)" );
 		return $result ? true : false;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -363,7 +397,7 @@ class NerbSchema
     public function dropIndex( string $table, string $index ) : bool
     {
 		// execute and return
-		$result = $this->database->query( "ALTER TABLE `$table` DROP INDEX IF EXISTS `$index`" );
+		$result = $this->database->execute( "ALTER TABLE `$table` DROP INDEX IF EXISTS `$index`" );
 		return $result ? true : false;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -372,6 +406,31 @@ class NerbSchema
     
     
     /**
+     * primary function.
+     * 
+     * @access public
+     * @param string $table
+     * @throws NerbError
+     * @return string
+     */
+    public function primary( string $table ) : string
+    {
+    	if( !in_array( $table, $this->tables )){
+    		$msg = "Table <code>[$table]</code> is not in database";
+	    	throw new NerbError( $msg );
+    	}
+    	//$result = mysqli_fetch_assoc($this->database->query( "SHOW KEYS FROM `$table` WHERE Key_name = 'PRIMARY'" ));
+    	$result = $this->database->queryArray( "SHOW KEYS FROM `$table` WHERE Key_name = 'PRIMARY'" );
+
+		// execute and return
+		return $result['Column_name'];
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
     *   returns an array of table names in the current database
     *
     *   @access     public
@@ -379,17 +438,8 @@ class NerbSchema
     */
     public function showTables() : array
     {
-        // build query string
-        $query = 'SHOW TABLES FROM `'.$this->database->use().'` ';
-		$results = $this->database->resultsToArray( $this->database->query( $query ));
-		
-		foreach( $results as $result ){
-			$this->tables[] = current($result);
-		} // end foreach
-		
-        // query database
-        return $this->tables;
-
+        return $this->database->tables();
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -428,7 +478,7 @@ class NerbSchema
     public function describe( string $table ) : array
     {
         // get table data from database
-        $result = $this->database->resultsToArray( $this->database->query( 'SHOW FULL COLUMNS FROM `'.$table.'` ' ));
+        $result = $this->database->queryArray( 'SHOW FULL COLUMNS FROM `'.$table.'`' );
 
         // iterate and change key case into array
         foreach ( $result as $columns ) {
@@ -436,7 +486,7 @@ class NerbSchema
 	        $columns = array_change_key_case( $columns );
             $info[ $columns['field'] ] = $columns;
 	        $info[ $columns['field'] ]['full_name'] = $table.'.'.$columns['field'];
-	        $info[ $columns['field'] ]['null'] = $columns['Null']=='YES'?'NULL':'NOT NULL';
+	        $info[ $columns['field'] ]['null'] = $columns['Null']=='YES'?'null':'NOT null';
         }// end foreach
 
         return $info;
