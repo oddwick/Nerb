@@ -166,7 +166,7 @@ class NerbDatabaseRow implements Iterator
     *   @return     mixed
     *   @throws     NerbError
     */
-    public function __get( string $field )
+    public function __get( string $field ) 
     {
         // check to see if field exists
         if ( !array_key_exists( $field, $this->columns ) ) {
@@ -309,20 +309,6 @@ class NerbDatabaseRow implements Iterator
 
 
 
-    /**
-    *   returns an array of the columns of the row
-    *
-    *   @access     public
-    *   @return     array
-    */
-    public function columns(): array
-    {
-        return $this->columns;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
     #################################################################
 
     //            !DATA MANIPULATION
@@ -337,7 +323,7 @@ class NerbDatabaseRow implements Iterator
     *   @access     public
     *   @return     object self
     */
-    public function lock()
+    public function lock() : self
     {
         $this->primary_key_lock = true;
         return $this;
@@ -353,7 +339,7 @@ class NerbDatabaseRow implements Iterator
      * @access public
      * @return void
      */
-    public function unlock()
+    public function unlock() : self
     {
         $this->primary_key_lock = false;
         return $this;
@@ -369,10 +355,9 @@ class NerbDatabaseRow implements Iterator
     *   @access     public
     *   @return     object self
     */
-    public function save()
+    public function save() : self
     {
         // fetch objects
-        $database = Nerb::fetch( $this->database );
         $table = Nerb::fetch( $this->database.'.'.$this->table );
 
         // send data to table for saving
@@ -381,88 +366,6 @@ class NerbDatabaseRow implements Iterator
         // return
         return $this;
         
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   Duplicates a row in the table.  The duplicated row is then returned
-    *   tables without autoincrement fields must have the key specified
-    *
-    *   @access     public
-    *   @param      string $key allows the key to be set manually
-    *   @return     int $id
-    */
-    public function duplicate( string $key = null ) : int
-    {
-		// fetch database
-        $table = Nerb::fetch( $this->database.'.'.$this->table );
-
-        // move row data into temp variable
-        $data = $this->data;
-
-        // if a key is given, set key value
-        if ( $key ) {
-            $data[ $table->primary ] = $key;
-
-            // else unset the key and get autoincrement value if no key is specified
-        } else {
-            unset( $data[ $table->primary ] );
-        }
-        
-
-        // inserts the data and retrieves the inserted row
-        $id = $table->insert( $data );
-
-        // returns the new key of the inserted row
-        return $id;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-#TODO: finish and test this method.  might need it for data transfers @Dexter Oddwick [12/25/17]
-    /**
-    *   saves changes made to a row into another table.  if a key already exists, it will overwrite the data, otherwise it will
-    *   insert it as a new row with a crisp new key
-    *
-    *   note:  the table structures MUST match otherwise the operation WILL FAIL
-    *
-    *   @access     public
-    *   @param      string $insert_table ( table to save row into )
-    *   @return     mixed ( primary key from insert into new table )
-    */
-    public function saveInto( string $insert_table )
-    {
-
-        // fetch objects
-        $database = Nerb::fetch( $this->database );
-
-        $source = Nerb::fetch( $this->table );
-
-        // check to see if table exists or throw an error
-        if ( !$database->isTable( $insert_table ) ) {
-            throw new NerbError( 'Can not save row to table <code>'.$table.'</code> because table does not exist in database.' );
-        } // endif
-
-        // check to see if table is open and registered
-        if ( Nerb::isRegistered( $this->database.'.'.$insert_table ) ) {
-            $destination = Nerb::fetch( $this->database.'.'.$insert_table );
-        } else {
-            $destination = new Nerb_database_table( $this->database, $insert_table );
-        }
-
-        // save into the new table
-        if ( $destination->exists( $this->data[ $source->primary ] ) ) {
-            $destination->save( $this->data );
-            return $source->primary;
-        } else {
-            $data = $this->__toArray();
-            unset( $data[ $source->primary ] );
-            return $destination->insert( $data );
-        }
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 } /* end class */
