@@ -392,6 +392,27 @@ class NerbDatabaseTable
 
 
     /**
+    *   returns a single row specified by a select clause
+    *
+    *   @access     public
+    *   @param      string $where
+    *   @return     NerbDatabaseRow
+    *   @throws     NerbError
+    */
+	public function fetchRow( string $where = '' )
+    {
+		// build query string
+        $query = "SELECT * FROM `$this->name`".$this->_where( $where, $limit, $offset );
+
+        $result = $this->database->fetch( $query );
+        return $result->current();
+    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
     *   finds a value based on primary key and returns a Row object
     *
     *   @access     public
@@ -399,7 +420,7 @@ class NerbDatabaseTable
     *   @return     NerbDatabaseRow
     *   @throws     NerbError
     */
-	public function fetchRow( string $value )
+	public function key( string $key )
     {
         // make sure the table has a primary key defined
         if ( !$this->primary ) {
@@ -407,7 +428,7 @@ class NerbDatabaseTable
         }
         
         //build query strin and execute
-        $query = "SELECT * FROM `$this->name` WHERE `$this->primary` = '$value' LIMIT 1";
+        $query = "SELECT * FROM `$this->name` WHERE `$this->primary` = '$key' LIMIT 1";
        
         $rows = $this->database->fetch( $query );
         
