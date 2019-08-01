@@ -93,6 +93,13 @@ class Nerb
     *   Initializes the framework and is essentially the constructor
     *
     *   @access     public
+    *   @global     string FRAMEWORK
+    *   @global     string MODULES
+    *   @global     string LIBRARY
+    *   @global     bool AUTOLOAD
+    *   @global     bool CATCH_EXCEPTIONS
+	*   @global     bool CATCH_ERRORS
+	*   @global     bool CATCH_FATAL_ERRORS
 	* 	@static
     *   @return     void
     */
@@ -298,7 +305,7 @@ class Nerb
 	    // check to see if shutdown is because of an error
 	    $error = error_get_last();
 	
-	    if( $error !== NULL) {
+	    if( $error !== null) {
 	    
 			// send the array to NerbError for formatting
 			$error = NerbError::format( $error ); 
@@ -342,14 +349,15 @@ class Nerb
             throw new NerbError( $handle.' must be a string.' );
         }
         
-        // duplicate handle
-        if ( array_key_exists( $handle, self::$registry ) ) {
-            throw new NerbError( 'An object named <code>['.$handle.'::'.get_class( self::$registry[ $handle ] ).']</code> already exists in the registry' );
-        }
-        
         // invalid object passed
         if ( !is_object( $object ) ) {
             throw new NerbError( 'Can not register <code>['.$handle.']</code> because is not an object.' );
+        }
+        
+        // duplicate handle
+        if ( array_key_exists( $handle, self::$registry ) ) {
+	        return true;
+            //throw new NerbError( 'An object named <code>['.$handle.'::'.get_class( self::$registry[ $handle ] ).']</code> already exists in the registry' );
         }
         
         //add to registry array
@@ -363,7 +371,7 @@ class Nerb
 
 
     /**
-    *   listRegistered function.
+    *   listRegisteredObjects function.
     * 
     *   returns a list of registered classes in the registry
     *
@@ -371,10 +379,10 @@ class Nerb
 	* 	@static
     *   @return     array
     */
-    public static function listRegistered() : array
+    public static function listRegisteredObjects() : array
     {
         foreach ( self::$registry as $handle => $object ) {
-            $reg[] = get_class( $object ); 
+            $reg[$handle] = get_class( $object ); 
         }
 
         return $reg;
