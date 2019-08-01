@@ -85,6 +85,16 @@ class NerbDatabaseRow implements Iterator
     protected $primary_key_lock = true;
 
     /**
+     * read_only
+     * 
+     * (default value: true)
+     * 
+     * @var bool
+     * @access protected
+     */
+    protected $read_only = true;
+
+    /**
      * pointer
      *
      * ( default value: 0 )
@@ -137,22 +147,6 @@ class NerbDatabaseRow implements Iterator
         } // end if
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   alias of __toArray()
-    *
-    *   @access     public
-    *   @return     array
-    */
-    public function dump(): array
-    {
-        return $this->__toArray();
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
@@ -398,9 +392,9 @@ class NerbDatabaseRow implements Iterator
     *
     *   @access     public
     *   @param      string $key allows the key to be set manually
-    *   @return     NerbDatabaseRow
+    *   @return     int $id
     */
-    public function duplicate( string $key = null )
+    public function duplicate( string $key = null ) : int
     {
 		// fetch database
         $table = Nerb::fetch( $this->database.'.'.$this->table );
@@ -412,8 +406,7 @@ class NerbDatabaseRow implements Iterator
         if ( $key ) {
             $data[ $table->primary ] = $key;
 
-            // else unset the key and get autoincrement value if no key is
-            // specified
+            // else unset the key and get autoincrement value if no key is specified
         } else {
             unset( $data[ $table->primary ] );
         }
@@ -424,22 +417,6 @@ class NerbDatabaseRow implements Iterator
 
         // returns the new key of the inserted row
         return $id;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   alias of duplicate
-    *
-    *   @access     public
-    *   @param      string $key allows the key to be set manually
-    *   @return     NerbDatabaseRow
-    */
-    public function insert( string $key = null )
-    {
-        return $this->duplicate( $key );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
