@@ -5,15 +5,13 @@
 ?>
 
 <div class="grid-x grid-margin-x grid-margin-y">
-	<div class="cell small-4">
+	<div class="cell small-12 medium-6 large-4">
 		<div class="splash">
 			<img src="/img/nerb_splash.jpg" title="splash"/>
 		</div>
 	</div>
-	<div class="cell small-1">
-	</div>
-	
-	<div class="cell small-7">
+
+	<div class="cell small-12 medium-6 large-7 large-offset-1">
 		<h2>Congratulations!</h2>
 		<h4>The Nerb Application Framework is successfully running.</h4>
 		<p>You are seeing this page because you have not yet defined any nodes.</p>
