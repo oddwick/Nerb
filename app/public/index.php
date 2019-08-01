@@ -44,10 +44,13 @@
 	
 	// connect to the database
 	// initialize & register tables
-	//Nerb::register( $db = new NerbDatabase( 'database', $DB ), 'data' );
-	//Nerb::register( new NerbDatabaseTable( $db, 'users' ), 'user_table' );
+	Nerb::register( $database = new NerbDatabase( 'Database', $DB ), 'Database' );
+	$Users = $database->table('users');
 	
-	//Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'user' );
+	//require_once APP_PATH.'/public/playground.php';
+
+	// create user object
+	Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'User' );
 	
 	// create a page object with an ini file
 	Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );
