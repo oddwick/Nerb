@@ -26,29 +26,9 @@ Copyright (c)2019 *
  */
 
 
-class NerbParams implements iterator
+class NerbParams
 {
 
-
-    /**
-     *  setup_key
-     *
-     *  ( default value: 'setup' )
-     *
-     *  @var string
-     *  @access protected
-     */
-    protected $setup_key = 'setup';
-
-    /**
-     *  params_key
-     *
-     *  ( default value: 'params' )
-     *
-     *  @var string
-     *  @access protected
-     */
-    protected $params_key = 'params';
 
     /**
      *  params
@@ -71,37 +51,27 @@ class NerbParams implements iterator
      */
     protected $defaults = array();
 
-    /**
-     * pointer
-     *
-     * ( default value: 0 )
-     *
-     * @var int
-     * @access protected
-     */
-    protected $pointer = 0;
-
 
 
     /**
      *  Constructor initiates Param object
-     *
+     * 
      * @access public
      * @param string $ini
-     * @param string $path
-     * @param array $params (default: array())
+     * @param bool $read_sections (default: false)
+     * @param array $additional_params (default: array())
      * @return void
      */
-    public function __construct(string $ini, string $path, array $params = array())
+    public function __construct( string $ini, bool $read_sections = false, array $additional_params = array() )
     {
         // error checking to make sure file exists
         // if the full path is given...
-        if (file_exists($path .'/'. $ini)) {
-            $ini_file = $path .'/'. $ini;
+        if (file_exists($ini)) {
+            $ini_file = $ini;
 
         // if a relative path is given
         } elseif (file_exists(APP_PATH.$path .'/'. $ini)) {
-            $ini_file = APP_PATH.$path .'/'. $ini;
+            $ini_file = APP_PATH .'/'. $ini;
 
         // blew it
         } else {
@@ -112,57 +82,31 @@ class NerbParams implements iterator
         // the user changeable variables will end up in $params and the defaults will be kept in $defaults
         try {
             // if the config.ini file is read, it loads the values into the params
-            $this->params = parse_ini_file($ini_file, true);
+            $this->params = parse_ini_file($ini_file, $read_sections, INI_SCANNER_TYPED);
         } catch (Exception $e) {
             throw new NerbError(
                 'Could not parse configuration file <code>'.$ini.'</code>. <br /> 
 					Make that it is formatted properly and conforms to required standards.'
             );
         }// end try
-
-        // error checking to make sure ini structure and keys are correct
-        // make sure that the setup section is present
-        if (!$this->params[ $this->setup_key ]) {
-            throw new NerbError(
-                'Required section <code>['.$this->setup_key.']</code> was not found in <code>['.$ini.']</code>.'
-            );
-        } // end if
-
-        // make sure that a default key is defined
-        elseif (!$this->params[ $this->setup_key ][ 'default_key']) {
-            throw new NerbError(
-                'Required key <code>[default_key]</code> was not found in <code>['.$this->setup_key.']</code> section in  <code>'.$ini.'</code>.'
-            );
-        } // end else
-
-        // make sure that the params section is found and contains values
-        elseif (empty($this->params[ $this->params[ $this->setup_key ]['default_key'] ])) {
-            throw new NerbError(
-                'Required default section <code>['.$this->params[ $this->setup_key ]['default_key'].']</code> was not found in <code>'.$ini.'</code>.'
-            );
-        } // end else if empty params
-
-        // copy the values from [params] to [defaults] so that the original values can be accessed even after changing
-        $this->defaults = $this->params[ $this->params_key ];
-
-        // assign the parameters key to a variable for quick access
-        $this->params_key = $this->params[ $this->setup_key ]['default_key'];
-
+        
+        // convert dot notation to arrays and assign inital values to default array so that 
+        // the default value can be retrieved if changed
+        $this->defaults = $this->params = $this->parse($this->params);
+        
+        //$this->debug();
+        
         // auto loading array at construction
         // -----------------------------------------------------------------------
         // if an array is given during instantiation, once the ini has been parsed
         // the array will be merged with the initial values
-        if (!empty($params)) {
-            if (!is_array($params)) {
-                throw new NerbError('Variable <code>[$array]</code> is expected to be Array, '.gettype($params).' given.');
-            } else {
-                // pass the array along for injection
-                $this->addParams($params);
-            } // end if is array
+        if (!empty($additional_params)) {
+            // pass the array along for injection
+            $this->addParams($additional_params);
         } // end if empty array
 
         // for debugging
-        //Nerb::inspect(  $this->params[ $this->params_key ], true  );
+        //Nerb::inspect(  $this->params, true  );
 
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -178,13 +122,17 @@ class NerbParams implements iterator
      *  @param mixed $value
      *  @return old
      */
-    public function __set(string $key, string $value) : string
+    public function __set( string $key, string $value ) : string
     {
         // get original value
-        $old = $this->params[ $this->params_key ][$key];
+        $old = $this->params[$key];
 
         // set new value
-        $this->params[ $this->params_key ][$key] = $value;
+        if( is_array($this->params[$key])){
+	        $this->params[$key][] = $value;
+        } else {
+	        $this->params[$key] = $value;
+        }
 
         // return old value
         return $old;
@@ -200,10 +148,57 @@ class NerbParams implements iterator
      *  @param string $key
      *  @return mixed
      */
-    public function __get($key)
+    public function __get( string $key )
     {
         // returns value
-        return $this->params[ $this->params_key ][ $key ];
+        return $this->params[$key];
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * get function that can be used to access arrays.
+     * 
+     * @access public
+     * @param string $key
+     * @param string $subkey (default: '')
+     * @return string
+     */
+    public function get( string $key, string $subkey = '' ) : string
+    {
+        // returns subkey value
+        if( $subkey ){
+	        return $this->params[$key][$subkey];
+        }
+        return $this->params[$key];
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * set function that can set array value.
+     * 
+     * @access public
+     * @param string $key
+     * @param string $subkey (default: '')
+     * @return string
+     */
+    public function set( string $key, string $value, string $subkey = '' ) : string
+    {
+        // get original value
+        $old = $this->params[$key];
+
+        // set new value
+        if( $subkey ){
+	        $this->params[$key][$subkey] = $value;
+        } else {
+	        $this->__set( $key, $value );
+        }
+
+        // return old value
+        return $old;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -217,10 +212,10 @@ class NerbParams implements iterator
      *  @param      bool $replace (default = false)
      *  @return     NerbParams
      */
-    public function addParams(array $params, bool $replace = false) : NerbParams
+    public function addParams( array $params, bool $replace = false ) : self
     {
         // overwrite array if replace is true, otherwise merges arrays
-        $this->params[ $this->params_key ] = $replace ? $params : array_merge($this->params[ $this->params_key ], $params);
+        $this->params = $replace ? $params : array_merge($this->params, $params);
 
         // return this
         return $this;
@@ -237,10 +232,10 @@ class NerbParams implements iterator
      *  @param      string $value
      *  @return     NerbParams
      */
-    public function addParam(string $key, string $value) : NerbParams
+    public function addParam(string $key, string $value) : self
     {
         // overwrite defaults with changed values if a params array is given
-        $this->params[ $this->params_key ][$key] = $value;
+        $this->params[$key] = $value;
 
         // return this
         return $this;
@@ -266,121 +261,9 @@ class NerbParams implements iterator
                 $temp =& $temp[$key];
             }
             $temp = $value;
-        }
+ 	        //if( is_array( $value ) ) $value = $this->parse( $value );
+       }
         return $config = $array;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   returns count of rows in rowset
-    *
-    *   @access     public
-    *   @return     int
-    */
-    public function count() : int
-    {
-        // return the number of available elements in the array
-        return count($this->params[ $this->params_key ]);
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-    *   returns the current element of the set
-    *
-    *   @access     public
-    *   @return     mixed
-    */
-    public function current()
-    {
-        // make sure that the pointer points to a valid row
-        if ($this->valid()) {
-            return current($this->params[ $this->params_key ]);
-        } else {
-            return false;
-        } // end if
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-    *   validates the position of the pointer
-    *
-    *   @access     public
-    *   @return     bool
-    */
-    public function valid() : bool
-    {
-
-        // validation check to ensure that pointer is less than available keys
-        return $this->pointer < count($this->params[$this->params_key]);
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-    *   advances the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
-    public function next() : int
-    {
-        // advance the params array to the next element
-        next($this->params[ $this->params_key ]);
-
-        // return incremented pointer
-        return ++$this->pointer;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-    *   decrements the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
-    public function prev() : int
-    {
-        // rewind the params array to the previous element
-        prev($this->params[ $this->params_key ]);
-
-        // return decremented pointer
-        return --$this->pointer;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-    *   returns the current position of the pointer
-    *
-    *   @access     public
-    *   @return     string
-    */
-    public function key() : string
-    {
-        // return the string of the key of the params array
-        return key($this->params[ $this->params_key ]);
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-    *   resets the pointer to 0
-    *
-    *   @access     public
-    *   @return     int
-    */
-    public function rewind() : int
-    {
-        // resets the params array to the beginning
-        reset($this->params[ $this->params_key ]);
-
-        // return 0 pointer
-        return $this->pointer=0;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -393,7 +276,7 @@ class NerbParams implements iterator
     *   @param      string $section
     *   @return     array (the entire parameter array is returned)
     */
-    public function dump($section = null) : array
+    public function dump(string $section = '') : array
     {
         // if section is given
         if ($section) {
@@ -407,25 +290,16 @@ class NerbParams implements iterator
 
 
 
-    /**
-     * raw function.
-     *
-     *  Gets a list of raw values from the params array based on key
-     *
-     * @access public
-     * @param string $key (registry key of the value)
-     * @param string $subkey ( default: '' ) (the key of a secondary array)
-     * @return array
-     */
-    public function value(string $key, $subkey = '') : array
-    {
-        // returns values for subkey, otherwise just key value
-        if ($subkey) {
-            return $this->params[ $key ][ $subkey ];
-        } else {
-            return $this->params[ $key ];
-        } // end if
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+	/**
+	 *	Function paramKey()
+	 *
+	 *	@access		public
+	 *	@return		string
+	*/
+	public function paramKey() : string
+	{
+		return $this->params_key;
+	}  // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -438,7 +312,7 @@ class NerbParams implements iterator
     *   @param      string $subkey the key of a secondary array
     *   @return     mixed
     */
-    public function getDefault($key, $subkey = null)
+    public function default(string $key, string $subkey = '')
     {
 
         // with subkeys
@@ -448,4 +322,24 @@ class NerbParams implements iterator
             return $this->defaults[ $key ];
         }
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+	/**
+	 * debug function.
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function debug(){
+		echo "<pre>";
+		print_r($this->params);
+		print_r($this->defaults);
+		die;
+		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	
 } // end class
