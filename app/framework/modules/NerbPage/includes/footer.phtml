@@ -1,9 +1,10 @@
+
 <!-- Included Footer Script Files -->
 <?PHP 
-	if( !$this->params['scripts_in_header'] ){
-		foreach( $this->params["script"] as $link ){
+	if( !$this->scripts_in_header ){
+		foreach( $this->script as $link ){
 			if ($link){
-				echo "<script ".( $this->params['asynch_scripts'] ? 'async ' : NULL )."type='text/javascript' src='".$link."'></script>'.PHP_EOL";
+				echo "<script ".( $this->asynch_scripts ? 'async ' : NULL )."type='text/javascript' src='".$link."'></script>'.PHP_EOL";
 			}
 		}
 	}
