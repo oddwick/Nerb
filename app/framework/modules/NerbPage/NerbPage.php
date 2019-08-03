@@ -31,134 +31,213 @@ class NerbPage
 {
     /**
      * params
+     *
+     * The page data is stored in page.ini
      * 
-     * (default value: array(
-     * 	    'browser_check' => false,
-     * 	    'use_error_pages' => false,
-     * 	    'cache_control' => "public", 
-     * 		'page_caching' => false,
-     * 		'cache_dir' => '/temp',
-     * 	    'asynch_scripts' => false,
-     * 	    'scripts_in_header' => true,
-     * 	    'preprocess' => false,   
-     * 	    'header' => MODULES.'/NerbPage/includes/header.phtml',    
-     * 	    'footer' => MODULES.'/NerbPage/includes/footer.phtml',    
-     * 	    'error_100' => MODULES.'/NerbPage/includes/100.phtml',    
-     * 	    'error_403' => MODULES.'/NerbPage/includes/403.phtml',    
-     * 	    'error_404' => MODULES.'/NerbPage/includes/404.phtml',    
-     * 	    'error_500' => MODULES.'/NerbPage/includes/500.phtml',
-     * 	    'title' => '',
-     * 	    'charset' => 'UTF-8',
-     * 		'language' => 'EN',
-     * 		'icon' => '/images/favorite.ico',
-     *         'crossorigin' => 'anonymous',
-     *         'viewport' => 'width=device-width, initial-scale=1.0',
-     * 	    'meta' => array(
-     *             'description' => '',
-     *             'keywords' => array(),
-     *             'author' => '',
-     *             'copyright' => '',
-     *             'robots' => 'index, follow',
-     *             'application-name' => 'Nerb Framework',
-     *             'generator' => '',
-     *             'publisher' => '',
-     *             'creator' => '',
-     *             'generator' => 'Nerb Framework Engine',
-     *         ),
-     * 	    'http-equiv' => array(
-     *             'content-type' => 'width=device-width, initial-scale=1.0',
-     * 	        'refresh' => '',
-     * 	    ),
-     * 	    'rel' => array(
-     * 	        'author' => '',
-     * 	        'dns-prefetch' => '',
-     * 	        'help' => '',
-     * 	        'icon' => '',
-     * 	        'license' => '',
-     * 	        'pingback' => '',
-     * 	        'next' => '',
-     * 	        'prev' => '',
-     * 	        'preconnect' => '', 
-     * 	        'prefetch' => '', 
-     * 	        'preload' => '', 
-     * 	        'search' => '', 
-     * 	        'canonical' => '', 
-     * 	        'shortcut' => '', 
-     * 	        'contents' => '', 
-     * 	        'index' => '', 
-     * 	    ),
-     * 	    'script' => array(),
-     * 	    'style' => array(),
-     * 	    'base' => null,	        
-     * 	    'alternate' => array(),
-     *     ))
-     * 
-     * @var array
-     * @property string MODULES
+     * @var NerbParams
      * @access protected
      */
-    protected $params = array(
-	    'browser_check' => false,
-	    'use_error_pages' => false,
-	    'cache_control' => "public", 
-		'page_caching' => false,
-		'cache_dir' => '/temp',
-	    'asynch_scripts' => false,
-	    'scripts_in_header' => true,
-	    'preprocess' => false,   
-	    'header' => MODULES.'/NerbPage/includes/header.phtml',    
-	    'footer' => MODULES.'/NerbPage/includes/footer.phtml',    
-	    'error_100' => MODULES.'/NerbPage/includes/100.phtml',    
-	    'error_403' => MODULES.'/NerbPage/includes/403.phtml',    
-	    'error_404' => MODULES.'/NerbPage/includes/404.phtml',    
-	    'error_500' => MODULES.'/NerbPage/includes/500.phtml',
-	    'title' => '',
-	    'charset' => 'UTF-8',
-		'language' => 'EN',
-		'icon' => '/images/favorite.ico',
-        'crossorigin' => 'anonymous',
-        'viewport' => 'width=device-width, initial-scale=1.0',
-	    'meta' => array(
-            'description' => '',
-            'keywords' => array(),
-            'author' => '',
-            'copyright' => '',
-            'robots' => 'index, follow',
-            'application-name' => 'Nerb Framework',
-            'generator' => '',
-            'publisher' => '',
-            'creator' => '',
-            'generator' => 'Nerb Framework Engine',
-        ),
-	    'http-equiv' => array(
-            'content-type' => 'width=device-width, initial-scale=1.0',
-	        'refresh' => '',
-	    ),
-	    'rel' => array(
-	        'author' => '',
-	        'dns-prefetch' => '',
-	        'help' => '',
-	        'icon' => '',
-	        'license' => '',
-	        'pingback' => '',
-	        'next' => '',
-	        'prev' => '',
-	        'preconnect' => '', 
-	        'prefetch' => '', 
-	        'preload' => '', 
-	        'search' => '', 
-	        'canonical' => '', 
-	        'shortcut' => '', 
-	        'contents' => '', 
-	        'index' => '', 
-	    ),
-	    'script' => array(),
-	    'style' => array(),
-	    'base' => null,	        
-	    'alternate' => array(),
-    );
+    protected $params;
 
-	/**
+    /**
+     * asynch_scripts
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $asynch_scripts = false;     
+    
+    /**
+     * scripts_in_header
+     * 
+     * (default value: true)
+     * 
+     * @var bool
+     * @access protected
+     */
+    protected $scripts_in_header = true;
+
+    /**
+     * cache_control
+     * 
+     * (default value: 'nocache')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $cache_control = 'nocache'; 
+
+    /**
+     * browser_check
+     * 
+     * (default value: true)
+     * 
+     * @var bool
+     * @access protected
+     */
+    protected $browser_check = true;
+
+    /**
+     * preprocess
+     * 
+     * (default value: true)
+     * 
+     * @var bool
+     * @access protected
+     */
+    protected $preprocess = true;
+
+    /**
+     * browser_fail
+     * 
+     * (default value: 'warn')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $browser_fail = 'warn'; 
+
+    /**
+     * browser
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $browser = array();
+
+    /**
+     * use_error_pages
+     * 
+     * (default value: true)
+     * 
+     * @var bool
+     * @access protected
+     */
+    protected $use_error_pages = true;
+
+    /**
+     * content_header
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $content_header; 
+
+    /**
+     * content_footer
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $content_footer;
+
+    /**
+     * title
+     * 
+     * (default value: 'Nerb Application Framework')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $title = 'Nerb Application Framework'; 
+
+    /**
+     * charset
+     * 
+     * (default value: 'UTF-8')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $charset = 'UTF-8'; 
+
+    /**
+     * language
+     * 
+     * (default value: 'EN')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $language = 'EN'; 
+
+    /**
+     * viewport
+     * 
+     * (default value: 'width=device-width, initial-scale=1.0')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $viewport = 'width=device-width, initial-scale=1.0'; 
+
+    /**
+     * meta
+     * 
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $meta = array();
+
+    /**
+     * http_equiv
+     * 
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $http_equiv = array();
+
+    /**
+     * rel
+     * 
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $rel = array();
+    
+    /**
+     * icon
+     * 
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $icon = array();
+
+    /**
+     * script
+     * 
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $script = array();
+
+    /**
+     * style
+     * 
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $style = array();	
+
+    /**
 	 * contentHeader
 	 * 
 	 * (default value: '')
@@ -166,7 +245,7 @@ class NerbPage
 	 * @var string
 	 * @access protected
 	 */
-	protected $contentHeader = '';
+	protected $contentHeader;
 	
 	/**
 	 * contentFooter
@@ -176,8 +255,48 @@ class NerbPage
 	 * @var string
 	 * @access protected
 	 */
-	protected $contentFooter = '';
+	protected $contentFooter;
 	
+	/**
+	 * header
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $header = MODULES.'/NerbPage/includes/header.phtml';
+
+	/**
+	 * footer
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $footer = MODULES.'/NerbPage/includes/footer.phtml';
+
+	/**
+	 * error_pages
+	 * 
+	 * (default value: array(
+	 * 		'100' => MODULES.'/NerbPage/includes/100.phtml',    
+	 * 		'403' => MODULES.'/NerbPage/includes/403.phtml',    
+	 * 		'404' => MODULES.'/NerbPage/includes/404.phtml',    
+	 * 		'500' => MODULES.'/NerbPage/includes/500.phtml',
+	 * 	))
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $error_pages = array(
+		'100' => MODULES.'/NerbPage/includes/100.phtml',    
+		'403' => MODULES.'/NerbPage/includes/403.phtml',    
+		'404' => MODULES.'/NerbPage/includes/404.phtml',    
+		'500' => MODULES.'/NerbPage/includes/500.phtml',
+	);
+
 	/**
 	 * content
 	 * 
@@ -187,16 +306,6 @@ class NerbPage
 	 * @access protected
 	 */
 	protected $content = array();
-	
-	/**
-	 * contentLink
-	 * 
-	 * (default value: false)
-	 * 
-	 * @var bool
-	 * @access protected
-	 */
-	protected $contentLink = false;
 	
 	/**
 	 * data
@@ -227,19 +336,21 @@ class NerbPage
 	 * @var NerbCache $cache
 	 * @access protected
 	 */
-	protected $cache;
+	protected $cache_data;
 
 	
 	/**
-	 * filename (name of file used for caching)
+	 * cache_filename (name of file used for caching)
 	 * 
 	 * (default value: null)
 	 * 
 	 * @var string
 	 * @access protected
 	 */
-	protected $filename = null;
+	protected $cache_filename = null;
 	
+
+
 
     /**
      * __construct function.
@@ -253,19 +364,18 @@ class NerbPage
      */
     public function __construct( string $ini_file )
     {
-		// process the ini file and merge it to params array
-        $data = $this->parse( $ini_file );
-        $this->params = array_merge( $this->params, $data );
-        
+		// process the ini file
+		$this->ini( $ini_file );
+		
 		// check browser if necessary
 		// Warning, this method is a bit slow and 
 		// the server must be configured for it to work properly
-        if( $this->params['browser_check'] ) $this->browserCheck();
+        if( $this->browser_check ) $this->browserCheck();
         
 		// this sends header commands to prevent the browser from caching contents and 
 	    // must revalidate.  this is best for pages that one must be logged in to view
-	    if( $this->params['cache_control'] ){
-		    session_cache_limiter( $this->params['cache_control'] );
+	    if( $this->cache_control ){
+		    session_cache_limiter( $this->cache_control );
 		    
 		    // -- alternate method --
 		    //header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
@@ -276,84 +386,34 @@ class NerbPage
 	    // if page caching is used and page is cached, 
 	    // then return cached content, otherwise procede with rendering
 	    if( PAGE_CACHING ){
-		    $this->page_caching = true;
+
+			// set caching flag and add meta tags for cached content
+			$this->cache();
+		
 			// the filename is a md5 hash of the full url of the page.
 		    // this makes it easier to store the full path of the url
 		    // and obfuscates the page in the cache directory and if
 		    // multiple sites are using the same temp dir, prevents 
 		    // cross site scripting
-		    $this->filename = md5( $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] ).'.cache';
+		    $this->cache_filename = md5( $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] ).'.cache';
 		    
 		    // create the cache
-		    $this->cache = new NerbPageCache( $this->filename );
+		    $this->cache_data = new NerbPageCache( $this->cache_filename );
 		    
 		    // check to see if the page is cached
 		    // if it is, then fetch the cache and exit
-		    if( $this->cache->isCached() && $this->cache->fetchCache() ) {
+		    if( $this->cache_data->isCached() && $this->cache_data->fetchCache() ) {
 			    if( DEBUG ) echo 'Cached content';
 			    exit;
 			}
 	    } // end if page caching
 	    
 		// auto add content headers and content footer to page
-		if( $this->params['content_header'] ) $this->contentHeader( $this->params['content_header'] );
-		if( $this->params['content_footer'] ) $this->contentFooter( $this->params['content_footer'] );
+		if( $this->content_header ) $this->contentHeader( $this->content_header );
+		if( $this->content_footer ) $this->contentFooter( $this->content_footer );
 	   
         return $this;
         
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * parse function.
-     *
-     * Processes ini file and turns it into an array and takes .(dot) notation and makes
-     * subkeys out of it
-     * 
-     * @access protected
-     * @param string $ini_file
-     * @return array
-     */
-    protected function parse( string $ini_file ) : array
-    {
-		// error checking to make sure file exists
-		// if a relative path is given	
-		if( file_exists( APP_PATH . $ini_file ) ){
-			$ini_file = APP_PATH . $ini_file;
-		}
-        
-        // if the full path is given...
-        if ( !file_exists( $ini_file ) ) {
-            throw new NerbError( 'Could not locate given configuration file <code>'.$ini_file.'</code>' );
-        }
-
-        // load and parse ini file and distribute variables
-        // the user changeable variables will end up in $params and the defaults will be kept in $defaults
-        try {
-            // if the config.ini file is read, it loads the values into the params
-            $data = parse_ini_file( $ini_file, false );
-        } catch ( Exception $e ) {
-            throw new NerbError( 
-                'Could not parse page ini file <code>'.$ini_file.'</code>.<br /> 
-					Make that it is formatted properly and conforms to required standards. '
-             );
-        }// end try
-
-		// initialize array
-		$array = array();
-		
-		// cycle through data and seperate . notation into key/value pairs
-		foreach( $data as $path => $value ) {
-		    $temp = &$array;
-		    foreach( explode('.', $path) as $key ) {
-		        $temp =& $temp[$key];
-		    }
-		    $temp = $value;
-		}
-		return $array;
-		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -381,7 +441,7 @@ class NerbPage
 	    if( $_SESSION['browser_check'] == 'pass' ){
 		    return;
 		    
-		} elseif( $_SESSION['browser_check'] == 'fail' && $this->params['browser_fail'] == 'error' ){
+		} elseif( $_SESSION['browser_check'] == 'fail' && $this->browser_fail == 'error' ){
 			// set error to serve bad browser page
 			$this->error = 100;
 			return;
@@ -391,12 +451,12 @@ class NerbPage
 		    // this requires browsercap.ini to be set up on the server and can be
 		    // checked through the phpinfo() function
 			$browser = get_browser();
-			if( $this->params[ 'browser' ][ $browser->browser ] > $browser->version ){
+			if( $this->browser[ $browser->browser ] > $browser->version ){
 				
 				// set session var to indicate browser failure
 				$_SESSION['browser_check'] = 'fail';
 				// set error to serve bad browser page
-				if( $this->params['browser_kill_on_fail'] )	$this->error = 100;
+				if( $this->browser_kill_on_fail )	$this->error = 100;
 				
 			} else {
 				$_SESSION['browser_check'] = 'pass';
@@ -417,85 +477,12 @@ class NerbPage
 
 
 
-    /**
-     *  setter function.
-     *
-     *  @access public
-     *  @param string $key
-     *  @param string $value
-     *  @return string old value
-     *  @property array $params
-     *  @throws NerbError
-     */
-    public function __set(string $key, string $value) : string
-    {
-        // error checking to ensure key exists
-        if (!array_key_exists($key, $this->params)){
-	        throw new NerbError( 'The key <code>['.$key.']</code> is not a valid parameter' );
-        } // end if
-        
-        // get original value
-        $old = $this->params[$key];
-
-        // set new value
-        $this->params[$key] = $value;
-
-        // return old value
-        return $old;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     *  getter function.
-     *
-     *  @access public
-     *  @param string $key
-     *  @property array $params
-     *  @return mixed
-     */
-    public function __get( string $key )
-    {
-        // returns value
-        return $this->params[ $key ];
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * dump function.
-     * 
-     * Get all parameters at once
-     *
-     * @access public
-     * @param string $section (default: null)
-     * @return array (the entire parameter array is returned)
-     */
-    public function dump( string $section = null ) : array
-    {
-        // if section is given
-        if ( $section ) {
-            return $this->params[ $section ];
-        } // return all values
-        else {
-            return $this->params;
-        } // end if
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 
     #################################################################
 
     //      !Cache control
 
     #################################################################
-
-
 
 
 
@@ -511,9 +498,16 @@ class NerbPage
      * @access protected
      * @return NerbPage
      */
-    public function cache() : NerbPage
+    public function cache() : self
     {
-        $this->params['page_caching'] = true;
+        $this->page_caching = true;
+	    
+	    // add meta cache data so that page can be identified as cached content
+	    $meta = array( 
+	    		'cached' => date("F d, Y - h:i:s a"),
+	    		'cached_url' => $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'],
+			);
+	    $this->meta( $meta );
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -534,9 +528,16 @@ class NerbPage
      * @access protected
      * @return NerbPage
      */
-    public function nocache() : NerbPage
+    public function nocache() : self
     {
-        $this->params['page_caching'] = false;
+        $this->page_caching = false;
+	    
+	    // remove meta cache data
+	    $meta = array( 
+	    		'cached' => '',
+	    		'cached_url' => '',
+			);
+	    $this->meta( $meta );
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -544,29 +545,36 @@ class NerbPage
 
 
 
-    /**
-     * metaCache function.
-     * 
-     * if page caching is used, add meta 'cached' tag so that 
-     * the page can be identified as cached content
-     *
-     * @access public
-     * @return void
-     */
-    public function metaCache()
-    {
-	    $meta = array( 
-	    		'cached' => date("F d, Y - h:i:s a"),
-	    		'cached_url' => $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'],
-			);
-	    $this->meta( $meta , true );
-	    return;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+	/**
+	 *	Function 
+	 *
+	 *	@access		protected
+	 *	@param		string $ini_file
+	 *	@return		self
+	*/
+	protected function ini( string $ini_file ) 
+	{
+		// process the ini file and merge it to params array
+		$params = new NerbParams( $ini_file );
+		
+		// dump the params into array
+        $dump = $params->dump();
+        
+        // cycle through and add them to class properties
+        foreach( $dump as $key => $value ){
+	        if( property_exists( $this, $key ) ){
+		        $this->$key = $value;
+	        } else {
+		       throw new NerbError( "The property <code>[$key]</code> does not exist.  Check your page.ini for proper spelling and syntax." ); 
+	        }
+        }
+		
+	}  // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
+    
+    
+    
+    
     #################################################################
 
     //      !Page Building
@@ -583,43 +591,38 @@ class NerbPage
     */
     public function render()
     {
-	    // add meta tags for cached content
-	    if( $this->page_caching ) $this->metaCache();
-		
 	    // clear any buffers
 	    ob_end_clean();
 	    ob_start();
 	    
 	    // include page header
-	    require $this->params['header'];
+	    require $this->header;
 	    
 	    // if the page has a content header, include it
 	    if( $this->contentHeader ) require $this->contentHeader;
 	    
 	    // if there is an error or there is no content, then include the error page 
-	    if( $this->error || ( empty( $this->content ) && $this->params['use_error_pages'] )){
+	    if( $this->error || ( empty( $this->content ) && $this->use_error_pages )){
 	    	$this->errorPage();
 	    } else {   
-		    		    
 			foreach( $this->content as $value ){
-		    	if( $this->params['preprocess'] ){
+		    	if( $this->preprocess ){
 					echo $value;
 			    } else {
 				    require $value;
 			    } // end if
 			} // end foreach
-		    		    
 	    }// end if
 	    
 	    // add content footer
 	    if( $this->contentFooter ) require $this->contentFooter;
 	    
 	    // add html footer
-	    require $this->params['footer'];
+	    require $this->footer;
         
 		// if page caching is used, capture content an cache it
 	    if( $this->page_caching ){
-			$this->cache->write( ob_get_contents() );
+			$this->cache_data->write( ob_get_contents() );
 	    }
 	    
         // output contents of buffer and clear
@@ -651,11 +654,33 @@ class NerbPage
      * @param string $content
      * @return NerbPage
      */
-    public function content( string $content ) : NerbPage
+    public function content( string $content ) : self
     {
+	    // error check to make sure content exists and is not a directory
+		if( is_dir( $content ) || !file_exists( $content )){
+		    $this->error = 404;
+			return;
+		}
 	    
-	    if( $this->preprocess ){
-		    
+	    // add content to the array
+		$this->content[] = $this->preprocess ? $this->preprocess( $content ) : $content;
+ 		
+		return $this;
+		
+	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+	/**
+	 * preprocess function.
+	 * 
+	 * @access protected
+	 * @param string $content
+	 * @return string
+	 */
+	protected function preprocess( string $content ) : string
+	{
 		    // catch the output buffer
 		    ob_start();		    
 		    
@@ -665,32 +690,23 @@ class NerbPage
 	    	if( !is_dir( $content ) && file_exists( $content )){
 			    require $content;
 	    	} else {
-		    	require $this->params['error_404'];
+		    	require $this->error_page['404'];
 	    	}
 		    
 			// add contents of output buffer to content array 
-		    $this->content[] = ob_get_contents();
+		    $processed = ob_get_contents();
 		    
 		    // clear buffer
 		    ob_end_clean();
 		    
-	    } else {
-	    	// add to the content array, which will be processed
-	    	// in the order that was added
-	    	if( is_file( $content ) ){
-			 	$this->content[] = $content;
-	    	} else {
-		    	$this->error = 404;
-	    	}
-	    }
- 		
-		return $this;
+		    // return results
+		    return $processed;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
+	
+	
+	
+	
     /**
      * contentHeader function.
      *
@@ -707,7 +723,7 @@ class NerbPage
      * @throws NerbError
      * @return NerbPage
      */
-    public function contentHeader( string $filename ) : NerbPage
+    public function contentHeader( string $filename ) : self
     {
 		if( file_exists($filename) ){
 			$this->contentHeader = $filename;
@@ -730,7 +746,7 @@ class NerbPage
      * @return NerbPage
      * @see contentHeader
      */
-    public function contentFooter( string $filename ) : NerbPage
+    public function contentFooter( string $filename ) : self
     {
 		if( file_exists($filename) ){
 			$this->contentFooter = $filename;
@@ -751,7 +767,7 @@ class NerbPage
      * @throws NerbError
 	 * @return NerbPage
 	 */
-	public function data( $data, string $value = '' ) : NerbPage
+	public function data( $data, string $value = '' ) : self
 	{
 		if( is_scalar( $data ) ){
 			$this->data[$data] = $value;
@@ -779,7 +795,7 @@ class NerbPage
 	    	
 	    	// unsupported browser	
 	    	case 100:
-		    	require $this->params['error_100'];
+		    	require $this->error_page['100'];
 	    		break;
 	    		
 	    	// bad request
@@ -788,12 +804,12 @@ class NerbPage
 	    	case 401:
 	    	// forbiden
 	    	case 403:
-		    	require $this->params['error_403'];
+		    	require $this->error_page['403'];
 	    		break;
 	    		
 	    	// page not found	
 	    	case 404:
-		    	require $this->params['error_404'];
+		    	require $this->error_page['404'];
 	    		break;
 	    		
 	    	// service error and unspecified errors
@@ -801,10 +817,12 @@ class NerbPage
 	    	// service unavailable
 	    	case 503:
 	    	default:
-		    	require $this->params['error_500'];
+		    	require $this->error_page['500'];
     	} // end swich
     	
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
     #################################################################
@@ -823,10 +841,10 @@ class NerbPage
      * @throws NerbError
      * @return NerbPage
      */
-    public function header( string $filename ) : NerbPage
+    public function header( string $filename ) : self
     {
 		if( file_exists($filename) ){
-	 		$this->params['header'] = $filename;
+	 		$this->header = $filename;
 			return $this;
 		} else {
 			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
@@ -845,10 +863,10 @@ class NerbPage
      * @throws NerbError
      * @return NerbPage
      */
-    public function footer( string $filename ) : NerbPage
+    public function footer( string $filename ) : self
     {
 		if( file_exists($filename) ){
-	 		$this->params['footer'] = $filename;
+	 		$this->footer = $filename;
 			return $this;
 		} else {
 			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
@@ -883,7 +901,7 @@ class NerbPage
      * @access public
      * @return NerbPage
      */
-    public function notFound() : NerbPage
+    public function notFound() : self
     {
  		$this->error = 404;
 		return $this;
@@ -901,7 +919,7 @@ class NerbPage
      * @access public
      * @return NerbPage
      */
-    public function unauth() : NerbPage
+    public function unauth() : self
     {
  		$this->error = 403;
 		return $this;
@@ -934,9 +952,9 @@ class NerbPage
 	 * @param string $title
 	 * @return NerbPage
 	 */
-	public function title( string $title ) : NerbPage
+	public function title( string $title ) : self
 	{
-		$this->params['title'] = $title;
+		$this->title = $title;
 		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -951,9 +969,9 @@ class NerbPage
 	 * @param string $charset
 	 * @return NerbPage
 	 */
-	public function charset( string $charset ) : NerbPage
+	public function charset( string $charset ) : self
 	{
-		$this->params['charset'] = $charset;
+		$this->charset = $charset;
 		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -968,29 +986,12 @@ class NerbPage
 	 * @param string $lang
 	 * @return NerbPage
 	 */
-	public function lang( string $lang ) : NerbPage
+	public function lang( string $lang ) : self
 	{
-		$this->params['lang'] = $lang;
+		$this->lang = $lang;
 		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * icon function.
-     * 
-     * @access public
-     * @param string $icon
-     * @return NerbPage
-     */
-    public function icon( string $icon ) : NerbPage
-    {
-	    $this->params['icon'] = $icon;
-	    return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -1003,9 +1004,10 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function equiv( string $title, string $value ) : NerbPage
+    public function equiv( string $title, string $value ) : self
     {
-	    $this->params['http-equiv'][$title] = $value;
+	    
+	    $this->http_equiv[$title] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1018,15 +1020,15 @@ class NerbPage
      * 
      * @access public
      * @param array $meta
-     * @param bool $merge (default: false)
+     * @param bool $merge (default: true)
      * @return NerbPage
      */
-    public function meta( array $meta, bool $merge = false ) : NerbPage
+    public function meta( array $meta, bool $merge = true ) : self
     {
 	    if( $merge ){
-		    $this->params['meta'] = array_merge( $this->params['meta'], $meta );
+		    $this->meta = array_merge( $this->meta, $meta );
 	    } else {
-		    $this->params['meta'] = $meta;
+		    $this->meta = $meta;
 	    }
 	    return $this;
 	    
@@ -1042,9 +1044,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function viewport( string $value ) : NerbPage
+    public function viewport( string $value ) : self
     {
-	    $this->params['viewport'] = $value;
+	    $this->viewport = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1059,9 +1061,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function description( string $value ) : NerbPage
+    public function description( string $value ) : self
     {
-	    $this->params['meta']['description'] = $value;
+	    $this->meta['description'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1079,12 +1081,12 @@ class NerbPage
 	 * @param bool $merge (default: true)
 	 * @return NerbPage
 	 */
-	public function keywords( array $values, bool $merge = true ) : NerbPage
+	public function keywords( array $values, bool $merge = true ) : self
     {
 	    if( $merge ){
-		    $this->params['meta']['keywords'] = array_merge( $this->params['meta']['keywords'], $values );
+		    $this->meta['keywords'] = array_merge( $this->meta['keywords'], $values );
 	    } else {
-		    $this->params['meta']['keywords'] = $values;
+		    $this->meta['keywords'] = $values;
 	    }
 	    return $this;
 	    
@@ -1102,9 +1104,9 @@ class NerbPage
 	 * @param mixed $value
 	 * @return NerbPage
 	 */
-	public function keyword( $value ) : NerbPage
+	public function keyword( $value ) : self
     {
-		$this->params['meta']['keywords'][] = $value;
+		$this->meta['keywords'][] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1121,9 +1123,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-   public function author( string $value ) : NerbPage
+   public function author( string $value ) : self
     {
-	    $this->params['meta']['author'] = $value;
+	    $this->meta['author'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1140,9 +1142,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function copyright( string $value ) : NerbPage
+    public function copyright( string $value ) : self
     {
-	    $this->params['meta']['copyright'] = $value;
+	    $this->meta['copyright'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1159,9 +1161,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function robots( string $value ) : NerbPage
+    public function robots( string $value ) : self
     {
-	    $this->params['meta']['robots'] = $value;
+	    $this->meta['robots'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1178,9 +1180,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function appname( string $value ) : NerbPage
+    public function appname( string $value ) : self
     {
-	    $this->params['meta']['application-name'] = $value;
+	    $this->meta['application-name'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1197,9 +1199,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function generator( string $value ) : NerbPage
+    public function generator( string $value ) : self
     {
-	    $this->params['meta']['generator'] = $value;
+	    $this->meta['generator'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1216,9 +1218,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function publisher( string $value ) : NerbPage
+    public function publisher( string $value ) : self
     {
-	    $this->params['meta']['publisher'] = $value;
+	    $this->meta['publisher'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1235,9 +1237,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function creator( string $value ) : NerbPage
+    public function creator( string $value ) : self
     {
-	    $this->params['meta']['creator'] = $value;
+	    $this->meta['creator'] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1255,9 +1257,9 @@ class NerbPage
      * @param string $value
      * @return NerbPage
      */
-    public function alt( string $title, string $value ) : NerbPage
+    public function alt( string $title, string $value ) : self
     {
-	    $this->params['alt'][$title] = $value;
+	    $this->alt[$title] = $value;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1274,9 +1276,9 @@ class NerbPage
      * @param string $style (url of stylesheet)
      * @return NerbPage
      */
-    public function style( string $style ) : NerbPage
+    public function style( string $style ) : self
     {
-	    $this->params['style'][] = $style;
+	    $this->style[] = $style;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1293,9 +1295,9 @@ class NerbPage
      * @param array $style
      * @return NerbPage
      */
-    public function styles( array $style ) : NerbPage
+    public function styles( array $style ) : self
     {
-	    $this->params['style'] = $style;
+	    $this->style = $style;
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1312,9 +1314,9 @@ class NerbPage
 	 * @param string $script
 	 * @return NerbPage
 	 */
-	public function script( string $script ) : NerbPage
+	public function script( string $script ) : self
 	{
-		$this->params['script'][] = $script;
+		$this->script[] = $script;
 		return $this;
 	
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1331,9 +1333,9 @@ class NerbPage
 	 * @param array $script
 	 * @return NerbPage
 	 */
-	public function scripts( array $script ) : NerbPage
+	public function scripts( array $script ) : self
 	{
-		$this->params['script'] = $script;
+		$this->script = $script;
 		return $this;
 	
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1344,16 +1346,16 @@ class NerbPage
 	/**
 	 * rel function.
 	 * 
-	 * Alias of link()
+	 * Add link rel statement to header
 	 * 
 	 * @access public
 	 * @param string $title
 	 * @param string $link
 	 * @return NerbPage
 	 */
-	public function rel( string $title, string $link ) : NerbPage
+	public function rel( string $title, string $link ) : self
 	{
-		$this->link( $title, $link );
+		$this->rel[$title] = $link;
 		return $this;
 	
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1362,18 +1364,18 @@ class NerbPage
 
 
 	/**
-	 * link function.
+	 * icon function.
 	 * 
-	 * Add link rel statement to header
+	 * Add link to page icons
 	 * 
 	 * @access public
 	 * @param string $title
 	 * @param string $link
 	 * @return NerbPage
 	 */
-	public function link( string $title, string $link ) : NerbPage
+	public function icon( string $title, string $link ) : self
 	{
-		$this->params['rel'][$title] = $link;
+		$this->icon[$title] = $link;
 		return $this;
 	
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1390,9 +1392,9 @@ class NerbPage
 	 * @param string $url
 	 * @return NerbPage
 	 */
-	public function base( string $url ) : NerbPage
+	public function base( string $url ) : self
 	{
-		$this->params['base'] = $url;
+		$this->base = $url;
 		return $this;
 	
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
