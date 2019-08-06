@@ -454,7 +454,7 @@ class NerbUser
 		$Users = Nerb::fetch( $table );
 		
 		// user not found
-		if( !$user = $Users->fetchFirstRow( $user.' = \''.$user_name.'\'') ){
+		if( !$user = $Users->fetchRow( $user.' = \''.$user_name.'\'', 1) ){
 			$this->logAttempt( 0, $user_name, $msg = 'user not found'  );
 			return array( false, $msg );
 		}
@@ -510,7 +510,7 @@ class NerbUser
 		$sessions = new NerbDatabaseTable( $database, TOKEN_TABLE );
 		
 		// fetch session data from table
-		$session = $sessions->fetchFirstRow( '`selector` = \''.$_SESSION['auth'].'\'' );
+		$session = $sessions->fetchRow( '`selector` = \''.$_SESSION['auth'].'\'' );
 
 		return $session->expires > time() && hash_equals( $session->hash, hash( 'sha256', $_COOKIE['token'] )) ? true : false;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
