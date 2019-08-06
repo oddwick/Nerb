@@ -17,12 +17,9 @@
 	 *  disable for production site
 	 *
 	*/
-
-	/*
-		ini_set( 'display_errors', 'On' );	
-		error_reporting( E_ERROR | E_WARNING | E_PARSE );
-		error_reporting(E_ALL );
-	*/
+	//	ini_set( 'display_errors', 'On' );	
+	//	error_reporting( E_ERROR | E_WARNING | E_PARSE );
+	//	error_reporting(E_ALL );
 	
 	// begin session
 	session_start();
@@ -38,9 +35,12 @@
 	// load static class
 	require_once APP_PATH.'/framework/Nerb.php';
 	
-	// initialize framework and include supplental config as app.ini
+	// initialize framework and include application config as app.ini
 	Nerb::init();
-	Nerb::addConfig( 'app.ini', '/config' );
+	Nerb::addConfig( '/config/app.ini' );
+	
+	// create a page object with an ini file
+	Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );
 	
 	// connect to the database
 	// initialize & register tables
@@ -48,12 +48,6 @@
 	$Users = $database->table('users');
 	
 	//require_once APP_PATH.'/public/playground.php';
-
-	// create user object
-	Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'User' );
-	
-	// create a page object with an ini file
-	Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );
 	
 	// set the token and parse the url from html strings
 	$options = array(
