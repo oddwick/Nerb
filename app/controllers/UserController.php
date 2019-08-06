@@ -47,11 +47,14 @@ class UserController extends NerbController
         
         $this->defineStructure( array( 'page' ));
         
+		// create user object
+		Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'user' );
+		
         // action calls
         if ( $this->action ) $this->action(); 
                 
 		// fetch user object
-		$user = Nerb::fetch( 'user' );
+		//$user = Nerb::fetch( 'user' );
 		
 		// if user is logged in, allow access to private sections, 
 		// otherwise kick out to registration page
@@ -159,7 +162,7 @@ class UserController extends NerbController
 	protected function login( string $user_name, string $user_pass ): string
 	{
 		
-		$user = Nerb::fetch( 'user' );
+		$user = Nerb::fetch( 'User' );
 		
 		// authenticate user
 		$status =  $user->authenticate( $user_name, $user_pass );
