@@ -18,7 +18,9 @@
  * @copyright       Copyright (c)2019
  * @license         https://www.github.com/oddwick/nerb
  *
- * @todo
+ * @property CACHE_DIR defined in config.ini
+ * @property CACHE_TTL defined in config.ini
+ * @global CACHE_DIR defined in config.ini
  *
  */
 
@@ -82,6 +84,9 @@ class NerbPageCache
      */
     public function __construct( string $filename )
     {
+	    if( !is_dir(CACHE_DIR) ){
+		    throw new NerbError( "Cache directory <code>[".CACHE_DIR."]</code> is not a valid directory.  Check <code>[config.ini]</code> for proper configuration." );
+	    }
         $this->filename = $filename;
         return $this;
         
@@ -266,10 +271,14 @@ class NerbPageCache
 			// clear output buffer and start new buffer
 			ob_end_clean();
 		    ob_start();
-		    
 		    // get file contents. readfile is more secure than include, prevents 
 		    // any embeded php from getting processed
 			readfile( $filename );
+		    if( DEBUG ){
+			    echo '<pre>';
+			    echo 'Cached - expires: '.(date( "m.d.y H:i:s", filemtime( $filename ) + CACHE_TTL ));
+			    echo '</pre>';
+			}
 			
 			//output buffer and clear
 			ob_flush();
