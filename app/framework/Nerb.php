@@ -105,9 +105,16 @@ class Nerb
     */
     public static function init()
     {
+		// define FRAMEWORK constant
+		define( 'FRAMEWORK', realpath(__DIR__) );
+		
+		if( !is_file( FRAMEWORK.'/config.ini'  )){
+			self::halt( 'Framework Initialization Error <br><code>[config.ini]</code> could not be found.' );
+			exit;
+		}
 		
 		//load configuration file
-		self::loadConfig();
+		self::loadConfig( FRAMEWORK.'/config.ini' );
 
         // add the reqired directories to the path
         self::$path['root'] = FRAMEWORK;
@@ -155,7 +162,6 @@ class Nerb
         // sets the default error handler to catch all errors
 		if( CATCH_FATAL_ERRORS ) register_shutdown_function( array('Nerb', 'fatal_handler'));
 		
-
         // begin output buffering
         ob_start();
 
@@ -165,6 +171,64 @@ class Nerb
 
 
 
+
+   /**
+    *   loadConfig function.
+    * 
+    *   loads and parses .ini file
+    *
+    *   @access     private
+	* 	@static
+	* 	@param string $config
+    *   @return     bool
+    */
+    private static function loadConfig( string $ini_file ) : bool
+    {
+		// this must be called here because this is before any of the paths
+		// have been defined
+		self::loadClass( 'NerbParams', FRAMEWORK.'/modules/NerbParams/'); 
+		// process the ini file and merge it to params array
+		$params = new NerbParams( $ini_file );
+		$params->globalize();
+		return true;
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+   /**
+    *   addConfig function.
+    * 
+    *   loads additional config files specific to the app
+    *
+    *   @access     public
+	* 	@static
+    *   @return     bool
+    */
+    public static function addConfig( string $ini ) : bool
+    {
+		// error checking to ensure file exists
+		// if full path is given
+		if( is_file( $ini )) {
+			$ini_file = $ini;
+			
+		// if path is relative to app root
+		} else if ( is_file( APP_PATH.$ini )) {
+			$ini_file = APP_PATH.$ini ;
+	
+		// oops. 
+		} else {
+            throw new NerbError( 'Could not locate given configuration file <code>['.$ini.']</code> using: <br><code>['.$ini.']</code><br><code>[APP_PATH'.$ini.']</code>' );
+		}
+
+		$params = new NerbParams( $ini_file );
+		$params->globalize();
+		
+		return true;	
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -214,54 +278,54 @@ class Nerb
     */
 	public static function error_handler( int $error_number, string $errstr, string $errfile, string $errline, array $errcontext )
 	{
-		if( USE_ERROR_LOGGING ){
+		if( !USE_ERROR_LOGGING ) return;
 
-			// determines if full path is shown or masked with APP_PATH
-			if ( !SHOW_FULL_PATH ) {
-				$errfile = str_ireplace(FRAMEWORK, '', $errfile);
-			} 
+
+		// determines if full path is shown or masked with APP_PATH
+		if ( !SHOW_FULL_PATH ) {
+			$errfile = str_ireplace(FRAMEWORK, '', $errfile);
+		} 
+		
+		// switch through error number to determine error type and 
+		// whether or not it is logged
+		switch ( $error_number ){
 			
-			// switch through error number to determine error type and 
-			// whether or not it is logged
-			switch ( $error_number ){
+			case 1:
+			case 256:
+				if( LOG_ALL_ERRORS == false ) return;
+				$prefix = 'ERROR ';
+				break;
 				
-				case 1:
-				case 256:
-					if( LOG_ALL_ERRORS == false ) return;
-					$prefix = 'ERROR ';
-					break;
-					
-				case 2:
-				case 512:
-					if( LOG_ALL_WARNINGS == false ) return;
-					$prefix = 'WARNING ';
-					break;
-				
-				case 4:
-					$prefix = 'PARSE ';
-					break;
-				
-				case 8:
-				case 1024:
-					if( LOG_ALL_NOTICE == false ) return;
-					$prefix = 'NOTICE ';
-					break;
-				
-				default:
-					$prefix = 'OTHER';
-					break;				
-			}// end switch
+			case 2:
+			case 512:
+				if( LOG_ALL_WARNINGS == false ) return;
+				$prefix = 'WARNING ';
+				break;
 			
-			// create error string
-			// WARNING | ERROR | NOTICE [date] file (line) string
-			$error = $errfile . ' (' . $errline . ') -- ' .$errstr;
+			case 4:
+				$prefix = 'PARSE ';
+				break;
 			
+			case 8:
+			case 1024:
+				if( LOG_ALL_NOTICE == false ) return;
+				$prefix = 'NOTICE ';
+				break;
 			
-			// log error to file
-			$log = new NerbLog( ERROR_LOG );
-			$log->write( $error , $prefix );
+			default:
+				$prefix = 'OTHER';
+				break;				
+		}// end switch
+		
+		// create error string
+		// WARNING | ERROR | NOTICE [date] file (line) string
+		$error = $errfile . ' (' . $errline . ') -- ' .$errstr;
+		
+		
+		// log error to file
+		$log = new NerbLog( ERROR_LOG );
+		$log->write( $error , $prefix );
 			
-		} // end if
 				
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -299,9 +363,8 @@ class Nerb
 	 * @static
 	 * @return void
 	 */
-	public static function fatal_handler() {
-	
-	    
+	public static function fatal_handler()
+	{
 	    // check to see if shutdown is because of an error
 	    $error = error_get_last();
 	
@@ -316,7 +379,7 @@ class Nerb
 	    }
 	    
 	    if( DEBUG ){
-		    echo 'Rendered in '.(microtime()-RENDER).'ms';
+		    echo '<pre>Rendered in '.(microtime()-RENDER).'ms</pre>';
 	    }
 	}
 
@@ -344,11 +407,6 @@ class Nerb
     public static function register( $object, string $handle ) : bool
     {
         // error checking
-        // invalid handle
-        if ( !is_string( $handle ) ) {
-            throw new NerbError( $handle.' must be a string.' );
-        }
-        
         // invalid object passed
         if ( !is_object( $object ) ) {
             throw new NerbError( 'Can not register <code>['.$handle.']</code> because is not an object.' );
@@ -356,6 +414,7 @@ class Nerb
         
         // duplicate handle
         if ( array_key_exists( $handle, self::$registry ) ) {
+	        // pass on object gracefully
 	        return true;
             //throw new NerbError( 'An object named <code>['.$handle.'::'.get_class( self::$registry[ $handle ] ).']</code> already exists in the registry' );
         }
@@ -524,7 +583,6 @@ class Nerb
     */
     public static function loadFile( string $file, string $dir = null )
     {
-
         //   if directory is given, directly look in directory, otherwise it will attempt to autodiscover
         //   classes using the paths listed in $path
 
@@ -581,10 +639,10 @@ class Nerb
 	* 
 	* 	@access public
 	* 	@static
-	* 	@param mixed $name
+	* 	@param string $name
 	* 	@return string
 	*/
-	private static function namespaceWrap( $name ) 
+	private static function namespaceWrap( string $name ) 
 	{
 	  if ( !is_scalar( $name ))
 	    return $name;
@@ -595,96 +653,6 @@ class Nerb
 	
 	
 
-   /**
-    *   loadConfig function.
-    * 
-    *   loads and parses the config.ini file
-    *
-    *   @access     private
-	* 	@static
-    *   @return     void
-    */
-    private static function loadConfig() : bool
-    {
-		
-		define( 'FRAMEWORK', realpath(__DIR__) );
-		
-		if( !is_file( FRAMEWORK.'/config.ini'  )){
-			self::halt( 'Framework Initialization Error <br><code>[config.ini]</code> could not be found.' );
-			exit;
-		}
-
-		// load and parse ini file
-		$data = parse_ini_file( FRAMEWORK.'/config.ini', false, INI_SCANNER_TYPED );
-		
-		if ( !is_array( $data )){
-			self::halt( 'Framework Initialization Error <br>Invalid configuration file given.' );
-			exit;
-		}
-		
-		// cycle through ini and convert each key to UPERCASE constant
-		foreach( $data as $key => $value ){
-			define( strtoupper($key), $value ); 
-		} // end foreach
-		
-		return true;	
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-   /**
-    *   addConfig function.
-    * 
-    *   loads additional config files specific to the app
-    *
-    *   @access     public
-	* 	@static
-    *   @return     bool
-    */
-    public static function addConfig( string $ini, string $path ) : bool
-    {
-		
-		// error checking to ensure file exists
-		// if full path is given
-		if( is_file( $path.'/'.$ini )) {
-			$ini_file = $ini;
-			
-		// if path is relative to app root
-		} else if ( is_file( APP_PATH.$path.'/'.$ini )) {
-			$ini_file = APP_PATH.$path.'/'.$ini ;
-	
-		// oops. 
-		} else {
-            throw new NerbError( 'Could not locate given configuration file <code>['.$ini.']</code> using: <br><code>['.$path.']</code><br><code>[APP_PATH'.$path.']</code>' );
-		}
-
-		// load and parse ini file
-		$data = parse_ini_file( $ini_file, false, INI_SCANNER_TYPED );
-		
-		if ( empty( $data )) {
-            throw new NerbError( 
-                'Configuration file <code>[$ini]</code> appears to be empty.'
-             );
-		}
-		
-		if ( !is_array( $data )) {
-            throw new NerbError( 
-                'Could not parse configuration file <code>['.$ini.']</code>.<br /> 
-					Make that it is formatted properly and conforms to required standards. '
-             );
-		}
-		
-		// cycle through ini and convert each key to UPERCASE constant
-		foreach( $data as $key => $value ){
-			define( strtoupper($key), $value ); 
-		} // end foreach
-		
-		return true;	
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -792,39 +760,19 @@ class Nerb
     */
     public static function jump( string $url )
     {
+        global $HTTP_USER_AGENT;
 
         // if no url is given, the it is assumed that a jump to root url ( / ) is intended
         $url = (  !$url  ) ? '/' : $url;
 
         // this is a microsoft refresh BUG
-        if ( self::isMicrosoftBrowser() ) {
+        if ( strstr( strtolower( $HTTP_USER_AGENT ), 'msie' ) ) {
             Header( 'Location: $url' );
         } else {
-            echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0; URL='".$url."'\" />\n";
+            echo "<META HTTP-EQUIV='Refresh' CONTENT=\"0; URL='$url' />".PHP_EOL;
         }
 
         exit;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-    *   Checks to see if client browser is msie
-    *
-    *   @access     public
-	* 	@static
-    *   @return     bool
-    */
-    public static function isMicrosoftBrowser() : bool
-    {
-        global $HTTP_USER_AGENT;
-        if ( strstr( strtolower( $HTTP_USER_AGENT ), 'msie' ) ) {
-            return true;
-        } else {
-            return false;
-        }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
