@@ -90,6 +90,21 @@ class NerbParams
             );
         }// end try
         
+		// make sure that the ini file was read
+		if ( empty( $this->params )) {
+            throw new NerbError( 
+                'Configuration file <code>[$ini]</code> appears to be empty.'
+             );
+		}
+		
+		// and make sure that it was read properly and created an array
+		if ( !is_array( $this->params )) {
+            throw new NerbError( 
+                'Could not parse configuration file <code>['.$ini.']</code>.<br /> 
+					Make that it is formatted properly and conforms to required standards. '
+             );
+		}
+		
         // convert dot notation to arrays and assign inital values to default array so that 
         // the default value can be retrieved if changed
         $this->defaults = $this->params = $this->parse($this->params);
@@ -288,18 +303,26 @@ class NerbParams
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-
+	
+	
 	/**
-	 *	Function paramKey()
+	 * globalize function.
 	 *
-	 *	@access		public
-	 *	@return		string
-	*/
-	public function paramKey() : string
+	 * turns the non array elements of the params array into global constants
+	 * 
+	 * @access public
+	 * @return self
+	 */
+	public function globalize() : self
 	{
-		return $this->params_key;
-	}  // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+		// cycle through ini and convert each key to UPERCASE constant
+		foreach( $this->params as $key => $value ){
+			if( !is_array( $value ) ){
+				define( strtoupper($key), $value ); 
+			}
+		} // end foreach
+		return $this;
+	}
 
 
 
@@ -312,9 +335,8 @@ class NerbParams
     *   @param      string $subkey the key of a secondary array
     *   @return     mixed
     */
-    public function default(string $key, string $subkey = '')
+    public function default( string $key, string $subkey = '' )
     {
-
         // with subkeys
         if ($subkey) {
             return $this->defaults[ $key ][ $subkey ];
