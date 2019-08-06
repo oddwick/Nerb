@@ -22,25 +22,25 @@
 class DefaultController extends NerbController
 {
 
-	/**
-	 * title
-	 *
-	 * This is the default value for the page title
-	 * 
-	 * (default value: 'Nerb Application Framework')
-	 * 
-	 * @var string
-	 * @access protected
-	 */
-	protected $title = 'Nerb Application Framework';
+    /**
+     * title
+     *
+     * This is the default value for the page title
+     * 
+     * (default value: 'Nerb Application Framework')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $title = 'Nerb Application Framework';
 	
 	
 	
     /**
-    *   Container function for executing domain logic for this module
-    *
-    *   @access		public
-    */
+     *   Container function for executing domain logic for this module
+     *
+     *   @access		public
+     */
     public function route()
     {
         // this is a public controller
@@ -49,7 +49,9 @@ class DefaultController extends NerbController
         $this->defineStructure( array( 'page' ));
         
         // action calls
-        if ( $this->action ) $this->action(); 
+        if ( $this->action ) {
+            $this->action();
+        }
         
         $content = $this->publicPages();
 
@@ -89,7 +91,7 @@ class DefaultController extends NerbController
      */
     protected function publicPages() : string
     {
-        switch ( $this->page ) {
+        switch ($this->page) {
             case 'forgotPass':
             default:
                 $page = 'default.php';
@@ -110,13 +112,13 @@ class DefaultController extends NerbController
      */
     protected function action()
     {
-        switch ( $this->action ) {
+        switch ($this->action) {
             default:
                 $page = '/';
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump( $content );
+        Nerb::jump($content);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

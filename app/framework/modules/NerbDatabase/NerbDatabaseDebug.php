@@ -27,12 +27,12 @@ class NerbDatabaseDebug extends NerbDatabase
 
 
     /**
-    *   Constructor initiates database connection
-    *
-    *   @access     public
-    *   @param      array $params connection parameters [host|user|pass|name]
-    *   @return     void
-    */
+     *   Constructor initiates database connection
+     *
+     *   @access     public
+     *   @param      array $params connection parameters [host|user|pass|name]
+     *   @return     void
+     */
     public function __construct( $database_handle, $params )
     {
         // set credentials for connecting
@@ -48,7 +48,7 @@ class NerbDatabaseDebug extends NerbDatabase
         $this->tables = $this->tables();
         
         // register this database so that other classes can access it
-        Nerb::register( $this, $database_handle );
+        Nerb::register($this, $database_handle);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,16 +56,16 @@ class NerbDatabaseDebug extends NerbDatabase
 
 
     /**
-    *   In debugging mode, outputs poll on exit
-    *
-    *   @access     public
-    *   @param      array $params connection parameters [host|user|pass|name]
-    *   @return     void
-    */
+     *   In debugging mode, outputs poll on exit
+     *
+     *   @access     public
+     *   @param      array $params connection parameters [host|user|pass|name]
+     *   @return     void
+     */
     public function __destruct()
     {
             $this->database->close();
-            $this->poll(true);
+            $this->poll(TRUE);
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -73,16 +73,16 @@ class NerbDatabaseDebug extends NerbDatabase
 
 
     /**
-    *   debugging method that outputs all queries made from this object during the
-    *   execution of the script
-    *
-    *   if $print is set to true, this method prints a formatted array of queries,
-    *   otherwise this method will just return an array
-    *
-    *   @access     public
-    *   @param      bool $print
-    *   @return     array
-    */
+     *   debugging method that outputs all queries made from this object during the
+     *   execution of the script
+     *
+     *   if $print is set to true, this method prints a formatted array of queries,
+     *   otherwise this method will just return an array
+     *
+     *   @access     public
+     *   @param      bool $print
+     *   @return     array
+     */
     public function poll( $print = false )
     {
         if ($print) {
@@ -99,15 +99,15 @@ class NerbDatabaseDebug extends NerbDatabase
                 // additional debugging information
                 if ($this->_debug) {
                     $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Connect time</CODE>: '.
-                        number_format($this->_profile[$count]['connect']-$this->_profile[$count]['start'], 7).' ms';
+                        number_format($this->_profile[$count]['connect'] - $this->_profile[$count]['start'], 7).' ms';
                     $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Query time</CODE>: '.
-                        number_format($this->_profile[$count]['query_time']-$this->_profile[$count]['connect'], 7).' ms';
+                        number_format($this->_profile[$count]['query_time'] - $this->_profile[$count]['connect'], 7).' ms';
                     $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Total time</CODE>: '.
-                        number_format($this->_profile[$count]['query_time']-$this->_profile[$count]['start'], 7).' ms';
+                        number_format($this->_profile[$count]['query_time'] - $this->_profile[$count]['start'], 7).' ms';
                     $string .= '<BR />&nbsp;&nbsp;&nbsp;<CODE>Rows</CODE>: '.$this->_profile[$count]['affected_rows'];
                     $string .= '<BR /><BR />';
                 }
-                $string .='</Lcode>';
+                $string .= '</Lcode>';
                 ++$count;
             }
             $string = Nerb_Format::tag($string, 'ol');
@@ -129,13 +129,13 @@ class NerbDatabaseDebug extends NerbDatabase
 
 
     /**
-    *   Fetches a specific query made to the database if an index is given. otherwise the last
-    *   query is returned
-    *
-    *   @access     public
-    *   @param      int $index
-    *   @return     array
-    */
+     *   Fetches a specific query made to the database if an index is given. otherwise the last
+     *   query is returned
+     *
+     *   @access     public
+     *   @param      int $index
+     *   @return     array
+     */
     public function getQuery( $index = false )
     {
 

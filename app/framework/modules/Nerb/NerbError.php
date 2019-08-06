@@ -57,15 +57,15 @@ class NerbError extends \Exception
      * @access protected
      */
     protected $content = array( 
-    	'title' => 'Nerb Application Error',
-		'css' => '',
-		'js' => '',
-		'content' => ''
-	);
+        'title' => 'Nerb Application Error',
+        'css' => '',
+        'js' => '',
+        'content' => ''
+    );
 
 
 
-	/**
+    /**
      * __construct function.
      * 
      * Constructor for Error class
@@ -82,7 +82,7 @@ class NerbError extends \Exception
         parent::__construct( $message, $code );
         
         // trip error for logging purposes
-		trigger_error( strip_tags( $message ), E_USER_ERROR );
+        trigger_error( strip_tags( $message ), E_USER_ERROR );
 
         // sets the error message
         $this->message = $message;
@@ -98,8 +98,8 @@ class NerbError extends \Exception
 
         // cleans out the paths from the message if set
         if( !SHOW_FULL_PATH ){
-        	$this->message = $this->cleanPath( $this->message );
-		}
+            $this->message = $this->cleanPath( $this->message );
+        }
 
         // set page elements
         // include the default nerb framework css sheet wrapped in a style tag
@@ -117,7 +117,7 @@ class NerbError extends \Exception
 
 
 
-	/**
+    /**
      * render function.
      * 
      * returns the error msg as a string
@@ -132,12 +132,12 @@ class NerbError extends \Exception
         ob_end_clean();
 
         //  include the template and inject the content
-        if ( file_exists( FRAMEWORK.'/resources/template.php' ) ) {
+        if (file_exists(FRAMEWORK.'/resources/template.php')) {
             // Starts output buffering
             ob_start();
 
             //Extracts vars to current view scope
-            extract( $this->content );
+            extract($this->content);
 
             // builds the error body block
             $content = $this->header();
@@ -162,7 +162,7 @@ class NerbError extends \Exception
 
 
 
-	/**
+    /**
      * error function.
      * 
      * returns formatted error message
@@ -180,7 +180,7 @@ class NerbError extends \Exception
 
 
 
-	/**
+    /**
      * code function.
      * 
      * returns formatted  code
@@ -194,36 +194,36 @@ class NerbError extends \Exception
         // actual line that caused the error
         if( SHOW_ERROR_LINE && ERROR_LEVEL > 0 ){
 
-        	$error .= '<h2>Details</h2>';
+            $error .= '<h2>Details</h2>';
         	
-        	if( ERROR_LEVEL == 1 ){
-    			$trace = end( $this->trace );
-	        	$file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
-				$error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
-				$error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
+            if( ERROR_LEVEL == 1 ){
+                $trace = end( $this->trace );
+                $file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
+                $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
+                $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
 			 	
-			 	// housekeeping for large array
-			 	unset( $file );
+                    // housekeeping for large array
+                    unset( $file );
 			 	
-        	} elseif ( ERROR_LEVEL == 2){
+            } elseif ( ERROR_LEVEL == 2){
         	
-	        	foreach( $this->trace as $trace){
-		        	// read offending file into an array
-		        	$file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
+                foreach( $this->trace as $trace){
+                    // read offending file into an array
+                    $file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
 		        	
-		        	// because if an error was thrown, technically it is the previous line
-		        	// that caused the error, so this only shows code line if it is not a 
-		        	// thrown error.  makes the code list a little easier to see real error
-		        	if( !stristr( $file[ $trace['line']-1 ], "throw" ) ){
-						$error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
-						$error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
-		        	}
-				 	// housekeeping for large array
-				 	unset( $file );
+                    // because if an error was thrown, technically it is the previous line
+                    // that caused the error, so this only shows code line if it is not a 
+                    // thrown error.  makes the code list a little easier to see real error
+                    if( !stristr( $file[ $trace['line']-1 ], "throw" ) ){
+                        $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
+                        $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
+                    }
+                        // housekeeping for large array
+                        unset( $file );
 		        	
-	        	}// end foreach
+                }// end foreach
 	        	
-        	}// end if ERROR_LEVEL
+            }// end if ERROR_LEVEL
         	
         } // end if SHOW_ERROR_LINE
         
@@ -233,7 +233,7 @@ class NerbError extends \Exception
 
 
 
-	/**
+    /**
      * trace function.
      * 
      * returns the formatted backtrace for the error
@@ -243,18 +243,18 @@ class NerbError extends \Exception
      */
     protected function trace() : string
     {
-        switch ( ERROR_LEVEL ) {
+        switch (ERROR_LEVEL) {
             case 2:
                 $count = 1;
                 $trace = '<h2>Trace</h2>'
                     . '<code><ul class="no-bullet">'
                     . '<li>#0: {INIT}</li>';
 
-                foreach ( $this->trace as $node ) {
-                    $trace .= '<li>#'.$count++.':&nbsp;'.$this->cleanPath( $node['file'] ).' ( '.$node['line'].' )';
+                foreach ($this->trace as $node) {
+                    $trace .= '<li>#'.$count++.':&nbsp;'.$this->cleanPath($node['file']).' ( '.$node['line'].' )';
 
                     //adds a suffix until the last line call to prevent NerbError->__construct() from being displayed
-                    if ( $count <= count( $this->trace ) ) {
+                    if ($count <= count($this->trace)) {
                         $trace .= ' &mdash; '.$node['class'].$node['type'].$node['function'].'()</li>';
                     } else {
                         $trace .= '<strong><- ERROR</strong>';
@@ -265,10 +265,10 @@ class NerbError extends \Exception
                 break;
 
             case 1:
-                $node = end( $this->trace );
+                $node = end($this->trace);
                 $trace = '<h2>Trace</h2>'
                     . '<p>'
-                    . $node['class'].$node['type'].$node['function'].'() &mdash; <em>'.$this->cleanPath( $node['file'] ).' on line <strong>'.$node['line'].'</strong></em>'
+                    . $node['class'].$node['type'].$node['function'].'() &mdash; <em>'.$this->cleanPath($node['file']).' on line <strong>'.$node['line'].'</strong></em>'
                     . '</p>';
                 break;
 
@@ -295,55 +295,55 @@ class NerbError extends \Exception
      */
     public static function format( array $error ) : array
     {
-    	// get error type name in human readable form
-		$error['type_name'] = array_search( $error['type'], get_defined_constants() );
+        // get error type name in human readable form
+        $error['type_name'] = array_search( $error['type'], get_defined_constants() );
 	    
-	    // seperate the trace from the message body
-	    $msg = preg_split( '/Stack trace:/' , $error['message'] );
+        // seperate the trace from the message body
+        $msg = preg_split( '/Stack trace:/' , $error['message'] );
 	    
-		// break the trace apart using line numbers (#0 etc)
-		$raw = preg_split( '/\#([0-9]) /' , $msg[1], NULL, PREG_SPLIT_NO_EMPTY );
+        // break the trace apart using line numbers (#0 etc)
+        $raw = preg_split( '/\#([0-9]) /' , $msg[1], NULL, PREG_SPLIT_NO_EMPTY );
 		
-		// add the error line and file to the end of the trace
-		array_unshift( $raw, $error['file'].' ('.$error['line'].'):'); 	
+        // add the error line and file to the end of the trace
+        array_unshift( $raw, $error['file'].' ('.$error['line'].'):'); 	
 		
-		// loop through, trim, and kill null values or messages that contain brackets eg. {main} 	    
-		foreach( $raw as $key => $value ){
-		    $raw[ $key ] = trim( $raw[ $key ] );
-		    if( empty( $raw[$key] ) || strstr($value ,'{' ) ) unset( $raw[$key] );
-	    }
+        // loop through, trim, and kill null values or messages that contain brackets eg. {main} 	    
+        foreach( $raw as $key => $value ){
+            $raw[ $key ] = trim( $raw[ $key ] );
+            if( empty( $raw[$key] ) || strstr($value ,'{' ) ) unset( $raw[$key] );
+        }
 	    
-	    // reindex array
-	    $raw = array_values( $raw );
-	    $count = 0;
+        // reindex array
+        $raw = array_values( $raw );
+        $count = 0;
 	    
-	    foreach( $raw as $value ){
+        foreach( $raw as $value ){
 		    
-		    //$value = str_replace(' ', '~', $value);
+            //$value = str_replace(' ', '~', $value);
 		    
-		    $hold = explode( ':', $value) ;
-		    $file = explode( '(', $hold[0] );
+            $hold = explode( ':', $value) ;
+            $file = explode( '(', $hold[0] );
 		    
-		    $trace[$count]['file'] = trim( $file[0] );
-		    $trace[$count]['line'] = str_replace(')', '', $file[1]);
+            $trace[$count]['file'] = trim( $file[0] );
+            $trace[$count]['line'] = str_replace(')', '', $file[1]);
 
-		    // kill params
-		    $hold[1] = preg_replace( "/\(.*\)/", "", $hold[1] );
-		    $plit = explode( '->', $hold[1] );
-		    if( count( $plit ) < 2 ){
-			    $trace[ $count ]['function'] = $plit[0];
-		    } else {
-			    $trace[ $count ]['class'] = trim( $plit[0] );
-			    $trace[ $count ]['function'] = trim( $plit[1] );
-		    }
-			$count++;
-	    } // end foreach
+            // kill params
+            $hold[1] = preg_replace( "/\(.*\)/", "", $hold[1] );
+            $plit = explode( '->', $hold[1] );
+            if( count( $plit ) < 2 ){
+                $trace[ $count ]['function'] = $plit[0];
+            } else {
+                $trace[ $count ]['class'] = trim( $plit[0] );
+                $trace[ $count ]['function'] = trim( $plit[1] );
+            }
+            $count++;
+        } // end foreach
 
-	    // transfer variables back to $error
-	    $error['message'] = $msg[0];
-		$error['trace'] = $trace;
+        // transfer variables back to $error
+        $error['message'] = $msg[0];
+        $error['trace'] = $trace;
 
-	    return $error;
+        return $error;
         
     } // end function
 
@@ -357,16 +357,16 @@ class NerbError extends \Exception
      * @param string $path
      * @return string
      */
-    protected function cleanPath( $path ) : string
+    protected function cleanPath($path) : string
     {
-        return  str_replace( APP_PATH, '..', $path );
+        return  str_replace(APP_PATH, '..', $path);
                     
     }// end function
 
 
 
 
-	/**
+    /**
      * header function.
      * 
      * creates a header and title for an error
@@ -386,7 +386,7 @@ class NerbError extends \Exception
 
 
 
-	/**
+    /**
      * footer function.
      * 
      * generates a footer block for an error
@@ -419,20 +419,20 @@ class NerbError extends \Exception
      * @see        NerbDebug
      * @throws     NerbError
      */
-    private function syntax( $class, $method = null ) : NerbDebug
+    private function syntax( $class, $method = NULL ) : NerbDebug
     {
-		//Target our class
-		$reflector = new ReflectionClass( $class );
+        //Target our class
+        $reflector = new ReflectionClass( $class );
 		
-		//Get the parameters of a method
-		$parameters = $reflector->getMethod('FireCannon')->getParameters();
+        //Get the parameters of a method
+        $parameters = $reflector->getMethod('FireCannon')->getParameters();
 		
-		//Loop through each parameter and get the type
-		foreach($parameters as $param)
-		{
-		     //Before you call getClass() that class must be defined!
-		     echo $param->getClass()->name;
-		}
+        //Loop through each parameter and get the type
+        foreach($parameters as $param)
+        {
+                //Before you call getClass() that class must be defined!
+                echo $param->getClass()->name;
+        }
 
         if ( is_object( $class ) ) {
             $class = get_class( $class );

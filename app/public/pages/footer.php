@@ -8,7 +8,7 @@
 		<div class="grid-x grid-padding-x">
 			<div class="cell small-12 medium-8">
 				<p>
-					&copy; <?= SITE_COPYRIGHT_BEGIN ? SITE_COPYRIGHT_BEGIN.'-' : NULL ; ?><?= date("Y", time() ).' '.SITE_COPYRIGHT; ?>, All rights reserved
+					&copy; <?= SITE_COPYRIGHT_BEGIN ? SITE_COPYRIGHT_BEGIN.'-' : NULL; ?><?= date("Y", time()).' '.SITE_COPYRIGHT; ?>, All rights reserved
 				</p>
 			</div>
 			
@@ -25,9 +25,9 @@
 <!-- begin debugging -->
 <pre>
 <?PHP 
-	//print_r($_SESSION); 
-	//print_r($_COOKIE); 
-	//echo sha1( time() );
+    //print_r($_SESSION); 
+    //print_r($_COOKIE); 
+    //echo sha1( time() );
 ?>
 </pre>
 <!-- end debugging -->

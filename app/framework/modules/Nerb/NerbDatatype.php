@@ -35,7 +35,7 @@
  *
  */
 
- class NerbDatatype
+    class NerbDatatype
 {
     /**
      * datatype
@@ -84,67 +84,67 @@
      * @access protected
      */
     protected $invalid_char = array(
-        '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']','{', '}',':', '<', '>', '|', '$',
+        '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']', '{', '}', ':', '<', '>', '|', '$',
     );
 
 
 
 
-	/**
-	 * __construct function.
-	 * 
-	 * @access public
-	 * @param string $datatype
-	 * @return NerbDatatype
-	 */
-	public function __construct( string $datatype )
+    /**
+     * __construct function.
+     * 
+     * @access public
+     * @param string $datatype
+     * @return NerbDatatype
+     */
+    public function __construct( string $datatype )
     {
-		// sets the datatype with error checking
-	    $this->set( $datatype );
+        // sets the datatype with error checking
+        $this->set( $datatype );
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
-	/**
-	 * set function.
-	 *
-	 * sets the datatype with which to compare the string
-	 * 
-	 * @access public
-	 * @param string $datatype
-	 * @throws NerbError
-	 * @return NerbDatatype
-	 */
-	public function set( string $datatype ) : NerbDatatype
+    /**
+     * set function.
+     *
+     * sets the datatype with which to compare the string
+     * 
+     * @access public
+     * @param string $datatype
+     * @throws NerbError
+     * @return NerbDatatype
+     */
+    public function set( string $datatype ) : NerbDatatype
     {
         // force lowercase
         $datatype = strtolower($datatype);
         if ( !in_array($datatype, $this->types) ) {
-             throw new NerbError('Invalid datatype.  Datatypes must be <code>['.implode('|', $this->types).']</code>');
+                throw new NerbError('Invalid datatype.  Datatypes must be <code>['.implode('|', $this->types).']</code>');
         }
 
-	    $this->datatype = $datatype;
-	    return $this;
+        $this->datatype = $datatype;
+        return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
-	/**
-	 * check function.
-	 *
-	 * performs the actual datacheck
-	 * 
-	 * @access public
-	 * @param string $string
-	 * @return string
-	 */
-	public function check( string $string )
+    /**
+     * check function.
+     *
+     * performs the actual datacheck
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public function check( string $string )
     {
-	    $method = $this->datatype;
-	    return $this->$method( $string );
+        $method = $this->datatype;
+        return $this->$method( $string );
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -158,7 +158,7 @@
      * @param bool $replace (default = false)
      * @return NerbDatatype
      */
-    public function invalidChars( array $chars, bool $replace = false) : NerbDatatype
+    public function invalidChars(array $chars, bool $replace = false) : NerbDatatype
     {
         // replace list
         if ($replace) {
@@ -183,7 +183,7 @@
      * @param string $char
      * @return NerbDatatype
      */
-    public function invalidChar( string $char ) : NerbDatatype
+    public function invalidChar(string $char) : NerbDatatype
     {
         // add to list
         $this->invalid_char[] = $char;
@@ -194,17 +194,17 @@
 
 
 
-	/**
-	 * int function.
-	 *
-	 * clears any non numeric character
-	 * 
-	 * @access public
-	 * @param string $string
-	 * @return string
-	 */
-	public function int( string $string ) : string
-	{
+    /**
+     * int function.
+     *
+     * clears any non numeric character
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public function int( string $string ) : string
+    {
         return preg_replace('/([^0-9])/', '', $string);
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -212,17 +212,17 @@
 
 
 
-	/**
-	 * float function.
-	 *
-	 * clears any non numeric character or period
-	 * 
-	 * @access public
-	 * @param string $string
-	 * @return string
-	 */
-	public function float( string $string ) : string
-	{
+    /**
+     * float function.
+     *
+     * clears any non numeric character or period
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public function float( string $string ) : string
+    {
         return preg_replace( '/([^0-9\.])/', '', $string );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -230,17 +230,17 @@
 
 
 
-	/**
-	 * alphanum function.
-	 * 
-	 * clears any non alphanumeric or space character
-	 *
-	 * @access public
-	 * @param string $string
-	 * @return string
-	 */
-	public function alphanum( string $string ) : string
-	{
+    /**
+     * alphanum function.
+     * 
+     * clears any non alphanumeric or space character
+     *
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public function alphanum( string $string ) : string
+    {
         return $this->whitespace( preg_replace( '/([^0-9a-zA-Z ])/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -248,17 +248,17 @@
 
 
 
-	/**
-	 * alpha function.
-	 *
-	 * clears any non alpha or space character
-	 * 
-	 * @access public
-	 * @param string $string
-	 * @return string
-	 */
-	public function alpha( string $string ) : string
-	{
+    /**
+     * alpha function.
+     *
+     * clears any non alpha or space character
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public function alpha( string $string ) : string
+    {
         return $this->whitespace( preg_replace('/([^a-zA-Z ])/', '', $string));
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -266,34 +266,34 @@
 
 
 
-	/**
-	 * metaphone function.
-	 *
-	 * clears any non alpha character and returns a metaphone
-	 * 
-	 * @access public
-	 * @param string $string 
-	 * @return string
-	 */
-	public function metaphone( string $string ) : string
-	{
+    /**
+     * metaphone function.
+     *
+     * clears any non alpha character and returns a metaphone
+     * 
+     * @access public
+     * @param string $string 
+     * @return string
+     */
+    public function metaphone( string $string ) : string
+    {
         return metaphone( $this->alpha( $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
-	/**
-	 * string function.
-	 *
-	 * kills any invalid characters defined in $invalid_char
-	 * 
-	 * @access public
-	 * @param string $string
-	 * @return string
-	 */
-	public function string( string $string ) : string
-	{
+    /**
+     * string function.
+     *
+     * kills any invalid characters defined in $invalid_char
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public function string( string $string ) : string
+    {
         $replace = '\\'.implode( '\\', $this->invalid_char );
         return $this->whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
 		
@@ -302,17 +302,17 @@
  
  
                 
-	/**
-	 * whitespace function.
-	 *
-	 * removes any extra whitespace as a result of replaced characters
-	 * 
-	 * @access protected
-	 * @param string $string
-	 * @return string
-	 */
-	protected function whitespace( string $string ) : string
-	{
+    /**
+     * whitespace function.
+     *
+     * removes any extra whitespace as a result of replaced characters
+     * 
+     * @access protected
+     * @param string $string
+     * @return string
+     */
+    protected function whitespace( string $string ) : string
+    {
         // replace any extra whitespace with a single space
         return trim(preg_replace('/\s+/', ' ', $string));
 		

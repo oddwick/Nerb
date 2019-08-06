@@ -72,7 +72,7 @@ class NerbDatabaseRow implements Iterator
      * @var mixed
      * @access protected
      */
-    protected $table = null;
+    protected $table = NULL;
 
     /**
      * primary_key_lock
@@ -82,7 +82,7 @@ class NerbDatabaseRow implements Iterator
      * @var bool
      * @access protected
      */
-    protected $primary_key_lock = true;
+    protected $primary_key_lock = TRUE;
 
     /**
      * read_only
@@ -92,7 +92,7 @@ class NerbDatabaseRow implements Iterator
      * @var bool
      * @access protected
      */
-    protected $read_only = true;
+    protected $read_only = TRUE;
 
     /**
      * pointer
@@ -108,15 +108,15 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   Constructor -- this object is only intended to be called by a Database object and is not for standing alone
-    *
-    *   @access     public
-    *   @param      string $database handle
-    *   @param      string $table handle
-    *   @param      array $columns table column as column=>table.column
-    *   @param      array $data
-    *   @return     void
-    */
+     *   Constructor -- this object is only intended to be called by a Database object and is not for standing alone
+     *
+     *   @access     public
+     *   @param      string $database handle
+     *   @param      string $table handle
+     *   @param      array $columns table column as column=>table.column
+     *   @param      array $data
+     *   @return     void
+     */
     public function __construct( string $database, string $table, array $columns, array $data )
     {
         $this->database = $database;
@@ -136,12 +136,12 @@ class NerbDatabaseRow implements Iterator
      * 	@param bool $return_all_columns (default: false)
      * 	@return array
      */
-    public function __toArray( bool $return_all_columns = false ): array
+    public function __toArray(bool $return_all_columns = false): array
     {
-        if ( $return_all_columns ) {
+        if ($return_all_columns) {
             return $this->data;
         } else {
-            return array_filter( $this->data, function ( $value ) {
+            return array_filter($this->data, function($value) {
                 return $value !== '';
             } );
         } // end if
@@ -159,13 +159,13 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   returns a value by key
-    *
-    *   @access     public
-    *   @param      string $field (field name)
-    *   @return     mixed
-    *   @throws     NerbError
-    */
+     *   returns a value by key
+     *
+     *   @access     public
+     *   @param      string $field (field name)
+     *   @return     mixed
+     *   @throws     NerbError
+     */
     public function __get( string $field ) 
     {
         // check to see if field exists
@@ -180,13 +180,13 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   seter that changes value of dataset
-    *
-    *   @access     public
-    *   @param      string $field (field name)
-    *   @return     string $value (old value)
-    *   @throws     NerbError
-    */
+     *   seter that changes value of dataset
+     *
+     *   @access     public
+     *   @param      string $field (field name)
+     *   @return     string $value (old value)
+     *   @throws     NerbError
+     */
     public function __set( string $field, string $value )
     {
         // error checking
@@ -222,43 +222,43 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   returns the current element of the row
-    *
-    *   @access     public
-    *   @return     mixed
-    */
+     *   returns the current element of the row
+     *
+     *   @access     public
+     *   @return     mixed
+     */
     public function current()
     {
         // make sure that the pointer points to a valid row
-        if ( $this->valid() ) {
+        if ($this->valid()) {
             return $this->data[$this->pointer];
         } else {
-            return false;
+            return FALSE;
         }
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
     /**
-    *   validates the position of the pointer
-    *
-    *   @access     public
-    *   @return     bool
-    */
+     *   validates the position of the pointer
+     *
+     *   @access     public
+     *   @return     bool
+     */
     public function valid(): bool
     {
-        return $this->pointer < count( $this->data );
+        return $this->pointer < count($this->data);
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-    *   advances the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   advances the pointer
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function next(): int
     {
         return ++$this->pointer;
@@ -268,11 +268,11 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   decrements the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   decrements the pointer
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function prev(): int
     {
         return --$this->pointer;
@@ -282,11 +282,11 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   returns the current position of the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   returns the current position of the pointer
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function key(): int
     {
         return $this->pointer;
@@ -296,11 +296,11 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   resets the pointer to 0
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   resets the pointer to 0
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function rewind(): int
     {
         return $this->pointer = 0;
@@ -318,14 +318,14 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   sets the primary_key_lock flag preventing primary key from being changed
-    *
-    *   @access     public
-    *   @return     object self
-    */
+     *   sets the primary_key_lock flag preventing primary key from being changed
+     *
+     *   @access     public
+     *   @return     object self
+     */
     public function lock() : self
     {
-        $this->primary_key_lock = true;
+        $this->primary_key_lock = TRUE;
         return $this;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -341,7 +341,7 @@ class NerbDatabaseRow implements Iterator
      */
     public function unlock() : self
     {
-        $this->primary_key_lock = false;
+        $this->primary_key_lock = FALSE;
         return $this;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -350,18 +350,18 @@ class NerbDatabaseRow implements Iterator
 
 
     /**
-    *   saves changes made to a row
-    *
-    *   @access     public
-    *   @return     object self
-    */
+     *   saves changes made to a row
+     *
+     *   @access     public
+     *   @return     object self
+     */
     public function save() : self
     {
         // fetch objects
-        $table = Nerb::fetch( $this->database.'.'.$this->table );
+        $table = Nerb::fetch($this->database.'.'.$this->table);
 
         // send data to table for saving
-        $table->save( $this->data );
+        $table->save($this->data);
 
         // return
         return $this;

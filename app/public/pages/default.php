@@ -1,7 +1,7 @@
 <?PHP 
-	//$db = Nerb::fetch('database');
-	//$CatalogList = new NerbDatabaseTable( $db, 'CatalogList');
-	//$Images = new NerbDatabaseTable($db, 'images');
+    //$db = Nerb::fetch('database');
+    //$CatalogList = new NerbDatabaseTable( $db, 'CatalogList');
+    //$Images = new NerbDatabaseTable($db, 'images');
 ?>
 
 <div class="grid-x grid-margin-x grid-margin-y">
@@ -25,11 +25,11 @@
 		<code>
 			<ul>
 			<?PHP 
-				$modules = Nerb::modules();
-				foreach( $modules  as $key => $value ){
-					echo '<li>'.$value.'</li>';
-				} // end foreach
-			?>
+                $modules = Nerb::modules();
+                foreach( $modules  as $key => $value ){
+                    echo '<li>'.$value.'</li>';
+                } // end foreach
+            ?>
 			</ul>
 		</code>
 	</div>
@@ -38,11 +38,11 @@
 		<code>
 			<ul>
 			<?PHP 
-				$modules = Nerb::status();
-				foreach( $modules  as $key => $value ){
-					echo '<li><strong>'.strtolower($key).'</strong> &mdash; '.$value.'</li>';
-				} // end foreach
-			?>
+                $modules = Nerb::status();
+                foreach( $modules  as $key => $value ){
+                    echo '<li><strong>'.strtolower($key).'</strong> &mdash; '.$value.'</li>';
+                } // end foreach
+            ?>
 			</ul>
 		</code>
 	</div>
