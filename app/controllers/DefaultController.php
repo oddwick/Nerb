@@ -55,7 +55,9 @@ class DefaultController extends NerbController
 
         // fetch page object and add content to it
         $page = Nerb::fetch( 'Page' );
-        $page->noCache();
+
+        //$page->nocache();
+
         $page->title( $this->title );
         $page->content( PAGES.'/'.$content );
         
@@ -117,8 +119,6 @@ class DefaultController extends NerbController
         Nerb::jump( $content );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 
     #####################################################################
