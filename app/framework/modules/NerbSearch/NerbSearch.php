@@ -43,10 +43,10 @@ class NerbSearch
      * @access protected
      */
     protected $params = array(
-        'greedy_search' => true,
+        'greedy_search' => TRUE,
         'keyword_min_length' => 3,
-        'allow_html' => false, // allows html chars in search -- setting to false will also kill wildcard chars
-        'use_datatyping' => true, // this forces strict use_datatyping for keywords
+        'allow_html' => FALSE, // allows html chars in search -- setting to false will also kill wildcard chars
+        'use_datatyping' => TRUE, // this forces strict use_datatyping for keywords
     );
 
 
@@ -58,9 +58,9 @@ class NerbSearch
      * @var array
      * @access protected
      */
-    protected $excluded_words =  array(
-        'a','an','are','as','at','be','by','com','for','from','how',
-        'in','is','it','of','on','or','that','the','this','to','was','what','when','who','with','the'
+    protected $excluded_words = array(
+        'a', 'an', 'are', 'as', 'at', 'be', 'by', 'com', 'for', 'from', 'how',
+        'in', 'is', 'it', 'of', 'on', 'or', 'that', 'the', 'this', 'to', 'was', 'what', 'when', 'who', 'with', 'the'
     );
 
     /**
@@ -137,7 +137,7 @@ class NerbSearch
      * @var bool
      * @access protected
      */
-    protected $error = false;
+    protected $error = FALSE;
 
     /**
      * msg
@@ -160,13 +160,13 @@ class NerbSearch
      * @param string $table (default: NULL) name of the table searched
      * @return void
      */
-    public function __construct(string $search_string, string $table = null)
+    public function __construct(string $search_string, string $table = NULL)
     {
         //transfer globals
-		$this->params['greedy_search'] = GREEDY_SEARCH;
-		$this->params['keyword_min_length'] = KEYWORD_MIN_LENGTH;
-		$this->params['allow_html'] = ALLOW_HTML;
-		$this->params['use_datatyping'] = USE_DATATYPING;
+        $this->params['greedy_search'] = GREEDY_SEARCH;
+        $this->params['keyword_min_length'] = KEYWORD_MIN_LENGTH;
+        $this->params['allow_html'] = ALLOW_HTML;
+        $this->params['use_datatyping'] = USE_DATATYPING;
        
         // process search_string
         // trim off spaces from search string
@@ -176,7 +176,7 @@ class NerbSearch
         $this->keywords = $this->_splitKeywords($search_string);
 
         // catch html special characters if not allowed
-        if ($this->params['allow_html'] == false) {
+        if ($this->params['allow_html'] == FALSE) {
             $this->keywords = $this->_htmlChars($this->keywords);
         }
 
@@ -213,7 +213,7 @@ class NerbSearch
     {
         // error checking to ensure key exists
         if (!array_key_exists($key, $this->params)){
-	        throw new NerbError( 'The key <code>['.$key.']</code> is not a valid parameter' );
+            throw new NerbError( 'The key <code>['.$key.']</code> is not a valid parameter' );
         } // end if
         
         // get original value
@@ -242,7 +242,7 @@ class NerbSearch
     public function __get(string $key)
     {
         // returns value
-        return $this->params[ $key ];
+        return $this->params[$key];
        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -281,7 +281,7 @@ class NerbSearch
      * @param bool $replace (default = false)
      * @return NerbSearch
      */
-    public function stopWords(array $words, bool $replace = false) : NerbSearch
+    public function stopWords(array $words, bool $replace = FALSE) : NerbSearch
     {
         // replace list
         if ($replace) {
@@ -325,14 +325,14 @@ class NerbSearch
      */
     public function where(string $field, string $condition) : NerbSearch
     {
-        $this->conditions[ $field ] = $condition;
+        $this->conditions[$field] = $condition;
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
-   /**
+    /**
      * sort function.  sets the sort field and direction
      *
      * @access public
@@ -342,7 +342,7 @@ class NerbSearch
      */
     public function sort(string $field, string $dir = 'DESC') : NerbSearch
     {
-        $this->sort_field[ $field ] = $dir;
+        $this->sort_field[$field] = $dir;
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -363,7 +363,7 @@ class NerbSearch
     {
         // force lowercase
         $datatype = strtolower($datatype);
-        $this->search_fields[ $field ] = $datatype;
+        $this->search_fields[$field] = $datatype;
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -396,7 +396,7 @@ class NerbSearch
 
         // this sets the conditions, eg if a search field or other match must be made
         if ( !empty($this->conditions) ) {
-	        $condition = '';
+            $condition = '';
             // If there are keyword(s) AND required condition(s)
             foreach ($this->conditions as $field => $value) {
                 if (!empty($value)) {
@@ -410,19 +410,19 @@ class NerbSearch
 
         // if a table is given, returns a full sql statement, otherwise just the where clause
         if ($this->error) {
-            return false;
+            return FALSE;
         } elseif ($this->table) {
             $sql .= "SELECT * FROM `".$this->table."` WHERE ";
         }
 
         // append sort field if given
-        if ( !empty($this->sort_field) ) {
+        if (!empty($this->sort_field)) {
             $sql .= $this->_orderBy();
         }
 
         // pass the statement to $this
         $this->sql = $sql;
-        return true;
+        return TRUE;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -474,7 +474,7 @@ class NerbSearch
         if ($this->error) {
             return $this->msg;
         } else {
-            return false;
+            return FALSE;
         }
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -492,9 +492,9 @@ class NerbSearch
      */
     protected function _err($msg): bool
     {
-        $this->error = true;
+        $this->error = TRUE;
         $this->msg = $msg;
-        return false;
+        return FALSE;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -522,7 +522,7 @@ class NerbSearch
         // ALL possible results will be returned, so NOT keywords will be eliminated
         // from search parameters
 
-		$search = array();
+        $search = array();
 		
         // loop through search fields
         foreach ($this->search_fields as $field => $datatype) {
@@ -535,14 +535,14 @@ class NerbSearch
 
                 // if the keyword still exists after use_datatyping and does not contain {NOT} if greedy searching
                 if (!empty($keyword) &&
-                    ( !$this->greedy_search || ( $this->greedy_search && !preg_match('/{NOT}/', $keyword) ) )
+                    (!$this->greedy_search || ($this->greedy_search && !preg_match('/{NOT}/', $keyword)))
                 ) {
                     $hold[] = $this->_formatKeyword($field, $keyword);
                 }
             }// end foreach search_fields
 
             // implode the remaining results
-            $search[] = implode($this->greedy_search?' OR ':' AND ', $hold);
+            $search[] = implode($this->greedy_search ? ' OR ' : ' AND ', $hold);
             
             unset($hold);
         }// end foreach keywords
@@ -604,7 +604,7 @@ class NerbSearch
         // inelegant, but checks to see if keyword is NOT
         if (preg_match('/{NOT}/', $keyword)) {
             $keyword = preg_replace('/{NOT}/', '', $keyword);
-            $bool =     '{NOT}';
+            $bool = '{NOT}';
         }
 
         // check to see if a wildcard was used
@@ -614,8 +614,8 @@ class NerbSearch
         }
         
         // create datatyper
-        $type = new NerbDatatype( $datatype );
-        $keyword = $type->check( $keyword );
+        $type = new NerbDatatype($datatype);
+        $keyword = $type->check($keyword);
 
 
         if (empty($keyword)) {
@@ -651,7 +651,7 @@ class NerbSearch
 
         // convert the {COMMA} and {WHITESPACE} back within each row of $this->keywords
         foreach ($keywords as $key => $keyword) {
-            $keyword = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function ($plit) {
+            $keyword = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function($plit) {
                 return chr($plit[1]);
             }, $keyword);
             $keyword = preg_replace("/\{COMMA\}/", ",", $keyword);
@@ -659,7 +659,7 @@ class NerbSearch
         }
 
         // convert the {COMMA} and {WHITESPACE} back in $this->keywords
-        $keywords = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function ($plit) {
+        $keywords = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function($plit) {
             return chr($plit[1]);
         }, $keywords);
         $keywords = preg_replace("/\{COMMA\}/", ",", $keywords);
@@ -713,7 +713,7 @@ class NerbSearch
     protected static function transform(array $keyword) : string
     {
         // replace commas and whitespace with {PLACEHOLDERS}
-        $keyword[1] = preg_replace_callback("~(\s)~", function ($match) {
+        $keyword[1] = preg_replace_callback("~(\s)~", function($match) {
             return '{WHITESPACE-'.ord($match[1]).'}';
         }, $keyword[1]);
         $keyword = preg_replace("/,/", "{COMMA}", $keyword[1]);

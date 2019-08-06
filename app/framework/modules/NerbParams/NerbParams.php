@@ -62,7 +62,7 @@ class NerbParams
      * @param array $additional_params (default: array())
      * @return void
      */
-    public function __construct( string $ini, bool $read_sections = false, array $additional_params = array() )
+    public function __construct( string $ini, bool $read_sections = FALSE, array $additional_params = array() )
     {
         // error checking to make sure file exists
         // if the full path is given...
@@ -70,8 +70,8 @@ class NerbParams
             $ini_file = $ini;
 
         // if a relative path is given
-        } elseif (file_exists(APP_PATH.$path .'/'. $ini)) {
-            $ini_file = APP_PATH .'/'. $ini;
+        } elseif (file_exists(APP_PATH.$path.'/'.$ini)) {
+            $ini_file = APP_PATH.'/'.$ini;
 
         // blew it
         } else {
@@ -90,20 +90,20 @@ class NerbParams
             );
         }// end try
         
-		// make sure that the ini file was read
-		if ( empty( $this->params )) {
+        // make sure that the ini file was read
+        if ( empty( $this->params )) {
             throw new NerbError( 
                 'Configuration file <code>[$ini]</code> appears to be empty.'
-             );
-		}
+                );
+        }
 		
-		// and make sure that it was read properly and created an array
-		if ( !is_array( $this->params )) {
+        // and make sure that it was read properly and created an array
+        if ( !is_array( $this->params )) {
             throw new NerbError( 
                 'Could not parse configuration file <code>['.$ini.']</code>.<br /> 
 					Make that it is formatted properly and conforms to required standards. '
-             );
-		}
+                );
+        }
 		
         // convert dot notation to arrays and assign inital values to default array so that 
         // the default value can be retrieved if changed
@@ -144,9 +144,9 @@ class NerbParams
 
         // set new value
         if( is_array($this->params[$key])){
-	        $this->params[$key][] = $value;
+            $this->params[$key][] = $value;
         } else {
-	        $this->params[$key] = $value;
+            $this->params[$key] = $value;
         }
 
         // return old value
@@ -163,7 +163,7 @@ class NerbParams
      *  @param string $key
      *  @return mixed
      */
-    public function __get( string $key )
+    public function __get(string $key)
     {
         // returns value
         return $this->params[$key];
@@ -184,7 +184,7 @@ class NerbParams
     {
         // returns subkey value
         if( $subkey ){
-	        return $this->params[$key][$subkey];
+            return $this->params[$key][$subkey];
         }
         return $this->params[$key];
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -207,9 +207,9 @@ class NerbParams
 
         // set new value
         if( $subkey ){
-	        $this->params[$key][$subkey] = $value;
+            $this->params[$key][$subkey] = $value;
         } else {
-	        $this->__set( $key, $value );
+            $this->__set( $key, $value );
         }
 
         // return old value
@@ -227,7 +227,7 @@ class NerbParams
      *  @param      bool $replace (default = false)
      *  @return     NerbParams
      */
-    public function addParams( array $params, bool $replace = false ) : self
+    public function addParams( array $params, bool $replace = FALSE ) : self
     {
         // overwrite array if replace is true, otherwise merges arrays
         $this->params = $replace ? $params : array_merge($this->params, $params);
@@ -273,11 +273,11 @@ class NerbParams
         foreach ($data as $path => $value) {
             $temp = &$array;
             foreach (explode('.', $path) as $key) {
-                $temp =& $temp[$key];
+                $temp = & $temp[$key];
             }
             $temp = $value;
- 	        //if( is_array( $value ) ) $value = $this->parse( $value );
-       }
+                //if( is_array( $value ) ) $value = $this->parse( $value );
+        }
         return $config = $array;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -285,17 +285,17 @@ class NerbParams
 
 
     /**
-    *   Get all parameters at once
-    *
-    *   @access     public
-    *   @param      string $section
-    *   @return     array (the entire parameter array is returned)
-    */
+     *   Get all parameters at once
+     *
+     *   @access     public
+     *   @param      string $section
+     *   @return     array (the entire parameter array is returned)
+     */
     public function dump(string $section = '') : array
     {
         // if section is given
         if ($section) {
-            return $this->params[ $section ];
+            return $this->params[$section];
         } // return all values
         else {
             return $this->params;
@@ -305,36 +305,36 @@ class NerbParams
 
 	
 	
-	/**
-	 * globalize function.
-	 *
-	 * turns the non array elements of the params array into global constants
-	 * 
-	 * @access public
-	 * @return self
-	 */
-	public function globalize() : self
-	{
-		// cycle through ini and convert each key to UPERCASE constant
-		foreach( $this->params as $key => $value ){
-			if( !is_array( $value ) ){
-				define( strtoupper($key), $value ); 
-			}
-		} // end foreach
-		return $this;
-	}
+    /**
+     * globalize function.
+     *
+     * turns the non array elements of the params array into global constants
+     * 
+     * @access public
+     * @return self
+     */
+    public function globalize() : self
+    {
+        // cycle through ini and convert each key to UPERCASE constant
+        foreach( $this->params as $key => $value ){
+            if( !is_array( $value ) ){
+                define( strtoupper($key), $value ); 
+            }
+        } // end foreach
+        return $this;
+    }
 
 
 
 
     /**
-    *   Gets the default value for an option
-    *
-    *   @access     public
-    *   @param      string $key the key of the default value
-    *   @param      string $subkey the key of a secondary array
-    *   @return     mixed
-    */
+     *   Gets the default value for an option
+     *
+     *   @access     public
+     *   @param      string $key the key of the default value
+     *   @param      string $subkey the key of a secondary array
+     *   @return     mixed
+     */
     public function default( string $key, string $subkey = '' )
     {
         // with subkeys
@@ -348,17 +348,17 @@ class NerbParams
 
 
 
-	/**
-	 * debug function.
-	 * 
-	 * @access protected
-	 * @return void
-	 */
-	protected function debug(){
-		echo "<pre>";
-		print_r($this->params);
-		print_r($this->defaults);
-		die;
+    /**
+     * debug function.
+     * 
+     * @access protected
+     * @return void
+     */
+    protected function debug(){
+        echo "<pre>";
+        print_r($this->params);
+        print_r($this->defaults);
+        die;
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 	

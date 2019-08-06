@@ -67,7 +67,7 @@ class NerbTemplate
      * @var bool
      * @access protected
      */
-    protected $error = false;
+    protected $error = FALSE;
 
     /**
      * msg
@@ -95,7 +95,7 @@ class NerbTemplate
     {
         
         if( !file_exists($filename)){
-	        throw new NerbError( "" );
+            throw new NerbError( "" );
         }
         
         // process search_string
@@ -106,7 +106,7 @@ class NerbTemplate
         $this->keywords = $this->_splitKeywords($search_string);
 
         // catch html special characters if not allowed
-        if ($this->params['allow_html'] == false) {
+        if ($this->params['allow_html'] == FALSE) {
             $this->keywords = $this->_htmlChars($this->keywords);
         }
 
@@ -143,7 +143,7 @@ class NerbTemplate
     {
         // error checking to ensure key exists
         if (!array_key_exists($key, $this->params)){
-	        throw new NerbError( 'The key <code>['.$key.']</code> is not a valid parameter' );
+            throw new NerbError( 'The key <code>['.$key.']</code> is not a valid parameter' );
         } // end if
         
         // get original value
@@ -168,7 +168,7 @@ class NerbTemplate
     public function __get(string $key)
     {
         // returns value
-        return $this->params[ $key ];
+        return $this->params[$key];
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -206,7 +206,7 @@ class NerbTemplate
      * @param bool $replace (default = false)
      * @return NerbTemplate
      */
-    public function tags(array $tags, bool $replace = false) : NerbTemplate
+    public function tags(array $tags, bool $replace = FALSE) : NerbTemplate
     {
         // replace list
         if ($replace) {
@@ -273,7 +273,7 @@ class NerbTemplate
 
         // pass the statement to $this
         $this->sql = $sql;
-        return true;
+        return TRUE;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -300,7 +300,7 @@ class NerbTemplate
         if ($this->error) {
             return $this->msg;
         } else {
-            return false;
+            return FALSE;
         }
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -318,9 +318,9 @@ class NerbTemplate
      */
     protected function _err($msg): bool
     {
-        $this->error = true;
+        $this->error = TRUE;
         $this->msg = $msg;
-        return false;
+        return FALSE;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -340,13 +340,13 @@ class NerbTemplate
      * @return void
      */
     protected function replaceTags()
-	{
-	    foreach ($this->tags as $tag => $value) {
-	        $this->template = str_replace('{'.$tag.'}', $value, $this->template);
-	    }
+    {
+        foreach ($this->tags as $tag => $value) {
+            $this->template = str_replace('{'.$tag.'}', $value, $this->template);
+        }
 	 
-	    return true;
-	}
+        return true;
+    }
 
 
 

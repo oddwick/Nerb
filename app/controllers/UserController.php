@@ -21,25 +21,25 @@
 class UserController extends NerbController
 {
 
-	/**
-	 * title
-	 *
-	 * This is the default value for the page title
-	 * 
-	 * (default value: 'Nerb Application Framework')
-	 * 
-	 * @var string
-	 * @access protected
-	 */
-	protected $title = 'Nerb Application Framework';
+    /**
+     * title
+     *
+     * This is the default value for the page title
+     * 
+     * (default value: 'Nerb Application Framework')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $title = 'Nerb Application Framework';
 	
 	
 	
     /**
-    *   Container function for executing domain logic for this module
-    *
-    *   @access		public
-    */
+     *   Container function for executing domain logic for this module
+     *
+     *   @access		public
+     */
     public function route()
     {
         // this is a public controller
@@ -47,31 +47,33 @@ class UserController extends NerbController
         
         $this->defineStructure( array( 'page' ));
         
-		// create user object
-		Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'user' );
+        // create user object
+        Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'user' );
 		
         // action calls
-        if ( $this->action ) $this->action(); 
+        if ( $this->action ) {
+            $this->action();
+        }
                 
-		// fetch user object
-		//$user = Nerb::fetch( 'user' );
+        // fetch user object
+        //$user = Nerb::fetch( 'user' );
 		
-		// if user is logged in, allow access to private sections, 
-		// otherwise kick out to registration page
-		if( !$user->verify() ) 
-		{
+        // if user is logged in, allow access to private sections, 
+        // otherwise kick out to registration page
+        if( !$user->verify() ) 
+        {
             $content = $this->publicPages();
         } else {
-            $nav = true;
+            $nav = TRUE;
             $content = $this->privatePages();
         }
         
         $content = $this->publicPages();
 
         // fetch page object and add content to it
-        $page = Nerb::fetch( 'Page' );
-        $page->title( $this->title );
-        $page->content( PAGES.'/'.$content );
+        $page = Nerb::fetch('Page');
+        $page->title($this->title);
+        $page->content(PAGES.'/'.$content);
         
         return $this;
         
@@ -101,7 +103,7 @@ class UserController extends NerbController
      */
     protected function publicPages() : string
     {
-        switch ( $this->page ) {
+        switch ($this->page) {
             case 'forgotPass':
             default:
                 $page = $this->module.'/login.php';
@@ -121,21 +123,21 @@ class UserController extends NerbController
      */
     protected function action()
     {
-        switch ( $this->action ) {
+        switch ($this->action) {
             case 'login':
-		        $page = $this->login($_POST['user_name'], $_POST['user_pass']);
-				break;
+                $page = $this->login($_POST['user_name'], $_POST['user_pass']);
+                break;
             
             
             case 'logout':
-		        $this->logout();
+                $this->logout();
             
             default:
                 $page = '/';
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump( $content );
+        Nerb::jump($content);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -168,7 +170,7 @@ class UserController extends NerbController
 		$status =  $user->authenticate( $user_name, $user_pass );
 		
 		// sucessful authentication
-		if( $status[0] == true ){
+		if( $status[0] == TRUE ){
 			$page = '/?msg='.urlencode( 'Welcome Back' );
 		} 
 		
@@ -192,10 +194,10 @@ class UserController extends NerbController
 	*/
 	public function logout(): string
 	{
-		$user = Nerb::fetch( 'user' );
+		$user = Nerb::fetch('user');
 		$user->destroySession();
 		session_unset($_SESSION);
-		return( '/?msg=You+have+been+logged+out' );
+		return('/?msg=You+have+been+logged+out');
 		
 	}// end function		
 

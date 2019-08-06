@@ -46,11 +46,11 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   Constructor -- this object is only intended to be called by a Database object and is not for standing alone
-    *
-    *   @access     public
-    *   @return     void
-    */
+     *   Constructor -- this object is only intended to be called by a Database object and is not for standing alone
+     *
+     *   @access     public
+     *   @return     void
+     */
     public function __construct()
     {
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,12 +58,12 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   returns the current element of the rowset
-    *
-    *   @access     public
-    *   @param      int $index
-    *   @return     NerbDatabaseRow
-    */
+     *   returns the current element of the rowset
+     *
+     *   @access     public
+     *   @param      int $index
+     *   @return     NerbDatabaseRow
+     */
     public function __get( int $index )
     {
         return $this->rows[$index];
@@ -73,11 +73,11 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   returns a listing of columns
-    *
-    *   @access     public
-    *   @return     array
-    */
+     *   returns a listing of columns
+     *
+     *   @access     public
+     *   @return     array
+     */
     public function columns() : array
     {
         return $this->_columns;
@@ -87,13 +87,13 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   Adds a row to the rowset
-    *
-    *   @access     public
-    *   @param      NerbDatabaseRow $row NerbDatabaseRow object
-    *   @throws     NerbError
-    *   @return     self
-    */
+     *   Adds a row to the rowset
+     *
+     *   @access     public
+     *   @param      NerbDatabaseRow $row NerbDatabaseRow object
+     *   @throws     NerbError
+     *   @return     self
+     */
     public function add( $row ) : self
     {
         if ( $row instanceof NerbDatabaseRow || is_subclass_of( $row, 'NerbDatabaseRow' ) ) {
@@ -108,32 +108,32 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   returns count of rows in rowset
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   returns count of rows in rowset
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function count() : int
     {
-        return count( $this->rows );
+        return count($this->rows);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
     /**
-    *   returns the current element of the rowset
-    *
-    *   @access     public
-    *   @return     NerbDatabaseRow
-    */
+     *   returns the current element of the rowset
+     *
+     *   @access     public
+     *   @return     NerbDatabaseRow
+     */
     public function current()
     {
         // make sure that the pointer points to a valid row
-        if ( $this->valid() ) {
+        if ($this->valid()) {
             return $this->rows[$this->pointer];
         } else {
-            return false;
+            return FALSE;
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,25 +141,25 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   validates the position of the pointer
-    *
-    *   @access     public
-    *   @return     bool
-    */
+     *   validates the position of the pointer
+     *
+     *   @access     public
+     *   @return     bool
+     */
     public function valid() : bool
     {
-        return $this->pointer<count( $this->rows );
+        return $this->pointer < count($this->rows);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
     /**
-    *   advances the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   advances the pointer
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function next() : int
     {
         return ++$this->pointer;
@@ -169,11 +169,11 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   decrements the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   decrements the pointer
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function prev() : int
     {
         return --$this->pointer;
@@ -183,11 +183,11 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   returns the current position of the pointer
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   returns the current position of the pointer
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function key() : int
     {
         return $this->pointer;
@@ -197,26 +197,26 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   resets the pointer to 0
-    *
-    *   @access     public
-    *   @return     int
-    */
+     *   resets the pointer to 0
+     *
+     *   @access     public
+     *   @return     int
+     */
     public function rewind() : int
     {
-        return $this->pointer=0;
+        return $this->pointer = 0;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
     /**
-    *   fetches a specific row
-    *
-    *   @access     public
-    *   @param      int $key
-    *   @return     NerbDatabaseRow
-    */
+     *   fetches a specific row
+     *
+     *   @access     public
+     *   @param      int $key
+     *   @return     NerbDatabaseRow
+     */
     public function fetch( int $key )
     {
         if ( $this->valid( $key ) ) {
@@ -228,11 +228,11 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   returns the entire $rows as an array
-    *
-    *   @access     public
-    *   @return     array
-    */
+     *   returns the entire $rows as an array
+     *
+     *   @access     public
+     *   @return     array
+     */
     public function fetchAll() : array
     {
         return $this->rows;
@@ -242,15 +242,15 @@ class NerbDatabaseRowset implements Iterator
 
 
     /**
-    *   returns all data as an array
-    *
-    *   @access     public
-    *   @return     array
-    */
+     *   returns all data as an array
+     *
+     *   @access     public
+     *   @return     array
+     */
     public function fetchArray() : array
     {
         $rows = $this->fetchAll();
-        foreach ( $rows as $row ) {
+        foreach ($rows as $row) {
             $data[] = $row->__toArray();
         }
         return $data;

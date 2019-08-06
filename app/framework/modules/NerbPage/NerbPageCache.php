@@ -36,7 +36,7 @@ class NerbPageCache
 	 * @var int
 	 * @access protected
 	 */
-	protected $error = null;
+	protected $error = NULL;
 	
 
 	/**
@@ -47,7 +47,7 @@ class NerbPageCache
 	 * @var string
 	 * @access protected
 	 */
-	protected $page = null;
+	protected $page = NULL;
 
 	
 	/**
@@ -58,7 +58,7 @@ class NerbPageCache
 	 * @var string
 	 * @access protected
 	 */
-	protected $cache_dir = null;
+	protected $cache_dir = NULL;
 
 	
 	/**
@@ -69,7 +69,7 @@ class NerbPageCache
 	 * @var string
 	 * @access protected
 	 */
-	protected $filename = null;
+	protected $filename = NULL;
 	
 
     /**
@@ -84,9 +84,9 @@ class NerbPageCache
      */
     public function __construct( string $filename )
     {
-	    if( !is_dir(CACHE_DIR) ){
-		    throw new NerbError( "Cache directory <code>[".CACHE_DIR."]</code> is not a valid directory.  Check <code>[config.ini]</code> for proper configuration." );
-	    }
+        if( !is_dir(CACHE_DIR) ){
+            throw new NerbError( "Cache directory <code>[".CACHE_DIR."]</code> is not a valid directory.  Check <code>[config.ini]</code> for proper configuration." );
+        }
         $this->filename = $filename;
         return $this;
         
@@ -110,7 +110,7 @@ class NerbPageCache
      */
     public function displayCache() : string
     {
-	   return $this->cache;
+        return $this->cache;
 	   
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -136,11 +136,11 @@ class NerbPageCache
 	    	if( !$status ){
 				$log = new NerbLog( ERROR_LOG );
 				$log->write( 'Could not delete cache file: '.$file, 'ERROR' );
-		    	$error = true;
+		    	$error = TRUE;
 		    }
 	    } // end foreach
 	    
-	    return $error ? false : true;
+	    return $error ? FALSE : TRUE;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -161,16 +161,16 @@ class NerbPageCache
 	    
 	    if( file_exists( $file ) ){
 		    if ( @unlink( $file ) ){
-			    return true;
+			    return TRUE;
 		    } else {
 				$log = new NerbLog( ERROR_LOG );
 				$log->write( 'Could not delete cache file: '.$file, 'ERROR' );
-			    return false;
+			    return FALSE;
 		    }
 	    }
 	    
 	    // return false if file does not exist
-	    return false;
+	    return FALSE;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -190,7 +190,7 @@ class NerbPageCache
     {
 	    // ignore user abort to make sure that the cache is fully written to
 	    // prevent corrupted cache or code injection
-	    ignore_user_abort( true );
+	    ignore_user_abort( TRUE );
 	    
 	    // error checking
 	    if( !is_dir( CACHE_DIR ) ){
@@ -204,11 +204,11 @@ class NerbPageCache
 	    // write contents to directory	    
 	    $status = @file_put_contents( $file, $content );
 	    if( $status ){
-		    return true;
+		    return TRUE;
 	    } else {
 		    $log = new NerbLog( ERROR_LOG );
 		    $log->write( 'Could not write to cache file: '.$file, 'ERROR' );
-		    return false;
+		    return FALSE;
 	    }
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -236,14 +236,14 @@ class NerbPageCache
 	    	( file_exists( $file ) && CACHE_TTL == -1 ) || 
 			( file_exists( $file ) && filemtime( $file ) > ( time() - CACHE_TTL ) ) 
 		){
-	    	return true;			
+	    	return TRUE;			
 	    } // end if
 	    
 	    // housekeeping --
 	    // clean up expired cache files if past time
 	    $this->uncache();
 	    
-	    return false;
+	    return FALSE;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -263,7 +263,7 @@ class NerbPageCache
 	    $filename = CACHE_DIR.'/'.$this->filename;
 	    
 	    // check to see if the file exists and read it to the output buffer
-	    if( file_exists( $filename ) ){
+	    if (file_exists($filename)) {
 		    
 		    // send header
 		    header('Content-Type: text/html');
@@ -273,21 +273,21 @@ class NerbPageCache
 		    ob_start();
 		    // get file contents. readfile is more secure than include, prevents 
 		    // any embeded php from getting processed
-			readfile( $filename );
-		    if( DEBUG ){
+			readfile($filename);
+		    if (DEBUG) {
 			    echo '<pre>';
-			    echo 'Cached - expires: '.(date( "m.d.y H:i:s", filemtime( $filename ) + CACHE_TTL ));
+			    echo 'Cached - expires: '.(date("m.d.y H:i:s", filemtime($filename) + CACHE_TTL));
 			    echo '</pre>';
 			}
 			
 			//output buffer and clear
 			ob_flush();
 			ob_end_clean();
-			return true;		    
+			return TRUE;		    
 	    }
 	    
 	    // return false if the page was not read 
-	    return false;
+	    return FALSE;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

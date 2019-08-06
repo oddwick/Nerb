@@ -1,18 +1,18 @@
-<?PHP if( $_REQUEST['msg'] ){ ?>
+<?PHP if ($_REQUEST['msg']) { ?>
 <!-- begin message bar -->
 <div class="msg-bar no-margin" id="msg-bar">
 	<p>
 	<span class="material-icons md-light md-18 anchor close" data-close="msg-bar">close</span> 
-	<?= urldecode( $_REQUEST['msg'] ); ?>
+	<?= urldecode($_REQUEST['msg']); ?>
     </p>
 </div>
 <!-- end message bar -->
-<?PHP } elseif( $_REQUEST['error'] ){ ?>
+<?PHP } elseif ($_REQUEST['error']) { ?>
 <!-- begin error bar -->
 <div class="error-bar no-margin" id="error-bar">
 	<p>
 	<span class="material-icons md-light md-18 anchor close" data-close="error-bar">close</span> 
-	<?= urldecode( $_REQUEST['error'] ); ?>
+	<?= urldecode($_REQUEST['error']); ?>
      </p>
 </div>
 <!-- end error bar -->	
