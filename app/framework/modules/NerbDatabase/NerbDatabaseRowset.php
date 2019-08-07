@@ -132,10 +132,8 @@ class NerbDatabaseRowset implements Iterator
         // make sure that the pointer points to a valid row
         if ($this->valid()) {
             return $this->rows[$this->pointer];
-        } else {
-            return FALSE;
         }
-        
+                
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
