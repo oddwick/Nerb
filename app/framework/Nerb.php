@@ -37,7 +37,7 @@ class Nerb
      * 
      * @var mixed
      * @access public
-     * @static
+     *  @static
      */
     static public $url;
 
@@ -48,7 +48,7 @@ class Nerb
      * 
      * @var array
      * @access public
-     * @static
+     *  @static
      */
     static public $config = array();
 
@@ -59,7 +59,7 @@ class Nerb
      * 
      * @var array
      * @access private
-     * @static
+     *  @static
      */
     static private $registry = array();
 
@@ -70,7 +70,7 @@ class Nerb
      * 
      * @var array
      * @access private
-     * @static
+     *  @static
      */
     static private $path = array();
 
@@ -100,7 +100,7 @@ class Nerb
      *   @global     bool CATCH_EXCEPTIONS
      *   @global     bool CATCH_ERRORS
      *   @global     bool CATCH_FATAL_ERRORS
-     * 	@static
+     * 	 @static
      *   @return     void
      */
     public static function init()
@@ -178,7 +178,7 @@ class Nerb
      *   loads and parses .ini file
      *
      *   @access     private
-     * 	@static
+     * 	 @static
      * 	@param string $config
      *   @return     bool
      */
@@ -204,7 +204,7 @@ class Nerb
      *   loads additional config files specific to the app
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @return     bool
      */
     public static function addConfig( string $ini ) : bool
@@ -246,7 +246,7 @@ class Nerb
      * stops execution of the Nerb framework 
      *
      * @access public
-     * @static
+     *  @static
      * @param string $msg mesage to display in the event 
      * @return void
      */
@@ -271,12 +271,12 @@ class Nerb
      *   class for supressing errors - extends php error_handler
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      Exception $exception
      *   @return     void
      *   @throws     NerbError
      */
-    public static function error_handler( int $error_number, string $errstr, string $errfile, string $errline, array $errcontext )
+    public static function error_handler( int $error_number, string $errstr, string $errfile, string $errline )
     {
         if( !USE_ERROR_LOGGING ) return;
 
@@ -338,7 +338,7 @@ class Nerb
      *   the default error handler to make pretty error messages
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      Exception $exception
      *   @return     void
      *   @throws     NerbError
@@ -360,7 +360,7 @@ class Nerb
      * thrown.  If shutdown has been caused by a uncaught or fatal error, a NerbError is thrown
      * 
      * @access public
-     * @static
+     *  @static
      * @return void
      */
     public static function fatal_handler()
@@ -398,7 +398,7 @@ class Nerb
      *   places an object in the registry
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      object $object
      *   @param      string $handle
      *   @return     bool
@@ -435,7 +435,7 @@ class Nerb
      *   returns a list of registered classes in the registry
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @return     array
      */
     public static function listRegisteredObjects() : array
@@ -457,13 +457,13 @@ class Nerb
      *   determines if an object has been placed in the registry
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $handle
      *   @return     bool
      */
     public static function isRegistered( string $handle ) : bool
     {
-        return array_key_exists( $handle, self::$registry ) ? TRUE : FALSE;
+        return array_key_exists( $handle, self::$registry ) ? true : false;
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -474,7 +474,7 @@ class Nerb
      *   determines if class has been registered and returns the name of the object
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $class
      *   @return     mixed
      */
@@ -485,7 +485,7 @@ class Nerb
                 return $handle;
         }
 
-        return FALSE;
+        return false;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -498,7 +498,7 @@ class Nerb
      *   retrieves an object from the registry
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $handle
      *   @return     object
      *   @throws     NerbError
@@ -539,7 +539,7 @@ class Nerb
      *   it will search the paths specified in Nerb::$path.   If still not found, an exception will be thrown.
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $class (class name)
      *   @param      string $dir (directory default is ./app/lib if none is given)
      *   @return     bool
@@ -557,7 +557,7 @@ class Nerb
 
         // if the class was contained in the file, return true otherwise throw an error
         if ( class_exists( $class ) ) {
-            return TRUE;
+            return true;
         } else {
             throw new NerbError( 'Class <code>['.$class.']</code> was not contained in $class.php' );
         }
@@ -576,7 +576,7 @@ class Nerb
      *   it will search the paths specified in Nerb::$path.   If still not found, an exception will be thrown.
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $file (class name)
      *   @param      string $dir (directory default is ./app/lib if none is given)
      *   @return     mixed
@@ -606,8 +606,6 @@ class Nerb
             }
         }// end if
 
-        return FALSE;
-        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -618,7 +616,7 @@ class Nerb
      *   Autoloads a class definition for use
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $class
      *   @return     void
      *	@see		loadClass()
@@ -638,7 +636,7 @@ class Nerb
      * 	wraps a class name in a namespace wrapper
      * 
      * 	@access public
-     * 	@static
+     * 	 @static
      * 	@param string $name
      * 	@return string
      */
@@ -674,24 +672,22 @@ class Nerb
      *   else it will be appended to the end of the $path array
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $path
      *   @param      string $alias
      *   @throws     NerbError
-     *   @return     void
+     *   @return     bool
      */
     public static function setPath( string $path, string $alias = null ) : bool
     {
-
         // check to see if the path is a valid directory
-        if ( !is_dir( $path ) ) {
-                    throw new NerbError( 'Set path error -- <code>['.$path.']</code> is not a valid path.' );
+        if ( is_dir( $path ) ) {
+	        self::$path[$alias] = $path;
+	        return true;
+        } else {
+	        throw new NerbError( 'Set path error -- <code>['.$path.']</code> is not a valid path.' );
         }
         
-        self::$path[$alias] = $path;
-        
-        return TRUE;
-       
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -703,7 +699,7 @@ class Nerb
      *   returns the application path
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $alias
      *   @return     string
      */
@@ -722,7 +718,7 @@ class Nerb
      *   searches Nerb::$path for a file and returns the location of that file
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $file (file name)
      *   @return     mixed (file name on success, false on failure)
      */
@@ -734,7 +730,7 @@ class Nerb
             }// end if
         }// end foreach
 
-        return FALSE;
+        return false;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -755,7 +751,7 @@ class Nerb
      *   Jumps to a new page.  probably the single most important function in this file
      *
      *   @access     public
-     * 	@static
+     * 	 @static
      *   @param      string $url (The url of page that is being jumpped to)
      *   @return     void
      */
@@ -774,7 +770,6 @@ class Nerb
         }
 
         exit;
-        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
