@@ -79,7 +79,7 @@ class Nerb
      * Singleton Pattern prevents multiple instances of Nerb.  all calls must be made statically e.g. Nerb::function(  args  );
      *
      *   @access     protected
-     * 	@final
+     * 	 @final
      *   @return     void
      */
     final protected function __construct()
@@ -376,12 +376,10 @@ class Nerb
             // throw error and die
             throw new NerbError( $error['message'], $error['trace'] );
             die;
-        }
-	    
-        if( DEBUG ){
+        } elseif( DEBUG ){
             echo '<pre>Rendered in '.(microtime()-RENDER).'ms</pre>';
         }
-    }
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
     #################################################################
@@ -440,6 +438,8 @@ class Nerb
      */
     public static function listRegisteredObjects() : array
     {
+        $reg = array();
+        
         foreach (self::$registry as $handle => $object) {
             $reg[$handle] = get_class($object); 
         }
@@ -619,7 +619,7 @@ class Nerb
      * 	 @static
      *   @param      string $class
      *   @return     void
-     *	@see		loadClass()
+     *	 @see		 loadClass()
      */
     public static function autoload( string $class )
     {
@@ -636,7 +636,7 @@ class Nerb
      * 	wraps a class name in a namespace wrapper
      * 
      * 	@access public
-     * 	 @static
+     * 	@static
      * 	@param string $name
      * 	@return string
      */
@@ -785,7 +785,8 @@ class Nerb
     /**
      *   Returns the current configuration of Nerb and lists current constants
      *
-     *   @access     protected
+     *   @access     public
+     * 	 @static
      *   @return     string
      */
     public static function status() : array
@@ -804,8 +805,9 @@ class Nerb
     /**
      *   Returns a list of the currently loaded modules
      *
-     *   @access     protected
-     *   @return     string
+     *   @access     public
+     * 	 @static
+     *   @return     array
      */
     public static function modules() : array
     {
@@ -829,7 +831,8 @@ class Nerb
     /**
      *   Debugging function will dump the value of a formatted variable and dies if needed
      *
-     *   @access     protected
+     *   @access     public
+     * 	 @static
      *   @param      mixed $var variable to be inspected
      *   @param      bool $die (if true, then kills the script after printing varible)
      *   @param      string $title (name to display if using multiple inspections)
