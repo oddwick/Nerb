@@ -243,40 +243,10 @@ class NerbTemplate
      * @access public
      * @return string
      */
-/*
     public function render()
     {
-        // error checking
-        // check to make sure search string is not empty
-        if (!$this->search_string) {
-            return $this->_err("Nothing to search for");
-
-        // make sure that minimum search string length is achieved
-        } elseif (strlen($this->search_string) <= $this->keyword_min_length) {
-            return $this->_err("Search must be greater than ".$this->keyword_min_length." characters");
-        }
-
-        // strip stop words
-        $this->keywords = $this->_stripStopWords($this->keywords);
-
-        // format keywords into a usable sql statement
-        $search = $this->_formatSearch($this->keywords);
-
-        // this sets the conditions, eg if a search field or other match must be made
-        if ($this->conditions) {
-            // If there are keyword(s) AND required condition(s)
-            foreach ($this->conditions as $field => $value) {
-                if (!empty($value)) {
-                    $condition .= "`$field` LIKE '$value' AND ";
-                }
-            }
-        } // end if conditions
-
-        // pass the statement to $this
-        $this->sql = $sql;
-        return;
+        return '';
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-*/
 
 
 
