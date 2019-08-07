@@ -34,7 +34,7 @@ class NerbSchema
     /**
      * database
      * 
-     * @var mysqli
+     * @var NerbDatabase
      * @access protected
      */
     protected $database;
