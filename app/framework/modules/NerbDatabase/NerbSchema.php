@@ -120,7 +120,7 @@ class NerbSchema
     public function backup( string $table, string $dir )
     {
 	    // error check to make sure table exists
-	    if( !$this->isTable( $table ) ) {
+	    if( !$this->database->isTable( $table ) ) {
 	        throw new NerbError( "Table <code>[$table]</code> does not exist in database" );
 	    }
 	    
