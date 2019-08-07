@@ -68,7 +68,7 @@ abstract class NerbController
      * @var mixed
      * @access protected
      */
-    protected $action = NULL;
+    protected $action = null;
     
     /**
      * set
@@ -78,7 +78,7 @@ abstract class NerbController
      * @var mixed
      * @access protected
      */
-    protected $set = NULL;
+    protected $set = null;
     
     /**
      * toggle
@@ -88,7 +88,7 @@ abstract class NerbController
      * @var mixed
      * @access protected
      */
-    protected $toggle = NULL;
+    protected $toggle = null;
     
     /**
      * params
@@ -140,7 +140,7 @@ abstract class NerbController
      * @var mixed
      * @access protected
      */
-    protected $return_page = NULL;
+    protected $return_page = null;
     
     /**
      * url
@@ -170,7 +170,7 @@ abstract class NerbController
      * @var bool
      * @access protected
      */
-    protected $debug = FALSE; //true;
+    protected $debug = false; //true;
     
     /**
      * title
@@ -404,9 +404,9 @@ abstract class NerbController
      *   e.g if the url scheme is /module/node/var0/var1/var2
      *   then getNode( 0 ) would return var0 with a node index of 2
      *
-     *   @access		public
-     *   @param      int node
-     *   @return     this
+     *   @access	public
+     *   @param     int node
+     *   @return    this
      */
     public function setNodeIndex( int $node ) : self
     {
@@ -421,9 +421,9 @@ abstract class NerbController
     /**
      *   returns the raw node value
      *
-     *   @access		public
-     *   @param      int node
-     *   @return     string
+     *   @access public
+     *   @param int node
+     *   @return string
      */
     public function node( int $node = 0 )
     {
@@ -437,9 +437,9 @@ abstract class NerbController
     /**
      *   alias of $this->node() returns indexed nodes
      *
-     *   @access		public
-     *   @param      int node
-     *   @return     string
+     *   @access	public
+     *   @param     int node
+     *   @return    string
      */
     public function getNode( int $node = 0 )
     {
@@ -453,9 +453,8 @@ abstract class NerbController
     /**
      *   sets the beginning node index for a url
      *
-     *   @access		public
-     *   @param      int node
-     *   @return     int
+     *   @access	public
+     *   @return    int
      */
     public function getNodeCount() :int
     {
@@ -473,7 +472,7 @@ abstract class NerbController
      *   @access     public
      *   @param      array options
      *   @throws     NerbError
-     *   @return     object self
+     *   @return     self
      */
     public function setOptions( array $options )
     {
@@ -501,7 +500,7 @@ abstract class NerbController
      *
      *   @access     public
      *   @param      string node
-     *   @return     object self
+     *   @return     self
      */
     public function setNode( string $node ) : self
     {
@@ -518,7 +517,7 @@ abstract class NerbController
      *
      *   @access     public
      *   @param      string action
-     *   @return     object self
+     *   @return     self
      */
     public function setAction( string $action ) : self
     {
@@ -600,23 +599,6 @@ abstract class NerbController
 
 	
     /**
-     *   alias of defineStructure
-     *
-     *   @access     public
-     *   @param      array $params
-     *   @return     NerbRouter
-     */
-    public function mapNodes( array $structure ) : self
-    {
-        $this->defineStructure( $structure );
-        return $this;
-		
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
      *   assigns a structure to the parsed url so that it can be called by name vs node#
      *
      *   @access     public
@@ -642,7 +624,7 @@ abstract class NerbController
      *
      *   @access     public
      *   @param      array $params
-     *   @return     NerbRouter
+     *   @return     array
      */
     public function urlReady( array $input ) : array
     {
