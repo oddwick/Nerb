@@ -241,8 +241,9 @@ class NerbTemplate
      * renders the page template
      *
      * @access public
-     * @return string bool on error
+     * @return string
      */
+/*
     public function render()
     {
         // error checking
@@ -273,8 +274,9 @@ class NerbTemplate
 
         // pass the statement to $this
         $this->sql = $sql;
-        return TRUE;
+        return;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+*/
 
 
 
