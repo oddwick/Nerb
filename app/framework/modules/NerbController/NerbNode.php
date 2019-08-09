@@ -46,10 +46,10 @@ class NerbNode
      * @param string $path_to_controller
      * @param string $mode
      * @param int $node
-     * @param array $options (default: array())
-     * @return void
+     * @param int $offset (default: 0)
+     * @return NerbController
      */
-    public static function controller(string $path_to_controller, string $mode, int $node, array $options = array())
+    public static function controller(string $path_to_controller, string $mode, int $node, int $offset = 0 ) : NerbController
     {
         // load required controller class for the router
         Nerb::loadclass('NerbController');
@@ -58,7 +58,7 @@ class NerbNode
         $controller = self::loadController($path_to_controller, self::getController());
 
         // returns a new controller
-        return new $controller($mode, $node, $options);
+        return new $controller( $mode, $node, $offset );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ class NerbNode
      *   @static
      *   @return     string
      */
-    protected static function getController(): string
+    protected static function getController() : string
     {
         // clean up the path
         $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
@@ -99,7 +99,7 @@ class NerbNode
      * @param string $controller
      * @return string
      */
-    private static function loadController( string $path_to_controller, string $controller ): string
+    private static function loadController( string $path_to_controller, string $controller ) : string
     {
         // build a path to the controller
         $controller_file = $path_to_controller.'/'.$controller.'.'.DEFAULT_FILE_EXTENSION;
@@ -135,7 +135,7 @@ class NerbNode
      *   @access     public
      *   @return     object self
      */
-    public function debug() :self
+    public function debug() : self
     {
         echo '<pre><code>[';
         echo '<strong>Controller</strong> - '.self::controller.'\n';
