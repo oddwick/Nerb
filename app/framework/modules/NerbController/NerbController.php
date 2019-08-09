@@ -211,7 +211,7 @@ abstract class NerbController
      *
      *   @access		public
      */
-    abstract function privatePages();
+    abstract protected function privatePages();
     /*
 		this is where your domain logic goes.
 	*/
