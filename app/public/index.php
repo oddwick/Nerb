@@ -61,5 +61,3 @@
     //Nerb::session();
 	
     exit();
-
-?>
