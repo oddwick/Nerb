@@ -48,7 +48,15 @@ abstract class NerbController
      * @var mixed
      * @access protected
      */
-    protected $controller; // the name of the controller
+    protected $controller;
+    
+    /**
+     * url
+     * 
+     * @var NerbUrl
+     * @access protected
+     */
+    protected $url;
     
     /**
      * params
@@ -177,7 +185,6 @@ abstract class NerbController
      * 
      * 	@access protected
      * 	@abstract
-     * 	@return void
      */
     abstract public function route();
     /*
