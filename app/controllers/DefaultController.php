@@ -39,17 +39,19 @@ class DefaultController extends NerbController
     /**
      *   Container function for executing domain logic for this module
      *
-     *   @access		public
+     *   @access public
+     *   @return self
      */
-    public function route()
+    public function route() : self
     {
         // this is a public controller
         $title = '';
         
-        $this->defineStructure( array( 'page' ));
+        // define page structure for the controller
+        $this->url->defineStructure( array( 'page') );
         
         // action calls
-        if ( $this->action ) {
+        if ( $this->url->action ) {
             $this->action();
         }
         
@@ -91,8 +93,16 @@ class DefaultController extends NerbController
      */
     protected function publicPages() : string
     {
-        switch ($this->page) {
-            case 'forgotPass':
+       switch ($this->page) {
+	        
+            case 'privacy':
+            	$page = '/default/privacy.php';
+            	break;
+            	
+            case 'terms':
+            	$page = '/default/terms.php';
+            	break;
+            	
             default:
                 $page = 'default.php';
         }// end switch
