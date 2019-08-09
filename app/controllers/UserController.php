@@ -45,7 +45,7 @@ class UserController extends NerbController
         // this is a public controller
         $title = '';
         
-        $this->defineStructure( array( 'page' ));
+        $this->url->defineStructure( array( 'page' ));
         
         // create user object
         Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'user' );
