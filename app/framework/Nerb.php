@@ -377,7 +377,7 @@ class Nerb
             throw new NerbError( $error['message'], $error['trace'] );
             die;
         } elseif( DEBUG ){
-            echo '<pre>Rendered in '.(microtime()-RENDER).'ms</pre>';
+	        Nerb::debug();
         }
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -759,16 +759,9 @@ class Nerb
     {
         global $HTTP_USER_AGENT;
 
-        // if no url is given, the it is assumed that a jump to root url ( / ) is intended
+       // if no url is given, the it is assumed that a jump to root url ( / ) is intended
         $url = (  !$url  ) ? '/' : $url;
-
-        // this is a microsoft refresh BUG
-        if ( strstr( strtolower( $HTTP_USER_AGENT ), 'msie' ) ) {
-            Header( 'Location: $url' );
-        } else {
-            echo "<META HTTP-EQUIV='Refresh' CONTENT=\"0; URL='$url' />".PHP_EOL;
-        }
-
+        Header( "Location: $url" );
         exit;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -787,7 +780,7 @@ class Nerb
      *
      *   @access     public
      * 	 @static
-     *   @return     string
+     *   @return     array
      */
     public static function status() : array
     {
@@ -797,6 +790,25 @@ class Nerb
             $config[$key] =  str_replace( APP_PATH, '..', $value );
         }
         return $config;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	    
+
+    /**
+     *   Returns the current configuration of Nerb and lists current constants
+     *
+     *   @access     public
+     * 	 @static
+     *   @return     void
+     */
+    public static function debug()
+    {
+	    echo '<pre>';
+        echo 'Rendered in '.(microtime()-RENDER).'ms'.PHP_EOL;
+	    print_r($_SESSION);
+	    print_r($_COOKIE);
+	    echo '</pre>';
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
