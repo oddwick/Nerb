@@ -78,7 +78,17 @@ class DefaultController extends NerbController
      */
     protected function privatePages()
     {
+/*
+       switch ( $this->page ) {
+	        
+            case '':
+            	
+            default:
+                $page = 'default.php';
+        }// end switch
+        
         return $page;
+*/
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
