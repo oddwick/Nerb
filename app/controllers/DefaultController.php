@@ -123,7 +123,7 @@ class DefaultController extends NerbController
      */
     protected function action()
     {
-        switch ($this->action) {
+        switch ( $this->url->action() ) {
             default:
                 $page = '/';
         }// end switch
