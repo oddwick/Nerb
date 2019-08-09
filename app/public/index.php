@@ -49,19 +49,16 @@
 	
     //require_once APP_PATH.'/public/playground.php';
 	
-    // set the token and parse the url from html strings
-    $options = array(
-        'node_index' => 0
-    );
-
     // create a controller
-    $controller = NerbNode::controller( CONTROLLERS, URL_MODE, 0, $options );
+    $controller = NerbNode::controller( CONTROLLERS, URL_MODE, 0 );
 
     // rout and display page
     $controller->route();
 	
     // display the page
     $page->render();
+    
+    //Nerb::session();
 	
     exit();
 
