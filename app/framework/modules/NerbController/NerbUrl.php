@@ -86,7 +86,7 @@ abstract class NerbUrl
      * @var string
      * @access protected
      */
-    protected $action;
+    protected $action = '';
     
     /**
      * return_page
@@ -94,7 +94,7 @@ abstract class NerbUrl
      * @var string
      * @access protected
      */
-    protected $return_page;
+    protected $return_page = '';
     
     /**
      * controller
@@ -341,6 +341,20 @@ abstract class NerbUrl
 
 
 
+    /**
+     * action function.
+     * 
+     * @access public
+     * @return string
+     */
+    public function action() : string
+    {
+	    return $this->action;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+	
     /**
      * handler for set calls
      *
