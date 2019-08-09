@@ -47,7 +47,7 @@ class NerbUrlKeyValue extends NerbUrl
         for( $i = 0; $i < count($parts); $i += 2){
 	        $hold[ $parts[$i] ] = $parts[ $i+1 ];
         }
-        $this->params = $hold;
+        $this->attribs = $hold;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
