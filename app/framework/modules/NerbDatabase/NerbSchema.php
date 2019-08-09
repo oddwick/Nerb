@@ -85,7 +85,7 @@ class NerbSchema
      * 
      * @access public
      * @param string $sql_file
-     * @return bool
+     * @return int
      * @throws NerbError
      */
     public function sqlFromFile( string $sql_file ) : int
@@ -343,16 +343,14 @@ class NerbSchema
      *
      * @access public
      * @param string $table
-     * @return int rows affected
+     * @return int (rows affected)
      */
     public function emptyTable( string $table ) : int
     {
         // sets query string
         $query = "TRUNCATE `$table`";
         
-        $result = $this->database->execute( $query );
-        
-        return $this->database->affected_rows();
+        return $this->database->execute( $query );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
