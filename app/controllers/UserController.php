@@ -42,9 +42,6 @@ class UserController extends NerbController
      */
     public function route()
     {
-        // this is a public controller
-        $title = '';
-        
         $this->url->defineStructure( array( 'page' ));
         
         // create user object
@@ -99,9 +96,10 @@ class UserController extends NerbController
      * The pages called here are public and can be seen by anyone
      * 
      * @access protected
-     * @return void
+     * @property string $page
+     * @return string
      */
-    protected function publicPages() : string
+    protected function publicPages()
     {
         switch ($this->page) {
             case 'forgotPass':
@@ -119,15 +117,15 @@ class UserController extends NerbController
      * This is where actions are performed. a jump is performed on the completion of an action
      * 
      * @access protected
+     * @property string $action
      * @return void
      */
     protected function action()
     {
         switch ($this->action) {
             case 'login':
-                $page = $this->login($_POST['user_name'], $_POST['user_pass']);
+                $page = $this->login($_REQUEST['user_name'], $_REQUEST['user_pass']);
                 break;
-            
             
             case 'logout':
                 $this->logout();
@@ -137,7 +135,7 @@ class UserController extends NerbController
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump($content);
+        Nerb::jump($page);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -161,7 +159,7 @@ class UserController extends NerbController
 	 * @param mixed $user_pass
 	 * @return void
 	 */
-	protected function login( string $user_name, string $user_pass ): string
+	protected function login( string $user_name, string $user_pass ) : string
 	{
 		
 		$user = Nerb::fetch( 'User' );
@@ -176,7 +174,7 @@ class UserController extends NerbController
 		
 		// failed authentication
 		else {
-			$page = $this->return_page.'?error='.urlencode( $status[1] );
+			$page = $this->url->return_page().'?error='.urlencode( $status[1] );
 		}
 		
 		return $page;	
@@ -192,7 +190,7 @@ class UserController extends NerbController
 	*	@access		protected
 	*	@return		string
 	*/
-	public function logout(): string
+	public function logout() : string
 	{
 		$user = Nerb::fetch('user');
 		$user->destroySession();
