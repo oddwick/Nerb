@@ -42,11 +42,8 @@ class DefaultController extends NerbController
      *   @access public
      *   @return self
      */
-    public function route() : self
+    public function route()
     {
-        // this is a public controller
-        $title = '';
-        
         // define page structure for the controller
         $this->url->defineStructure( array( 'page') );
         
@@ -75,11 +72,13 @@ class DefaultController extends NerbController
     /**
      * The pages called here require the user to be logged in to view them
      *
-     * @access         protected
-     * @return         string
+     * @access protected
+     * @property string $page
+     * @return string
      */
-    protected function privatePages() : string
+    protected function privatePages()
     {
+        return $page;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -89,11 +88,12 @@ class DefaultController extends NerbController
      * The pages called here are public and can be seen by anyone
      * 
      * @access protected
-     * @return void
+     * @property string $page
+     * @return string
      */
-    protected function publicPages() : string
+    protected function publicPages()
     {
-       switch ($this->page) {
+       switch ( $this->page ) {
 	        
             case 'privacy':
             	$page = '/default/privacy.php';
@@ -118,6 +118,7 @@ class DefaultController extends NerbController
      * This is where actions are performed. a jump is performed on the completion of an action
      * 
      * @access protected
+     * @property string $action
      * @return void
      */
     protected function action()
@@ -128,7 +129,7 @@ class DefaultController extends NerbController
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump($content);
+        Nerb::jump($page);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
