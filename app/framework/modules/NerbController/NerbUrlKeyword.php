@@ -40,7 +40,7 @@ class NerbUrlKeyword extends NerbUrl
      */
     public function parse()
     {
-        $this->params = explode( KEYWORD_SEPARATOR, $this->url);   
+        $this->attribs = explode( KEYWORD_SEPARATOR, $this->url);   
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -57,8 +57,9 @@ class NerbUrlKeyword extends NerbUrl
      */
     public function defineStructure( array $structure ) : self
     {
+	    $count = count( $structure);
         //add additional index so that params can be accessed by index and name
-        for( $i = 0;  $i < count( $structure); $i++ ){
+        for( $i = 0;  $i < $count; $i++ ){
             $this->attribs[ $structure[$i] ] = $this->attribs[$i];
         }
 
