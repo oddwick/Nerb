@@ -175,10 +175,8 @@ abstract class NerbUrl
         // check to see if structure masking is set and verify that value exists
         if( STRUCTURE_MASKING && !empty( $_SESSION['mask_values'][$node] )){
             return  $_SESSION['mask_values'][$node];
-        } elseif( !empty( $this->attribs[$node] )){
+        } else{
             return $this->attribs[$node];
-        } else  {
-            return $this->params[$node];
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -265,9 +263,9 @@ abstract class NerbUrl
      *   e.g if the url scheme is /module/node/var0/var1/var2
      *   then getNode( 0 ) would return var0 with a node index of 2
      *
-     *   @access	public
-     *   @param     int offset
-     *   @return    this
+     *   @access public
+     *   @param int offset
+     *   @return this
      */
     public function setNodeOffset( int $offset ) : self
     {
@@ -298,8 +296,8 @@ abstract class NerbUrl
     /**
      *   sets the beginning node index for a url
      *
-     *   @access	public
-     *   @return    int
+     *   @access public
+     *   @return int
      */
     public function getNodeCount() : int
     {
