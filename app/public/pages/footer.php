@@ -13,6 +13,7 @@
 			</div>
 			
 			<div class="cell small-12 medium-4 right">
+				<a rel="license" href="/">Home</a> | 
 				<a rel="license" href="/privacy">Privacy</a> | 
 				<a rel="license" href="/terms">Terms &amp; Conditions</a>
 			</div>

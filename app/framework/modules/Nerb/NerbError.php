@@ -79,10 +79,11 @@ class NerbError extends \Exception
     {
 
         // fire the constructor for the default error class
-        parent::__construct( $message, $code );
+        parent::__construct( $message );
+        //trigger_error( strip_tags( $message ), E_USER_ERROR );
+        
         
         // trip error for logging purposes
-        trigger_error( strip_tags( $message ), E_USER_ERROR );
 
         // sets the error message
         $this->message = $message;
@@ -91,7 +92,8 @@ class NerbError extends \Exception
         // ERROR_LEVEL is set in the Nerb_conf file.
 
         //gets the trace data that lead up to the error
-        $this->trace = $trace ? $trace : debug_backtrace();
+        $this->trace = $trace ? $trace : $this->getTrace();
+        //$this->trace = $trace ? $trace : debug_backtrace();
         
         //array_shift ( $this->trace );
         $this->trace = array_reverse( $this->trace );
@@ -100,7 +102,9 @@ class NerbError extends \Exception
         if( !SHOW_FULL_PATH ){
             $this->message = $this->cleanPath( $this->message );
         }
-
+		
+        $this->log( $this->trace[0], $this->message);
+        
         // set page elements
         // include the default nerb framework css sheet wrapped in a style tag
         // for inserting inline into the header
@@ -108,7 +112,7 @@ class NerbError extends \Exception
 
         // renders the error
         echo $this->render();
-
+        
         // mic drop - and we're outta here...
         die();
         
@@ -176,6 +180,32 @@ class NerbError extends \Exception
         return '<h2>Message</h2><p>'.$this->message.'</p>';        
         
     }// end function
+
+
+
+
+    /**
+     * log function.
+     * 
+     * @access protected
+     * @param array $trace
+     * @param string $msg
+     * @param string $prefix (default: 'ERROR')
+     * @return void
+     */
+    protected function log( array $trace, string $msg, string $prefix = 'ERROR' )
+	{
+        // create error string
+        $error = $this->cleanPath($trace['file']) . ' (' . $trace['line'] . ') -- ' .$msg.' --  nerb error';
+        
+        // log error to file
+        // WARNING | ERROR | NOTICE [date] file (line) string
+        $log = new NerbLog( ERROR_LOG );
+        $log->write( $error , $prefix );
+			
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 

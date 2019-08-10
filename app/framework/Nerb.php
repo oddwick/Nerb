@@ -154,13 +154,13 @@ class Nerb
         self::loadClass( 'NerbError' );
         
         // sets the default exception handler for all uncaught errors
-        if( CATCH_EXCEPTIONS ) set_exception_handler( array('Nerb', 'exception_handler'));
+        set_exception_handler( ['NerbHandler', 'exception_handler']);
 		
         // sets the default error handler to catch all errors
-        if( CATCH_ERRORS ) set_error_handler( array('Nerb', 'error_handler'));
+        set_error_handler( ['NerbHandler', 'error_handler']);
 		
-        // sets the default error handler to catch all errors
-        if( CATCH_FATAL_ERRORS ) register_shutdown_function( array('Nerb', 'fatal_handler'));
+        // sets the default error handler to catch fatal errors
+        //register_shutdown_function( ['Nerb', 'fatal_handler']);
 		
         // begin output buffering
         ob_start();
@@ -232,14 +232,6 @@ class Nerb
 
 
 
-    #################################################################
-
-    //      !Exceptions, Errors & logs
-
-    #################################################################
-
-
-
     /**
      * halt function.
      * 
@@ -264,95 +256,6 @@ class Nerb
 		
 
 
-
-    /**
-     *   error_handler function.
-     * 
-     *   class for supressing errors - extends php error_handler
-     *
-     *   @access     public
-     * 	 @static
-     *   @param      Exception $exception
-     *   @return     void
-     *   @throws     NerbError
-     */
-    public static function error_handler( int $error_number, string $errstr, string $errfile, string $errline )
-    {
-        if( !USE_ERROR_LOGGING ) return;
-
-
-        // determines if full path is shown or masked with APP_PATH
-        if ( !SHOW_FULL_PATH ) {
-            $errfile = str_ireplace(FRAMEWORK, '', $errfile);
-        } 
-		
-        // switch through error number to determine error type and 
-        // whether or not it is logged
-        switch ( $error_number ){
-			
-            case 1:
-            case 256:
-                if( LOG_ALL_ERRORS == false ) return;
-                $prefix = 'ERROR ';
-                break;
-				
-            case 2:
-            case 512:
-                if( LOG_ALL_WARNINGS == false ) return;
-                $prefix = 'WARNING ';
-                break;
-			
-            case 4:
-                $prefix = 'PARSE ';
-                break;
-			
-            case 8:
-            case 1024:
-                if( LOG_ALL_NOTICE == false ) return;
-                $prefix = 'NOTICE ';
-                break;
-			
-            default:
-                $prefix = 'OTHER';
-                break;				
-        }// end switch
-		
-        // create error string
-        // WARNING | ERROR | NOTICE [date] file (line) string
-        $error = $errfile . ' (' . $errline . ') -- ' .$errstr;
-		
-		
-        // log error to file
-        $log = new NerbLog( ERROR_LOG );
-        $log->write( $error , $prefix );
-			
-				
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-	
-    /**
-     *   exception_handler function.
-     * 
-     *   the default error handler to make pretty error messages
-     *
-     *   @access     public
-     * 	 @static
-     *   @param      Exception $exception
-     *   @return     void
-     *   @throws     NerbError
-     */
-    public static function exception_handler( $exception ) : void
-    {
-        //throws a general error for all uncaught exceptions
-        throw new NerbError( '<strong>Uncaught exception -> </strong> '.$exception->getMessage(), $exception->getTrace() );
-		
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
     /**
      * fatal_handler function.
      *
@@ -367,8 +270,9 @@ class Nerb
     {
         // check to see if shutdown is because of an error
         $error = error_get_last();
-	
-        if( $error !== null) {
+		
+        if( !empty( $error ) ) {
+        die;
 	    
             // send the array to NerbError for formatting
             $error = NerbError::format( $error ); 
@@ -376,10 +280,15 @@ class Nerb
             // throw error and die
             throw new NerbError( $error['message'], $error['trace'] );
             die;
+            
         } elseif( DEBUG ){
 	        Nerb::debug();
         }
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 
     #################################################################
