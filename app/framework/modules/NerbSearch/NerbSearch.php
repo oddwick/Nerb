@@ -279,9 +279,9 @@ class NerbSearch
      * @access public
      * @param array $words
      * @param bool $replace (default = false)
-     * @return NerbSearch
+     * @return self
      */
-    public function stopWords(array $words, bool $replace = FALSE) : NerbSearch
+    public function stopWords(array $words, bool $replace = FALSE) : self
     {
         // replace list
         if ($replace) {
@@ -301,12 +301,12 @@ class NerbSearch
      *
      * @access public
      * @param string $word
-     * @return NerbSearch
+     * @return self
      */
-    public function stopWord(string $word) : NerbSearch
+    public function stopWord(string $word) : self
     {
         // add to list
-        $this->excluded_words[] = $words;
+        $this->excluded_words[] = $word;
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -321,9 +321,9 @@ class NerbSearch
      * @access public
      * @param string $field
      * @param string $condition
-     * @return NerbSearch
+     * @return self
      */
-    public function where(string $field, string $condition) : NerbSearch
+    public function where(string $field, string $condition) : self
     {
         $this->conditions[$field] = $condition;
         return $this;
@@ -338,9 +338,9 @@ class NerbSearch
      * @access public
      * @param string $field
      * @param string $dir (default: 'DESC')
-     * @return NerbSearch
+     * @return self
      */
-    public function sort(string $field, string $dir = 'DESC') : NerbSearch
+    public function sort(string $field, string $dir = 'DESC') : self
     {
         $this->sort_field[$field] = $dir;
         return $this;
@@ -357,9 +357,9 @@ class NerbSearch
      * @access public
      * @param string $field
      * @param string $datatype (default: 'string')
-     * @return NerbSearch
+     * @return self
      */
-    public function field(string $field, string $datatype = 'string') : NerbSearch
+    public function field(string $field, string $datatype = 'string') : self
     {
         // force lowercase
         $datatype = strtolower($datatype);
@@ -384,15 +384,15 @@ class NerbSearch
             return $this->_err("Nothing to search for");
 
         // make sure that minimum search string length is achieved
-        } elseif (strlen($this->search_string) <= $this->keyword_min_length) {
-            return $this->_err("Search must be greater than ".$this->keyword_min_length." characters");
+        } elseif (strlen($this->search_string) <= $this->params['keyword_min_length']) {
+            return $this->_err("Search must be greater than ".$this->params['keyword_min_length']." characters");
         }
 
         // strip stop words
         $this->keywords = $this->_stripStopWords($this->keywords);
 
         // format keywords into a usable sql statement
-        $search = $this->_formatSearch($this->keywords);
+        $search = $this->_formatSearch( $this->keywords );
 
         // this sets the conditions, eg if a search field or other match must be made
         if ( !empty($this->conditions) ) {
@@ -513,9 +513,9 @@ class NerbSearch
      * 
      * @access protected
      * @param array $keywords
-     * @return mixed
+     * @return string
      */
-    protected function _formatSearch(array $keywords)
+    protected function _formatSearch(array $keywords) : string
     {
         // Greedy search (match any keywords)
         // note boolean NOT will not work with greedy searches, otherwise
@@ -535,14 +535,14 @@ class NerbSearch
 
                 // if the keyword still exists after use_datatyping and does not contain {NOT} if greedy searching
                 if (!empty($keyword) &&
-                    (!$this->greedy_search || ($this->greedy_search && !preg_match('/{NOT}/', $keyword)))
+                    (!$this->params['greedy_search'] || ($this->params['greedy_search'] && !preg_match('/{NOT}/', $keyword)))
                 ) {
                     $hold[] = $this->_formatKeyword($field, $keyword);
                 }
             }// end foreach search_fields
 
             // implode the remaining results
-            $search[] = implode($this->greedy_search ? ' OR ' : ' AND ', $hold);
+            $search[] = implode($this->params['greedy_search'] ? ' OR ' : ' AND ', $hold);
             
             unset($hold);
         }// end foreach keywords
@@ -564,11 +564,13 @@ class NerbSearch
      * _formatKeyword function.
      *
      * @access protected
-     * @param string keyword
+     * @param string $keyword
      * @return string
      */
     protected function _formatKeyword(string $field, string $keyword) : string
     {
+        $not = '';
+        
         // if keyword is {NOT} create NOT RLIKE statement else return rlike
         if (preg_match('/{NOT}/', $keyword)) {
             $keyword = preg_replace('/{NOT}/', '', $keyword);
@@ -584,8 +586,8 @@ class NerbSearch
      * _datatype function.
      *
      * @access protected
-     * @param string keyword
-     * @param string datatype
+     * @param string $keyword
+     * @param string $datatype
      * @return string
      *
      * @todo figure out bool datatype
@@ -597,7 +599,7 @@ class NerbSearch
         $bool = NULL;
         
         // if use_datatyping is not used, then escape the keyword and return
-        if (!$this->use_datatyping) {
+        if (!$this->params['use_datatyping']) {
             return $this->_escapeDB($keyword);
         }
 
@@ -633,9 +635,9 @@ class NerbSearch
      *
      * @access protected
      * @param string $search_string
-     * @return array
+     * @return string
      */
-    protected function _splitKeywords(string $search_string) : array
+    protected function _splitKeywords(string $search_string) : string
     {
         // wildcard searches: Replace * or ? with %
         $search_string = str_replace('*', '{?}', str_replace('?', '{?}', $search_string));
@@ -708,7 +710,7 @@ class NerbSearch
      *
      * @access protected
      * @param array $keyword
-     * @return void
+     * @return string
      */
     protected static function transform(array $keyword) : string
     {
