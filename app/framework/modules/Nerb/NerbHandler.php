@@ -23,7 +23,20 @@
 class NerbHandler
 {
 
-    protected static $prefix = array( 
+    protected static $prefix = array(
+	    E_ERROR => 'FATAL',
+	    E_CORE_ERROR => 'FATAL',
+	    E_COMPILE_ERROR => 'FATAL',
+	    E_PARSE => 'FATAL',
+	    E_USER_ERROR => 'ERROR',
+	    E_RECOVERABLE_ERROR => 'ERROR',
+	    E_WARNING => 'WARNING',
+	    E_CORE_WARNING => 'WARNING',
+	    E_COMPILE_WARNING => 'WARNING',
+	    E_USER_WARNING => 'WARNING',
+	    E_NOTICE => 'NOTICE',
+	    E_USER_NOTICE => 'NOTICE',
+	    E_STRICT => 'DEBUG',
         0 => 'OTHER ',
         1 => 'ERROR ',
         2 => 'WARNING ',
@@ -66,47 +79,15 @@ class NerbHandler
      */
     public static function error_handler( int $error_number, string $error_message, string $error_file, string $error_line )
     {
-      //return;
+        if( !LOG_ALL_ERRORS ) return;
+        
         // determines if full path is shown or masked with APP_PATH
-        if ( !SHOW_FULL_PATH ) {
-            $error_file = self::cleanPath( $error_file );
-        } 
+        $error_file = self::cleanPath( $error_file );
 		
         // create error string
         $error = $error_file . ' (' . $error_line . ') -- ' .$error_message;
         
-		switch ($error_number) {
-		    case E_ERROR:
-		    case E_CORE_ERROR:
-		    case E_COMPILE_ERROR:
-		    case E_PARSE:
-		        if( LOG_ALL_ERRORS ) self::log($error, "fatal");
-		        break;
-		        
-		    case E_USER_ERROR:
-		    case E_RECOVERABLE_ERROR:
-		        if( LOG_ALL_ERRORS ) self::log($error, "error");
-		        break;
-		        
-		    case E_WARNING:
-		    case E_CORE_WARNING:
-		    case E_COMPILE_WARNING:
-		    case E_USER_WARNING:
-		        if( LOG_ALL_WARNINGS )self::log($error, "warn");
-		        break;
-		        
-		    case E_NOTICE:
-		    case E_USER_NOTICE:
-		         if( LOG_ALL_NOTICE ) self::log($error, "info");
-		        break;
-		        
-		    case E_STRICT:
-		        self::log($error, "debug");
-		        break;
-		        
-		    default:
-		        if( LOG_ALL_WARNINGS ) self::log($error, "warn");
-		}
+		self::log($error, self::$prefix[$error_number]);
 		
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,10 +106,10 @@ class NerbHandler
      *   @return     void
      *   @throws     NerbError
      */
-    public static function exception_handler( $exception ) : void
+    public static function exception_handler( $exception )
     {
         //throws a general error for all uncaught exceptions
-        //throw new NerbError( '<strong>Uncaught exception -> </strong> '.$exception->getMessage(), $exception->getTrace() );
+        throw new NerbError( '<strong>Uncaught exception -> </strong> '.$exception->getMessage(), $exception->getTrace() );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -150,6 +131,7 @@ class NerbHandler
         
         // log error to file
         // WARNING | ERROR | NOTICE [date] file (line) string
+        Nerb::loadClass( 'NerbLog' );
         $log = new NerbLog( ERROR_LOG );
         $log->write( $message , strtoupper($prefix) );
 			

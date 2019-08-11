@@ -57,26 +57,16 @@ class NerbParams
      *  Constructor initiates Param object
      * 
      * @access public
-     * @param string $ini
+     * @param string $ini_file
      * @param bool $read_sections (default: false)
      * @param array $additional_params (default: array())
-     * @return void
+     * @return self
      */
-    public function __construct( string $ini, bool $read_sections = FALSE, array $additional_params = array() )
+    public function __construct( string $ini_file, bool $read_sections = FALSE, array $additional_params = array() )
     {
-        // error checking to make sure file exists
-        // if the full path is given...
-        if (file_exists($ini)) {
-            $ini_file = $ini;
-
-        // if a relative path is given
-        } elseif (file_exists(APP_PATH.$path.'/'.$ini)) {
-            $ini_file = APP_PATH.'/'.$ini;
-
-        // blew it
-        } else {
-            throw new NerbError('Could not locate given configuration file <code>'.$ini.'</code> using: <br><code>'.$path.'</code><br><code>APP_PATH'.$path.'</code>');
-        }
+        
+        // find the ini file
+        $ini_file = $this->configExists( $ini_file);
 
         // load and parse ini file and distribute variables
         // the user changeable variables will end up in $params and the defaults will be kept in $defaults
@@ -109,7 +99,6 @@ class NerbParams
         // the default value can be retrieved if changed
         $this->defaults = $this->params = $this->parse($this->params);
         
-        //$this->debug();
         
         // auto loading array at construction
         // -----------------------------------------------------------------------
@@ -120,9 +109,10 @@ class NerbParams
             $this->addParams($additional_params);
         } // end if empty array
 
-        // for debugging
-        //Nerb::inspect(  $this->params, true  );
-
+		// for debugging
+		//$this->debug();
+		//NerbDebug::inspect(  $this->params, true  );
+		
         return $this;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -133,11 +123,11 @@ class NerbParams
      *  setter function.
      *
      *  @access public
-     *  @param mixed $key
+     *  @param string $key
      *  @param mixed $value
-     *  @return old
+     *  @return mixed
      */
-    public function __set( string $key, string $value ) : string
+    public function __set( string $key, string $value )
     {
         // get original value
         $old = $this->params[$key];
@@ -178,15 +168,13 @@ class NerbParams
      * @access public
      * @param string $key
      * @param string $subkey (default: '')
-     * @return string
+     * @return mixed
      */
-    public function get( string $key, string $subkey = '' ) : string
+    public function get( string $key, string $subkey = '' )
     {
         // returns subkey value
-        if( $subkey ){
-            return $this->params[$key][$subkey];
-        }
-        return $this->params[$key];
+        return empty( $subkey ) ? $this->params[$key] : $this->params[$key][$subkey];
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -214,6 +202,32 @@ class NerbParams
 
         // return old value
         return $old;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * configExists function.
+     * 
+     * @access public
+     * @param string $ini_file
+     * @throws NerbError
+     * @return string (found file name)
+     */
+    public function configExists( string $ini_file ) : string
+    {
+        // error checking to make sure file exists
+        // if the full path is given...
+        if ( !file_exists($ini_file) && !file_exists(APP_PATH.$path.( substr($file, 0, 1) == '/' ? '' : '/').$ini_file)) {
+            throw new NerbError("Could not locate given configuration file <code>{$ini}</code> using: <br><code>{$path}</code><br><code>{APP_PATH}/{$path}</code>");
+        }
+            
+        $ini_file = file_exists($ini_file) ? $ini_file : APP_PATH.$path.( substr($file, 0, 1) == '/' ? '' : '/').$ini_file;
+        
+        return $ini_file;
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -225,7 +239,7 @@ class NerbParams
      *  @access     public
      *  @param      array $params
      *  @param      bool $replace (default = false)
-     *  @return     NerbParams
+     *  @return     self
      */
     public function addParams( array $params, bool $replace = FALSE ) : self
     {
@@ -245,7 +259,7 @@ class NerbParams
      *  @access     public
      *  @param      string $key
      *  @param      string $value
-     *  @return     NerbParams
+     *  @return     self
      */
     public function addParam(string $key, string $value) : self
     {
@@ -276,7 +290,6 @@ class NerbParams
                 $temp = & $temp[$key];
             }
             $temp = $value;
-                //if( is_array( $value ) ) $value = $this->parse( $value );
         }
         return $config = $array;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -291,15 +304,11 @@ class NerbParams
      *   @param      string $section
      *   @return     array (the entire parameter array is returned)
      */
-    public function dump(string $section = '') : array
+    public function dump( string $section = '' ) : array
     {
-        // if section is given
-        if ($section) {
-            return $this->params[$section];
-        } // return all values
-        else {
-            return $this->params;
-        } // end if
+        // if section is given, return specific section, otherwise the whole params
+        return empty($section) ? $this->params : $this->params[$section];
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -338,11 +347,8 @@ class NerbParams
     public function default( string $key, string $subkey = '' )
     {
         // with subkeys
-        if ($subkey) {
-            return $this->defaults[ $key ][ $subkey ];
-        } else {
-            return $this->defaults[ $key ];
-        }
+        return empty($subkey) ? $this->defaults[ $key ] : $this->defaults[ $key ][ $subkey ];
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -358,7 +364,7 @@ class NerbParams
         echo "<pre>";
         print_r($this->params);
         print_r($this->defaults);
-        die;
+        echo "</pre>";
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 	

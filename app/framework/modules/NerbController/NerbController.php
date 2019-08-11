@@ -40,7 +40,7 @@ abstract class NerbController
      * @var string
      * @access protected
      */
-    protected $mode = 'key-value';
+    protected $mode = 'rest';
 
     /**
      * controller

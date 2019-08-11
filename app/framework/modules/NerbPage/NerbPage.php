@@ -94,7 +94,7 @@ class NerbPage
      * @var bool
      * @access protected
      */
-    protected $preprocess = true;
+    protected $page_preprocess = true;
 
     /**
      * browser_fail
@@ -623,18 +623,8 @@ class NerbPage
 	    // if the page has a content header, include it
 	    if( $this->content_header ) require $this->content_header;
 	    
-	    // if there is an error or there is no content, then include the error page 
-	    if( $this->error || ( empty( $this->content ) && $this->use_error_pages )){
-	    	$this->error_page( $this->error );
-	    } else {   
-			foreach( $this->content as $value ){
-		    	if( $this->preprocess ){
-					echo $value;
-			    } else {
-				    require $value;
-			    } // end if
-			} // end foreach
-	    }// end if
+	    // add page content
+	    $this->includePageContent();
 	    
 	    // add content footer
 	    if( $this->content_footer ) require $this->content_footer;
@@ -664,6 +654,33 @@ class NerbPage
 
 
 
+    /**
+     * includePageContent function.
+     * 
+     * @access protected
+     * @return void
+     */
+    protected function includePageContent() 
+    {
+		// if there is an error or there is no content, then include the error page 
+	    if( $this->error || ( empty( $this->content ) && $this->use_error_pages )){
+	    	$this->error_page( $this->error );
+	    	return;
+	    } 
+	    
+	     
+		foreach( $this->content as $value ){
+	    	if( $this->page_preprocess ){
+				echo $value;
+		    } else {
+			    require $value;
+		    } 
+		}
+		
+	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
     /**
      * content function.
@@ -685,8 +702,7 @@ class NerbPage
 		}
 	    
 	    // add content to the array
-		$this->content[] = $this->preprocess ? $this->preprocess( $content ) : $content;
- 		
+		$this->content[] = $this->page_preprocess ? $this->preprocess( $content ) : $content;
 		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -740,12 +756,12 @@ class NerbPage
      */
     public function header( string $filename ) : self
     {
-		if( file_exists($filename) ){
-			$this->content_header = $filename;
-			return $this;
-		} else {
+		if( !file_exists($filename) ){
 			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
 		}
+		
+		$this->content_header = $filename;
+		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -763,12 +779,12 @@ class NerbPage
      */
     public function footer( string $filename ) : self
     {
-		if( file_exists($filename) ){
-			$this->content_footer = $filename;
-			return $this;
-		} else {
+		if( !file_exists($filename) ){
 			throw new NerbError( 'Could not locate resource <code>'.$filename.'</code>' );
 		}
+		
+		$this->content_footer = $filename;
+		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -950,12 +966,11 @@ class NerbPage
 	 */
 	public function attrib( string $property, string $value ) : self
 	{
-        if( property_exists( $this, $property ) ){
-			$this->$property = $value;
-        } else {
+        if( !property_exists( $this, $property ) ){
 	       throw new NerbError( "The property <code>[$property]</code> does not exist.  Check your page.ini for proper spelling and syntax." ); 
         }
         
+		$this->$property = $value;
 		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -972,7 +987,6 @@ class NerbPage
      */
     public function equiv( string $title, string $value ) : self
     {
-	    
 	    $this->http_equiv[$title] = $value;
 	    return $this;
 	    

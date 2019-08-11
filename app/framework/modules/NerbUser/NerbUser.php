@@ -104,34 +104,8 @@ class NerbUser
     public function __construct( string $table, string $id_field, string $user_name_field, string $pass_field, array $params = array() )
     {
 		
-        // error checking
-        if ($table){
-            $this->table = $table;
-        } else {
-            throw new NerbError('Required parameter <code>{string $table}</code> not defined.');
-        }
-		
-        if($id_field){
-            $this->id_field = $id_field;
-        } else{
-            throw new NerbError('Required parameter <code>{string $id_field}</code> not defined.');
-        }
-		
-        if($user_name_field){
-            $this->user_name_field = $user_name_field;
-        } else{
-            throw new NerbError('Required parameter <code>{string $user_name_field}</code> not defined.');
-        }
-		
-        if($pass_field){
-            $this->pass_field = $pass_field;
-        } else {
-            throw new NerbError('Required parameter <code>{string $pass_field}</code> not defined.');
-        }
-
-
         // add params if given
-        if( $params ){
+        if( !empty($params) ){
             $this->params = array_merge( $this->params, $params);
         }
 		
@@ -210,7 +184,7 @@ class NerbUser
 			)';
 			
         $database = Nerb::fetch( $this->database );
-        $database->query( $query );
+        $database->execute( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -240,7 +214,7 @@ class NerbUser
 			)';
 			
         $database = Nerb::fetch( $this->database );
-        $database->query( $query );
+        $database->execute( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -260,7 +234,7 @@ class NerbUser
 	 * 
 	 * @access protected
 	 * @param mixed $user_id
-	 * @return void
+	 * @return string
 	 */
 	protected function createSession($user_id)
 	{
@@ -378,10 +352,10 @@ class NerbUser
 	*	logs all login attempts to the database
 	*
 	*	@access		protected
-	*	@param 		int user_id
-	*	@param 		string userName
-	*	@param 		string msg
-	*	@param 		bool status default is false
+	*	@param 		int $user_id
+	*	@param 		string $user_name
+	*	@param 		string $msg
+	*	@param 		bool $status (default: false)
 	*	@return		void
 	*/
 	protected function logAttempt(int $user_id, string $user_name, string $msg, bool $status = false)
@@ -413,7 +387,8 @@ class NerbUser
 			    $msg = 'FAIL '.$msg;
 			}
 			$msg .= '; uid='.$user_id.' uname='.$user_name.' ['.$_SERVER['REMOTE_ADDR'].']';
-			$status = Nerb::log( ACCESS_LOG, $msg );
+			$log = new NerbLog( ACCESS_LOG );
+			$log->log( $msg );
 		}
 		
 		return;
@@ -466,9 +441,7 @@ class NerbUser
 			
 			// log attempt to the log file
 			$this->logAttempt($user->user_id, $user_name, 'user authenticated', true);
-			
 			$session_id = $this->createSession($user->user_id);
-			// jump to home page
 			return array(true, $session_id);
 			
 		} else {
@@ -514,7 +487,12 @@ class NerbUser
 		// fetch session data from table
 		$session = $sessions->fetchRow('`selector` = \''.$_SESSION['auth'].'\'');
 
-		return $session->expires > time() && hash_equals($session->hash, hash('sha256', $_COOKIE['token'])) ? true : false;
+		if( $session->expires > time() && hash_equals($session->hash, hash('sha256', $_COOKIE['token'] ) ) ){
+			return true;
+		} else {
+			return false;
+		}
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -523,8 +501,8 @@ class NerbUser
 	/**
 	*	logs a user out
 	*
-	*	@access		protected
-	*	@return		string
+	*	@access	protected
+	*	@return	string
 	*/
 	public function logout() : string
 	{

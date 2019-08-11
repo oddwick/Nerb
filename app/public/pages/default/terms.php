@@ -65,55 +65,6 @@
             <li>or upload, post, e-mail or otherwise transmit any material that contains software viruses or any other computer code, files or programs designed to interrupt, destroy or limit the functionality of any computer software, network, hardware, or telecommunications equipment.</li>
         </ol>
 
-        <p>In addition, this site is strictly for personal use.&nbsp; Any person attempting to use this site for anything other than personal use or:</p>
-
-        <ol>
-            <li>as an agent, representative, or otherwise under the direction of Faulkner, Garmhausen, Keister &amp; Shenk, Amos Advantage Press Incorporated or any other individual, group, corporation, nonprofit, or association acting on their behalf, whether paid, unpaid, or as an unsolicited individual providing information at their bequest; or</li>
-
-            <li>as an individual whether acting independently or at the direction of another, whether paid or unpaid, with the intent of using or providing information gained in the use of this site for the purpose of prosecution or the attempt of halting the production of this site; or</li>
-
-            <li>any other individual, organization, nonprofit, group, collective, firm, corporation, or association using this site for any other purpose other than personal use and whose actions result in legal proceedings; or</li>
-
-            <li>any other use of this site that is for a purpose other than personal, non-commercial enjoyment</li>
-        </ol>
-
-        <p>shall be considered fraudulent usage.&nbsp; As a condition of the use of this site, you agree in full understanding that fraudulent use is strictly forbidden and you also agree that you will be liable in full for, but not limited, to the following:</p>
-
-        <ol>
-            <li>ANY and ALL legal expenses incurred as a result of any proceedings brought as a result of fraudulent use,
-
-                <ol type="a">
-                    <li>regardless of the outcome, verdict, disposition, or dismissal of the proceedings, and</li>
-
-                    <li>regardless of the forum of the proceedings, whether in court, arbitrated, or negotiated, and</li>
-
-                    <li>any miscellaneous legal fees incurred, including but not limited to: notarizing, filing, and or court costs; and</li>
-                </ol>
-            </li>
-
-            <li>ANY financial obligations incurred as a levied as result of a judgment, fine, penalty, sanction, fee, settlement, verdict, decision, adjudication, ruling, pronouncement, decree, finding or agreement, whether by way of judgment, jury verdict, arbitration, or settlement; and</li>
-
-            <li>ANY direct or indirect expenses relating to jurisdictional issues, including but not limited to, travel, food, and lodging; and</li>
-
-            <li>ANY medical expenses as a result of legal proceedings, including but not limited to:
-
-                <ol>
-                    <li>medical treatment sought as a result of anxiety or stress related disorders brought on by said proceedings; and</li>
-
-                    <li>prescriptions medications for treatment of any disorders that develop as a result of stress, sleep deprivation, anxiety, phobias, or nervous tension; and</li>
-
-                    <li>any continuing treatment of incurred illnesses beyond the duration of legal proceedings, regardless of of the outcome, verdict, or disposition of the case; and</li>
-
-                    <li>any medical co-payments, insurance premiums, or other medical expenses incurred during the illness; and</li>
-                </ol>
-            </li>
-
-            <li>ANY loss of wages, salaries, tips, deposits, lost contracts, or any other expenses that are a direct result of legal proceedings; and</li>
-
-            <li>ANY financial compensation deemed reasonable by judge or jury for hardship and or suffering as a direct result of legal proceedings.</li>
-        </ol>
-
-        <p>Failure to read the terms, failure to understand the terms, or poor financial standing shall not be considered an affirmative defense.</p>
 
         <h3>Links to Other Sites</h3>
 

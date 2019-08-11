@@ -6,16 +6,16 @@
 <footer>
 	<div class="grid-container">
 		<div class="grid-x grid-padding-x">
-			<div class="cell small-12 medium-8">
+			<div class="cell small-12 medium-6">
 				<p>
 					&copy; <?= SITE_COPYRIGHT_BEGIN ? SITE_COPYRIGHT_BEGIN.'-' : NULL; ?><?= date("Y", time()).' '.SITE_COPYRIGHT; ?>, All rights reserved
 				</p>
 			</div>
 			
-			<div class="cell small-12 medium-4 right">
+			<div class="cell small-12 medium-6 right">
 				<a rel="license" href="/">Home</a> | 
-				<a rel="license" href="/privacy">Privacy</a> | 
-				<a rel="license" href="/terms">Terms &amp; Conditions</a>
+				<a rel="license" href="/privacy">Sample Privacy</a> | 
+				<a rel="license" href="/terms">Sample Terms &amp; Conditions</a>
 			</div>
 			
 		</div>

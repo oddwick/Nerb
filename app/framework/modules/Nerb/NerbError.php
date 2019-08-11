@@ -199,6 +199,7 @@ class NerbError extends \Exception
         $error = $this->cleanPath($trace['file']) . ' (' . $trace['line'] . ') -- ' .$msg.' --  nerb error';
         
         // log error to file
+        Nerb::loadClass( 'NerbLog' );
         // WARNING | ERROR | NOTICE [date] file (line) string
         $log = new NerbLog( ERROR_LOG );
         $log->write( $error , $prefix );

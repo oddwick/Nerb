@@ -37,17 +37,19 @@
 	
     // initialize framework and include application config as app.ini
     Nerb::init();
-    Nerb::addConfig( '/config/app.ini' );
+    Nerb::loadConfig( '/config/app.ini' );   
 	
     // create a page object with an ini file
     Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );
+    
+    //require_once APP_PATH.'/public/playground.php';
+    
 	
     // connect to the database
     // initialize & register tables
     Nerb::register( $database = new NerbDatabase( 'Database', $DB ), 'Database' );
     $Users = $database->table('users');
 	
-    //require_once APP_PATH.'/public/playground.php';
 	
     // create a controller
     $controller = NerbNode::controller( CONTROLLERS, URL_MODE, 0 );

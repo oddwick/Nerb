@@ -11,28 +11,16 @@ $(window).on('load', function () {
 	// modal trigger
 	$( "[data-modal-id]" ).click(function(event) {
 		$( "#" + $(this).attr('data-modal-id') ).fadeIn();
-		//if( $(event.target).attr('class') == 'modal-window' ) {
-			//$( this ).fadeOut();
-		//}   
 		centerModal();
 	});
 		
 	$( "[data-modal-close]" ).click(function(event) {
-		if( $(this).parent().parent().attr('class') == 'modal-window' ){
-			$(this).parent().parent().fadeOut("fast");
-		} else if( $(this).attr('data-modal-close') != '' ){
-			$("#"+$(this).attr('data-modal-close') ).fadeOut("fast");
-		}
+		$("#"+$(this).attr('data-modal-close') ).fadeOut("fast");
 	});
 		
 	$( "[data-alert-close]" ).click(function(event) {
-		if( $(this).attr('data-alert-close') != '' ){
-			$("#"+$(this).attr('data-alert-close') ).fadeOut("fast");
-		} else {
-			$(this).parent().fadeOut("fast");
-		}
+		$("#"+$(this).attr('data-alert-close') ).fadeOut("fast");
 	});
-		
 		
  });	
 
@@ -52,7 +40,7 @@ function centerModal(){
 	    my: "center",
 	    at: "center",
 	    of: window,
-	    using: function (pos, ext) {
+	    using: function (pos) {
 	        $(this).animate({ top: pos.top }, "fast", "linear" );
 	    }
 	});
