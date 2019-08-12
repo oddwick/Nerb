@@ -42,12 +42,12 @@ class NerbSchema
     /**
      * tables
      * 
-     * (default value: '')
+     * (default value: array())
      * 
-     * @var string
+     * @var array
      * @access protected
      */
-    protected $tables = '';
+    protected $tables = array();
 
 
 
@@ -56,21 +56,13 @@ class NerbSchema
      *
      *   @access     public
      *   @param      NerbDatabase $database
-     *   @return     NerbDatabaseSchema
+     *   @return     self
      *   @throws     NerbError
      */
     public function __construct( NerbDatabase &$database )
     {
-        // if a NerbDatabase is given, bind to it and contiune
-        if ( $database instanceof NerbDatabase || is_subclass_of( $database, 'NerbDatabase' ) ) {
-            // fetch the database name for later retrival
-            $this->database = $database;
-        } else {
-                throw new NerbError( 'Database adaptor <code>[$database]</code> must be a <code>[NerbDatabase]</code> object.  <code>['.get_class( $database ).']</code> object was passed.' );
-        } // end if
-		
+        $this->database = $database;
         $this->tables = $this->showTables();
-
         return $this;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,24 +126,22 @@ class NerbSchema
 		$file = $dir.'/'.$filename;
 		
 		if( USE_EXEC_BACKUP ){
+			$credentials = $this->database->credentials();
 			// create credentials
-	        $host = $this->params['connection']['host'];
-	        $user = $this->params['connection']['user'];
-	        $pass = base64_decode( $this->params['connection']['pass'] );
-	        $database = $this->params['connection']['name'];
+	        $host = $credentials['host'];
+	        $user = $credentials['user'];
+	        $pass = base64_decode( $credentials['pass'] );
+	        $database = $credentials['name'];
 			
 			// esecute mysql command line dump
 			exec("mysqldump --user={$user} --password={$pass} --host={$host} {$database} {$table} --result-file={$file} 2>&1", $output);
-			return true;
+			return $filename;
 			
-		} else{
-			// run query and return the contrived filename on success
-			if( $this->database->query( "SELECT * INTO OUTFILE '$file' FROM $table" ) ){
-				return $filename;
-			} else {
-				return false;
-			}
-		} // end if
+		} 
+		
+		// run query and return the contrived filename on success
+		$this->database->query( "SELECT * INTO OUTFILE '$file' FROM $table" ) ){
+		return $filename;
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -202,13 +192,14 @@ class NerbSchema
     public function showCreateTable( string $table ) : string
     {
         // error check to make sure table exists
-        if( $this->database->isTable( $table ) ){
-            // fetch result and return create table statement
-            $result = mysqli_fetch_assoc( $this->database->query("SHOW CREATE TABLE `$table`") );
-            return $result['Create Table'];
-        } else {
+        if( !$this->database->isTable( $table ) ){
             throw new NerbError( "Table <code>[$table]</code> does not exist in database" );
         }
+        
+        // fetch result and return create table statement
+        $result = mysqli_fetch_assoc( $this->database->query("SHOW CREATE TABLE `$table`") );
+        return $result['Create Table'];
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -464,11 +455,11 @@ class NerbSchema
     {
         // get table data from database
         $result = $this->describe( $table );
-        if( array_key_exists( $column, $result) ){
-            return $result[ $column ];
-        } else {
+        if( !array_key_exists( $column, $result) ){
             throw new NerbError( "Column <code>[$column]</code> does not exist in table <code>[$table]</code>" );
         }
+        
+        return $result[ $column ];
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -486,6 +477,7 @@ class NerbSchema
         // get table data from database
         $result = $this->database->queryArray( 'SHOW FULL COLUMNS FROM `'.$table.'`' );
 
+		$info = array();
         // iterate and change key case into array
         foreach ( $result as $columns ) {
             // change key case
