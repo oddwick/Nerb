@@ -101,19 +101,12 @@ class NerbUser
      * @param array $params (default: array())
      * @return void
      */
-    public function __construct( string $table, string $id_field, string $user_name_field, string $pass_field, array $params = array() )
+    public function __construct( string $table, string $id_field, string $user_name_field, string $pass_field )
     {
 		
-        // add params if given
-        if( !empty($params) ){
-            $this->params = array_merge( $this->params, $params);
-        }
-		
         // check to see if a database is registered
-        if( $database = Nerb::isClassRegistered( 'NerbDatabase' ) ){
-            $this->database = $database;
-        } else {
-            throw new NerbError( 'Could not find a registered database' );
+        if( !$database = Nerb::isClassRegistered( 'NerbDatabase' ) ){
+			throw new NerbError( 'Could not find a registered database' );
         }
 		
         // fetch database and check to see if token table exists
@@ -122,16 +115,20 @@ class NerbUser
         }
 		
         // fetch database and check to see if table exists
-        $db = Nerb::fetch( $database );
+        $this->database = $database ;
+        $database = Nerb::fetch( $this->database );
 		
-        if( !$db->isTable( TOKEN_TABLE ) ){
-            // attempt to create a token table otherwise throw error
-            if( CREATE_TOKEN_TABLE ){
-                $this->createSessionTable();
-            } else {
-                throw new NerbError( 'Could not find table <code>['.TOKEN_TABLE.']</code> in database.' );
-            } // end if
+        if( !$database->isTable( TOKEN_TABLE ) ){
+	        $this->createSessionTable();
         } // end if
+        
+        // pass parameters
+        $this->table = $table;
+        $this->id_field = $id_field;
+        $this->user_name_field = $user_name_field;
+        $this->pass_field = $pass_field;
+	       
+		
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -388,7 +385,7 @@ class NerbUser
 			}
 			$msg .= '; uid='.$user_id.' uname='.$user_name.' ['.$_SERVER['REMOTE_ADDR'].']';
 			$log = new NerbLog( ACCESS_LOG );
-			$log->log( $msg );
+			$log->write( $msg );
 		}
 		
 		return;
@@ -436,19 +433,16 @@ class NerbUser
 			return array(false, $msg);
 		}
 
-		// successful login
-		if (password_verify($user_pass, $user->$pass)) {
-			
-			// log attempt to the log file
-			$this->logAttempt($user->user_id, $user_name, 'user authenticated', true);
-			$session_id = $this->createSession($user->user_id);
-			return array(true, $session_id);
-			
-		} else {
+		if ( !password_verify($user_pass, $user->$pass)) {
 			$this->logAttempt($user->user_id, $user_name, $msg = 'invalid password');
+			return array(false, $msg);
 		}
-		
-		return array(false, $msg);
+			
+		// log attempt to the log file
+		$this->logAttempt($user->user_id, $user_name, 'user authenticated', true);
+		$session_id = $this->createSession($user->user_id);
+		return array(true, $session_id);
+			
 				
 	}// end function		
 
@@ -475,6 +469,8 @@ class NerbUser
 	 * 
 	 * @access public
 	 * @return bool
+	 * @property expires;
+	 * @property hash;
 	 */
 	public function verify() : bool
 	{
@@ -487,11 +483,7 @@ class NerbUser
 		// fetch session data from table
 		$session = $sessions->fetchRow('`selector` = \''.$_SESSION['auth'].'\'');
 
-		if( $session->expires > time() && hash_equals($session->hash, hash('sha256', $_COOKIE['token'] ) ) ){
-			return true;
-		} else {
-			return false;
-		}
+		return $session->expires > time() && hash_equals($session->hash, hash('sha256', $_COOKIE['token'] ) ) ? true : false; 
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -506,7 +498,7 @@ class NerbUser
 	*/
 	public function logout() : string
 	{
-		session_unset($_SESSION);
+		session_unset();
 		setcookie('token', 0, time() - 3600, '/');
 		return('/?msg=You+have+been+logged+out');
 	}// end function		
@@ -514,9 +506,3 @@ class NerbUser
 
 } // end class
 
-
-
-
-
-
-?>
