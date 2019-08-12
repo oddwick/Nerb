@@ -259,6 +259,23 @@ class NerbDatabase
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
+
+
+    /**
+     *   returns database login credentials
+     *
+     *   @access     public
+     *   @return     array
+     */
+    public function credentials() : array
+    {
+        return $this->params['connection'];
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
     /**
      *   factory function that reates a NerbDatabaseTable.
      * 	fisrt it checks the registry to see if there ia a copy of this table already
