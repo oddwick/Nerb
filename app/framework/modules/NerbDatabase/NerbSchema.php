@@ -140,7 +140,7 @@ class NerbSchema
 		} 
 		
 		// run query and return the contrived filename on success
-		$this->database->query( "SELECT * INTO OUTFILE '$file' FROM $table" ) ){
+		$this->database->execute( "SELECT * INTO OUTFILE '$file' FROM $table" );
 		return $filename;
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
