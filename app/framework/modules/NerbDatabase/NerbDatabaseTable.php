@@ -31,10 +31,10 @@ class NerbDatabaseTable
      * 
      * (default value: '')
      * 
-     * @var string
+     * @var NerbDatabase
      * @access protected
      */
-    protected $database = '';
+    protected $database;
 	
     /**
      * name
@@ -75,6 +75,16 @@ class NerbDatabaseTable
      * @access protected
      */
     protected $columns = array();
+    
+    /**
+     * data_type - default is 's'
+     * 
+     * (default value: array( 's', 'int' => 'i','float' => 'd','string' => 's'))
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $data_type = array( 's', 'int' => 'i','float' => 'd','string' => 's');
 
 
 
@@ -207,10 +217,10 @@ class NerbDatabaseTable
 
 
     /**
-     *   returns a listing of columns
+     *   returns the primary key of the table
      *
      *   @access     public
-     *   @return     array
+     *   @return     string
      */
     public function primary(): string
     {
@@ -404,7 +414,7 @@ class NerbDatabaseTable
     public function fetchRow( string $where = '' )
     {
         // build query string
-        $query = "SELECT * FROM `$this->name`".$this->_where( $where, $limit, $offset );
+        $query = "SELECT * FROM `$this->name`".$this->_where( $where, 1 );
 
         $result = $this->database->fetch( $query );
         return $result->current();
@@ -485,7 +495,7 @@ class NerbDatabaseTable
         if ( !$this->isColumn( $column ) ) {
             throw new NerbError( $this->_errorString('The column <code>['.$column.']</code> is not in table <code>['.$this->name.']</code><p>' ));
         }
-        $query = "SELECT DISTINCT `$column` FROM `$this->name`".$this->_where( $where, $limit, 0 );
+        $query = "SELECT DISTINCT `$column` FROM `$this->name`".$this->_where( $where );
         $order = $order ? " ORDER BY `$column` ".$order : NULL;
 
         // execute query string return array
@@ -579,9 +589,9 @@ class NerbDatabaseTable
      * 
      * 	@access 	protected
      * 	@param 		array $values
-     * 	@return 	string
+     * 	@return 	self
      */
-    protected function execute( NerbStatement $statement, array $values )
+    protected function execute( NerbStatement $statement, array $values ) : self
     {
         // iterate trhrough the $values array 
         foreach( $values as $key => $value ){
@@ -590,25 +600,10 @@ class NerbDatabaseTable
             $type =  explode( '(',  $this->attribs[$key]['type'] );
 			
             // use variable variable to hold the value and bind the data type to it
-            $$key = $value;
-			
-            switch ( $type[0] ){
-				
-                case 'int':
-                    $data_type = 'i';
-                    break;
-				
-                case 'float':
-                    $data_type = 'd';
-                    break;
-				
-                default:
-                    $data_type = 's';
-				
-            } // end switch
+            ${$key} = $value;
 			
             // actually bind the variables to the statement using variable variable
-            $statement->mbind_param( $data_type, $$key);
+            $statement->mbind_param( $data_type[ $type[0] ], ${$key});
 
         } // end foreach
 		
