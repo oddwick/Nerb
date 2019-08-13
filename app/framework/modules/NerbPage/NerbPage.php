@@ -284,22 +284,28 @@ class NerbPage
 	 * error_page
 	 * 
 	 * (default value: array(
-	 * 		'100' => MODULES.'/NerbPage/includes/100.phtml',    
-	 * 		'403' => MODULES.'/NerbPage/includes/403.phtml',    
-	 * 		'404' => MODULES.'/NerbPage/includes/404.phtml',    
-	 * 		'500' => MODULES.'/NerbPage/includes/500.phtml',
+	 * 		'100' => MODULES.'/NerbPage/includes/100.phtml', // unsupported browser   
+	 * 		'400' => MODULES.'/NerbPage/includes/400.phtml', // bad request
+	 * 		'401' => MODULES.'/NerbPage/includes/401.phtml', // unauthorized   
+	 * 		'403' => MODULES.'/NerbPage/includes/403.phtml', // forbiden   
+	 * 		'404' => MODULES.'/NerbPage/includes/404.phtml', // page not found	   
+	 * 		'500' => MODULES.'/NerbPage/includes/500.phtml', // service error and unspecified errors
+	 * 		'503' => MODULES.'/NerbPage/includes/503.phtml', // service unavailable
 	 * 	))
 	 * 
 	 * @var string
 	 * @access protected
 	 */
 	protected $error_page = array(
-		'100' => MODULES.'/NerbPage/includes/100.phtml',    
-		'403' => MODULES.'/NerbPage/includes/403.phtml',    
-		'404' => MODULES.'/NerbPage/includes/404.phtml',    
-		'500' => MODULES.'/NerbPage/includes/500.phtml',
+		'100' => MODULES.'/NerbPage/includes/100.phtml', // unsupported browser   
+		'400' => MODULES.'/NerbPage/includes/400.phtml', // bad request
+		'401' => MODULES.'/NerbPage/includes/401.phtml', // unauthorized   
+		'403' => MODULES.'/NerbPage/includes/403.phtml', // forbiden   
+		'404' => MODULES.'/NerbPage/includes/404.phtml', // page not found	   
+		'500' => MODULES.'/NerbPage/includes/500.phtml', // service error and unspecified errors
+		'503' => MODULES.'/NerbPage/includes/503.phtml', // service unavailable
 	);
-
+	
 	/**
 	 * page_caching
 	 * 
@@ -421,40 +427,43 @@ class NerbPage
     protected function browser_check()
     {
 	    // if the check has already been conducted and passed, return
-	    // if a check has failed, and browser_fail is set set to kill, do not recheck
-	    // otherwise 
 	    if( $_SESSION['browser_check'] == 'pass' ){
 		    return;
-		    
-		} elseif( $_SESSION['browser_check'] == 'fail' && $this->browser_fail == 'error' ){
+		} 
+		
+	    // if a check has previously failed, and browser_fail is set set to kill, return error 100 bad browser
+		if( $_SESSION['browser_check'] == 'fail' && $this->browser_fail == 'error' ){
 			// set error to serve bad browser page
 			$this->error = 100;
 			return;
+	    } 
+	    
+	    // get browser information
+	    // this requires browsercap.ini to be set up on the server and can be
+	    // checked through the phpinfo() function
+		$browser = get_browser();
+
+		// set flags to indicate what type of device the user is on
+		// to determine if you want to serve mobile specific versions of the site
+		$_SESSION['browser'] = $browser->browser;
+		$_SESSION['browser_version'] = $browser->version;
+		$_SESSION['browser_device'] = $browser->device;
+		$_SESSION['browser_platform'] = $browser->platform;
+		
+		if( $this->browser[ $browser->browser ] > $browser->version ){
+			// set session var to indicate browser failure
+			$_SESSION['browser_check'] = 'fail';
 			
-	    } else {
-		    // get browser information
-		    // this requires browsercap.ini to be set up on the server and can be
-		    // checked through the phpinfo() function
-			$browser = get_browser();
-			if( $this->browser[ $browser->browser ] > $browser->version ){
-				// set session var to indicate browser failure
-				$_SESSION['browser_check'] = 'fail';
-				// set error to serve bad browser page
-				if( $this->browser_fail )	$this->error = 100;
-				
-			} else {
-				$_SESSION['browser_check'] = 'pass';
+			// set error to serve bad browser page
+			if( $this->browser_fail ){	
+				$this->error = 100;
 			}
-			
-			// set flags to indicate what type of device the user is on
-			// to determine if you want to serve mobile specific versions of the site
-			$_SESSION['browser'] = $browser->browser;
-			$_SESSION['browser_version'] = $browser->version;
-			$_SESSION['browser_device'] = $browser->device;
-			$_SESSION['browser_platform'] = $browser->platform;
 			return;
+		} 
 			
-	    } // end if
+		$_SESSION['browser_check'] = 'pass';
+		return;
+			
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -493,10 +502,8 @@ class NerbPage
 	    // cross site scripting
 	    $this->cache_filename = md5( $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] ).'.cache';
 	    
-        if( !$this->cache ){
-	      	// create the cache object
-		    $this->cache = new NerbPageCache( $this->cache_filename );
-        }
+	    // create cache object
+	    $this->cache = new NerbPageCache( $this->cache_filename );
 
 	    // add meta cache data so that page can be identified as cached content
 	    $this->meta( 'cached', date("F d, Y - h:i:s a") );
@@ -553,12 +560,14 @@ class NerbPage
 	    foreach( $this->nocache as $value ){
 		    // format expression
 		    $value = '/^('.str_replace('/', '\/', $value).')/i';
-		    if( preg_match( $value , $_SERVER['REQUEST_URI'] ) ) return; 
+		    if( preg_match( $value , $_SERVER['REQUEST_URI'] ) ){
+			    return;
+			} 
 	    } // end foreach
 	    
 	    // check to see if the page is cached
 	    // if it is, then fetch the cache and exit
-	    if( $this->cache && $this->cache->isCached() ) {
+	    if( !empty($this->cache) && $this->cache->isCached() ) {
 		    $this->cache->fetchCache();
 		    exit;
 		}
@@ -585,11 +594,10 @@ class NerbPage
         
         // cycle through and add them to class properties
         foreach( $dump as $key => $value ){
-	        if( property_exists( $this, $key ) ){
-		        $this->$key = $value;
-	        } else {
-		       throw new NerbError( "The property <code>[$key]</code> does not exist.  Check your page.ini for proper spelling and syntax." ); 
-	        }
+	        if( !property_exists( $this, $key ) ){
+				throw new NerbError( "The property <code>[$key]</code> does not exist.  Check your page.ini for proper spelling and syntax." ); 
+	        }		        
+			$this->$key = $value;
         }
 		
 	}  // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -796,38 +804,15 @@ class NerbPage
 	 *
 	 * if an error is called, then an error page is included
 	 * 
-	 * @access public
+	 * @access protected
+	 * @param int $error
 	 * @return void
 	 */
-	protected function error_page( int $error ){
-	    	
-    	switch( $error ){
-	    	// unsupported browser	
-	    	case 100:
-		    	require $this->error_page['100'];
-	    		break;
-	    		
-	    	// bad request
-	    	case 400:
-	    	// unauthorized
-	    	case 401:
-	    	// forbiden
-	    	case 403:
-		    	require $this->error_page['403'];
-	    		break;
-	    		
-	    	// page not found	
-	    	case 404:
-		    	require $this->error_page['404'];
-	    		break;
-	    		
-	    	// service error and unspecified errors
-	    	case 500:
-	    	// service unavailable
-	    	case 503:
-	    	default:
-		    	require $this->error_page['500'];
-    	} // end swich
+	protected function error_page( int $error )
+	{
+		$error_page = empty( $this->error_page[$error] ) ? 500 : $error;
+    	require $this->error_page[ $error_page ];
+    	return;
     	
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
