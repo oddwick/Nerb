@@ -26,12 +26,20 @@ class UserController extends NerbController
      *
      * This is the default value for the page title
      * 
-     * (default value: 'Nerb Application Framework')
+     * (default value: 'Sample User Controller')
      * 
      * @var string
      * @access protected
      */
-    protected $title = 'Nerb Application Framework';
+    protected $title = 'Sample User Controller';
+    
+    /**
+     * user
+     * 
+     * @var NerbUser
+     * @access protected
+     */
+    protected $user;
 	
 	
 	
@@ -42,31 +50,21 @@ class UserController extends NerbController
      */
     public function route()
     {
-        $this->url->defineStructure( array( 'page' ));
+        // define page structure for the controller
+        $this->url->defineStructure( array( 'page') );
         
         // create user object
-        Nerb::register( $user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' ), 'user' );
+        $this->user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' );
 		
         // action calls
-        if ( $this->action ) {
+        if ( $this->url->action ) {
             $this->action();
         }
-                
-        // fetch user object
-        //$user = Nerb::fetch( 'user' );
-		
+        
         // if user is logged in, allow access to private sections, 
         // otherwise kick out to registration page
-        if( !$user->verify() ) 
-        {
-            $content = $this->publicPages();
-        } else {
-            $nav = TRUE;
-            $content = $this->privatePages();
-        }
+        $content = !$this->user->verify() ? $this->publicPages() : $this->privatePages();
         
-        $content = $this->publicPages();
-
         // fetch page object and add content to it
         $page = Nerb::fetch('Page');
         $page->title($this->title);
@@ -80,20 +78,27 @@ class UserController extends NerbController
 
 
     /**
-     * The pages called here require the user to be logged in to view them
+     * This is a switchboard for private pages and require the user to be logged in to view them
      *
      * @access         protected
      * @return         string
      */
     protected function privatePages() : string
     {
+        switch ($this->page) {
+            case 'forgotPass':
+            default:
+                $page = $this->module.'/login.php';
+        }// end switch
+        return $page;
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * The pages called here are public and can be seen by anyone
+     * This is a switchboard for public pages and can be seen by anyone
      * 
      * @access protected
      * @property string $page
@@ -114,7 +119,7 @@ class UserController extends NerbController
 
 
     /**
-     * This is where actions are performed. a jump is performed on the completion of an action
+     * This is a switchboard where actions are performed. a jump is performed on the completion of an action
      * 
      * @access protected
      * @property string $action
@@ -122,13 +127,15 @@ class UserController extends NerbController
      */
     protected function action()
     {
-        switch ($this->action) {
+        switch ( $this->url->action() ) {
             case 'login':
-                $page = $this->login($_REQUEST['user_name'], $_REQUEST['user_pass']);
+                $page = $this->login( $_REQUEST['user_name'], $_REQUEST['user_pass'] );
                 break;
             
             case 'logout':
-                $this->logout();
+				$this->user->destroySession();
+				$page = '/?msg='.urlencode('You have been logged out');
+				break;
             
             default:
                 $page = '/';
@@ -162,10 +169,8 @@ class UserController extends NerbController
 	protected function login( string $user_name, string $user_pass ) : string
 	{
 		
-		$user = Nerb::fetch( 'User' );
-		
 		// authenticate user
-		$status =  $user->authenticate( $user_name, $user_pass );
+		$status =  $this->user->authenticate( $user_name, $user_pass );
 		
 		// sucessful authentication
 		if( $status[0] == TRUE ){
@@ -183,21 +188,6 @@ class UserController extends NerbController
 
 
 
-
-	/**
-	*	logs the user out by destroying their session
-	*
-	*	@access		protected
-	*	@return		string
-	*/
-	public function logout() : string
-	{
-		$user = Nerb::fetch('user');
-		$user->destroySession();
-		session_unset($_SESSION);
-		return('/?msg=You+have+been+logged+out');
-		
-	}// end function		
 
 
 } /* end class */

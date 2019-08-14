@@ -53,7 +53,7 @@ class NerbError extends \Exception
      * 		'content' => ''
      * 		 ) )
      * 
-     * @var string
+     * @var array
      * @access protected
      */
     protected $content = array( 
@@ -136,30 +136,30 @@ class NerbError extends \Exception
         ob_end_clean();
 
         //  include the template and inject the content
-        if (file_exists(FRAMEWORK.'/resources/template.php')) {
-            // Starts output buffering
-            ob_start();
+        if ( !file_exists(FRAMEWORK.'/resources/template.php')) {
+			return 'Holy shit, what the <em>FUCK</em> did you do?!?';
+		}
+       
+        // Starts output buffering
+        ob_start();
 
-            //Extracts vars to current view scope
-            extract($this->content);
+        //Extracts vars to current view scope
+        extract( $this->content );
 
-            // builds the error body block
-            $content = $this->header();
-            $content .= $this->msg();
-            $content .= $this->code();
-            $content .= $this->trace();
-            $content .= $this->footer();
+        // builds the error body block
+        $content = $this->header();
+        $content .= $this->msg();
+        $content .= $this->code();
+        $content .= $this->trace();
+        $content .= $this->footer();
 
-            // Includes the template contents
-            include FRAMEWORK.'/resources/template.php';
+        // Includes the template contents
+        include FRAMEWORK.'/resources/template.php';
 
-            // fetch, kill, and return the output buffer
-            $buffer = ob_get_contents();
-            ob_end_clean();
-            return $buffer;
-        } else {
-            echo 'Holy shit, what the <em>FUCK</em> did you do?!?';
-        }
+        // fetch, kill, and return the output buffer
+        $buffer = ob_get_contents();
+        ob_end_clean();
+        return $buffer;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -224,39 +224,35 @@ class NerbError extends \Exception
         // if show error line is true, then display the 
         // actual line that caused the error
         if( SHOW_ERROR_LINE && ERROR_LEVEL > 0 ){
-
             $error .= '<h2>Details</h2>';
+        }
         	
-            if( ERROR_LEVEL == 1 ){
-                $trace = end( $this->trace );
+        if( ERROR_LEVEL == 1 ){
+            $trace = end( /** @scrutinizer ignore-type */ $this->trace );
+            $file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
+            $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
+            $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
+            // housekeeping for large array
+            unset( $file );
+		 	
+        } 
+        
+        if ( ERROR_LEVEL == 2){
+            foreach( $this->trace as $trace){
+                // read offending file into an array
                 $file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
-                $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
-                $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
-			 	
-                    // housekeeping for large array
-                    unset( $file );
-			 	
-            } elseif ( ERROR_LEVEL == 2){
-        	
-                foreach( $this->trace as $trace){
-                    // read offending file into an array
-                    $file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
-		        	
-                    // because if an error was thrown, technically it is the previous line
-                    // that caused the error, so this only shows code line if it is not a 
-                    // thrown error.  makes the code list a little easier to see real error
-                    if( !stristr( $file[ $trace['line']-1 ], "throw" ) ){
-                        $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
-                        $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
-                    }
-                        // housekeeping for large array
-                        unset( $file );
-		        	
-                }// end foreach
 	        	
-            }// end if ERROR_LEVEL
-        	
-        } // end if SHOW_ERROR_LINE
+                // because if an error was thrown, technically it is the previous line
+                // that caused the error, so this only shows code line if it is not a 
+                // thrown error.  makes the code list a little easier to see real error
+                if( !stristr( $file[ $trace['line']-1 ], "throw" ) ){
+                    $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
+                    $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
+                }
+                // housekeeping for large array
+                unset( $file );
+            }// end foreach
+        }
         
         return $error;
         
@@ -336,7 +332,7 @@ class NerbError extends \Exception
         $raw = preg_split( '/\#([0-9]) /' , $msg[1], NULL, PREG_SPLIT_NO_EMPTY );
 		
         // add the error line and file to the end of the trace
-        array_unshift( $raw, $error['file'].' ('.$error['line'].'):'); 	
+        array_unshift( /** @scrutinizer ignore-type */ $raw, $error['file'].' ('.$error['line'].'):'); 	
 		
         // loop through, trim, and kill null values or messages that contain brackets eg. {main} 	    
         foreach( $raw as $key => $value ){
@@ -436,53 +432,5 @@ class NerbError extends \Exception
         
     }// end function
     
-    
-    
-    /**
-     * syntax function.
-     * 
-     * creates a debug object for syntax checking
-     *
-     * @access     private
-     * @param      string $class ( class being evaluated )
-     * @param      string $function ( name of specific function )
-     * @return     NerbDebug
-     * @see        NerbDebug
-     * @throws     NerbError
-     */
-    private function syntax( $class, $method = NULL ) : NerbDebug
-    {
-        //Target our class
-        $reflector = new ReflectionClass( $class );
-		
-        //Get the parameters of a method
-        $parameters = $reflector->getMethod('FireCannon')->getParameters();
-		
-        //Loop through each parameter and get the type
-        foreach($parameters as $param)
-        {
-                //Before you call getClass() that class must be defined!
-                echo $param->getClass()->name;
-        }
-
-        if ( is_object( $class ) ) {
-            $class = get_class( $class );
-        }
-
-        if ( !class_exists( $class ) ) {
-            throw new NerbError( 'Class <code>['.$class.']</code> has not been defined' );
-        }
-
-        if ( $method && !method_exists( $class, $method ) ) {
-            throw new NerbError( 'Method <code>['.$method.']</code> does not exist in class <code>['.$class.']</code>' );
-        }
-
-        Nerb::loadClass( 'NerbDebug' );
         
-        $debug = new NerbDebug;
-        
-        return $debug->syntax( $class, $method );
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-    
 } /* end class */

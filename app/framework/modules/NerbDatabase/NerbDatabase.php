@@ -167,8 +167,8 @@ class NerbDatabase
         // give this database connection a name for other classes to retrieve it
         $this->handle = $handle;
 
-        // give this database connection a name for other classes to retrieve it
-        $this->connection_name = $this->params['connection']['name'];
+        // the name of the current database being used
+        $this->database_name = $this->params['connection']['name'];
 
         // establish connection to the table
         $this->connect();
@@ -207,9 +207,9 @@ class NerbDatabase
             $this->params['connection']['socket']
         );
 			
-        if ( mysqli_connect_error( $this->connection ) ) {
-            $error = mysqli_connect_error( $this->connection );
-            $errno = mysqli_connect_errno( $this->connection );
+        if ( mysqli_connect_error() ) {
+            $error = mysqli_connect_error();
+            $errno = mysqli_connect_errno();
 			
             throw new NerbError(
                 '<p>Could not connect to Database host <strong>'.$this->params['connection']['host'].'</strong>. Database said:</p>'
@@ -263,7 +263,7 @@ class NerbDatabase
      */
     public function database() : string
     {
-        return $this->connection_name;
+        return $this->database_name;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -358,7 +358,7 @@ class NerbDatabase
         $profile = array('query' => $query, 'start' => microtime());
 
         // fetch result
-        if ( !$result = $this->connection->real_query( $query )) {
+        if ( !$this->connection->real_query( $query )) {
             $error = mysqli_error( $this->connection );
             $error_no = mysqli_errno( $this->connection );
             throw new NerbError('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
@@ -381,7 +381,7 @@ class NerbDatabase
      *
      *   @access     public
      *   @param      string $query
-     *   @return     mysqli_result
+     *   @return     mixed
      *   @throws     NerbError
      */
     public function query( string $query )
@@ -524,7 +524,7 @@ class NerbDatabase
         }
         
         // query the database
-        $result =  $this->query( $query );
+        $result = $this->query( $query );
        
         // maps the fields as (field=>table.field) for multiple table select statements
         $column_list = mysqli_fetch_fields( $result );
@@ -624,14 +624,14 @@ class NerbDatabase
 
 
     /**
-     *   this creates a prepared statement from a query string
+     *  this creates a prepared statement from a query string
      *	the query string must be formatted for prepared statements similar to this
      *
      *	INSERT INTO table VALUES (column, column, column) VALUES (?, ?, ?)
      *
-     *   @access     public
-     *   @param     	string $query_string (formatted query string)
-     *   @return     Nerb_Statement
+     *   @access public
+     *   @param string $query_string (formatted query string)
+     *   @returnNerbStatement
      */
     public function prepare( $query_string )
     {
@@ -645,8 +645,8 @@ class NerbDatabase
     /**
      *   returns an array of table names in the current database
      *
-     *   @access     protected
-     *   @return     array
+     *   @access protected
+     *   @return array
      */
     protected function listTables() : array
     {
@@ -661,8 +661,8 @@ class NerbDatabase
     /**
      *   return the current table list from the database
      *
-     *   @access     public
-     *   @return     array
+     *   @access public
+     *   @return array
      */
     public function tables() : array
     {
@@ -675,9 +675,9 @@ class NerbDatabase
     /**
      *   checks to see if a table exists in the current database
      *
-     *   @access     public
-     *   @param      string $table
-     *   @return     bool
+     *   @access public
+     *   @param string $table
+     *   @return bool
      */
     public function isTable( string $table ) : bool
     {

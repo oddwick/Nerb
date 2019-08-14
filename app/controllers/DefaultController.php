@@ -70,7 +70,7 @@ class DefaultController extends NerbController
 
 
     /**
-     * The pages called here require the user to be logged in to view them
+     * This is a switchboard for private pages and require the user to be logged in to view them
      *
      * @access protected
      * @property string $page
@@ -95,7 +95,7 @@ class DefaultController extends NerbController
 
 
     /**
-     * The pages called here are public and can be seen by anyone
+     * This is a switchboard for public pages and can be seen by anyone
      * 
      * @access protected
      * @property string $page
@@ -125,7 +125,7 @@ class DefaultController extends NerbController
 
 
     /**
-     * This is where actions are performed. a jump is performed on the completion of an action
+     * This is a switchboard where actions are performed. a jump is performed on the completion of an action
      * 
      * @access protected
      * @property string $action
