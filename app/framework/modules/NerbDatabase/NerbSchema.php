@@ -156,10 +156,10 @@ class NerbSchema
      * @access public
      * @param string $table
      * @param string $file
-     * @return bool
+     * @return int
      * @throws NerbError
      */
-    public function loadCvs( string $table, string $file ) : bool
+    public function loadCvs( string $table, string $file ) : int
     {
 	    // error check to make sure table exists
 	    if( !$this->database->isTable( $table ) ) {
@@ -172,7 +172,7 @@ class NerbSchema
 	    }
 		
 		// run query and return
-		return $this->database->query( "LOAD DATA INFILE '$file' INTO TABLE $table" ) ? TRUE : FALSE;
+		return $this->database->execute( "LOAD DATA INFILE '$file' INTO TABLE $table" );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -223,9 +223,9 @@ class NerbSchema
      * @param string $default (default: null)
      * @param bool $null (default: true)
      * @param string $after (default: null)
-     * @return bool
+     * @return int
      */
-    public function addColumn(string $table, string $column, string $type, $length = null, $default = null, bool $null = true, string $after = null) : bool
+    public function addColumn(string $table, string $column, string $type, $length = null, $default = null, bool $null = true, string $after = null) : int
     {
         // put parenthesis arount the length is specified
         $length = $length ? "($length)" : null;
@@ -240,9 +240,7 @@ class NerbSchema
         $query .= $after ? " AFTER `$after`" : '';
 
         // execute and return
-        $result = $this->database->execute( $query );
-		
-        return $result ? true : false;
+        return $this->database->execute( $query );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -255,13 +253,12 @@ class NerbSchema
      * @access public
      * @param string $table
      * @param string $column
-     * @return bool
+     * @return int
      */
-    public function dropColumn( string $table, string $column ) : bool
+    public function dropColumn( string $table, string $column ) : int
     {
         // execute and return
-        $result = $this->database->execute( "ALTER TABLE `$table` DROP `$column`" );
-        return $result ? true : false;
+        return $this->database->execute( "ALTER TABLE `$table` DROP `$column`" );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -275,16 +272,15 @@ class NerbSchema
      * @param string $table
      * @param string $column
      * @param string $new_name
-     * @return bool
+     * @return int
      */
-    public function renameColumn( string $table, string $column, string $new_name ) : bool
+    public function renameColumn( string $table, string $column, string $new_name ) : int
     {
         // get column info
         $description =  $this->describeColumn( $table, $column );
 
         // execute and return
-        $result = $this->database->execute( "ALTER TABLE `$table` CHANGE COLUMN `$column` `$new_name` ".$description['type'].' '.$description['null'] );
-        return $result ? true : false;
+        return $this->database->execute( "ALTER TABLE `$table` CHANGE COLUMN `$column` `$new_name` ".$description['type'].' '.$description['null'] );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -297,13 +293,12 @@ class NerbSchema
      * @access public
      * @param string $table
      * @param string $new_name
-     * @return bool
+     * @return int
      */
-    public function renameTable( string $table, string $new_name ) : bool
+    public function renameTable( string $table, string $new_name ) : int
     {
         // execute and return
-        $result = $this->database->execute( "ALTER TABLE `$table` RENAME `$new_name`" );
-        return $result ? true : false;
+        return $this->database->execute( "ALTER TABLE `$table` RENAME `$new_name`" );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -315,13 +310,13 @@ class NerbSchema
      * 
      * @access public
      * @param string $table
-     * @return bool
+     * @return int
      */
-    public function dropTable( string $table ) : bool
+    public function dropTable( string $table ) : int
     {
         // execute and return
-        $result = $this->database->execute( "DROP TABLE IF EXISTS $table" );
-        return $result ? true : false;
+        return $this->database->execute( "DROP TABLE IF EXISTS $table" );
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -357,26 +352,25 @@ class NerbSchema
      * @param string $column
      * @param string $type (default: null)
      * @param string $using (default: null)
-     * @return bool
+     * @return int
      */
-    public function addIndex( string $table, string $index, string $column, string $type = NULL, string $using = NULL ) : bool
+    public function addIndex( string $table, string $index, string $column, string $type = NULL, string $using = NULL ) : int
     {
         // make uppercase keywords
         $type = strtoupper($type); 
         $using = strtoupper($using); 
 		
         // error checking
-        if( $type && ($type != 'UNIQUE' && $type != 'FULLTEXT' && $type != 'SPATIAL') ){
-            throw new NerbError( '<code>['.$type.']</code> is not a valid value.  <code>$type</code> must be <code>[UNIQUE|FULLTEXT|SPATIAL]</code>' );	
+        if( $type && !preg_match('/^(UNIQUE|FULLTEXT|SPATIAL)$/', $type ) ){
+            throw new NerbError( 'Index type <code>['.$type.']</code> is not a valid value.  <code>$type</code> must be <code>[UNIQUE|FULLTEXT|SPATIAL]</code>' );	
         }
 		
-        if( $using && ($using != 'BTREE' && $using != 'HASH' && $using != 'RTREE') ){
+        if( $using && !preg_match('/^(BTREE|HASH|RTREE)$/', $using ) ){
             throw new NerbError( '<code>['.$using.']</code> is not a valid value.  <code>$using</code> must be <code>[BTREE|HASH|RTREE]</code>' );	
         }
-		
+        
         // execute and return
-        $result = $this->database->execute( "CREATE $type INDEX `$index` ".($using ? "USING $using" : null)." ON $table($column)" );
-        return $result ? true : false;
+        return $this->database->execute( "CREATE $type INDEX `$index` ".($using ? "USING $using" : null)." ON $table($column)" );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -389,13 +383,12 @@ class NerbSchema
      * @access public
      * @param string $table
      * @param string $index
-     * @return bool
+     * @return int
      */
-    public function dropIndex( string $table, string $index ) : bool
+    public function dropIndex( string $table, string $index ) : int
     {
         // execute and return
-        $result = $this->database->execute( "ALTER TABLE `$table` DROP INDEX IF EXISTS `$index`" );
-        return $result ? true : false;
+        return $this->database->execute( "ALTER TABLE `$table` DROP INDEX IF EXISTS `$index`" );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
