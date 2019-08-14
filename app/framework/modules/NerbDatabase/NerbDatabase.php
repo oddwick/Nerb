@@ -125,39 +125,6 @@ class NerbDatabase
      */
     public function __construct( string $handle, array $params )
     {
-        $this->init( $handle, $params );
-
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     *   Destructor, if set will output the value of the current query array
-     *
-     *   @access     public
-     *   @param      array $params connection parameters [host|user|pass|name]
-     *   @return     void
-     */
-    public function __destruct()
-    {
-        $this->connection->close();
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * init function.
-     * 
-     * @access protected
-     * @param string $handle
-     * @param array $params
-     * @return void
-     */
-    protected function init( string $handle, array $params )
-    {
         // set credentials for connecting
         $this->params['connection'] = $params;
 
@@ -182,6 +149,22 @@ class NerbDatabase
         }
         
         return;
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     *   Destructor, if set will output the value of the current query array
+     *
+     *   @access     public
+     *   @param      array $params connection parameters [host|user|pass|name]
+     *   @return     void
+     */
+    public function __destruct()
+    {
+        $this->connection->close();
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
