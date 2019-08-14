@@ -125,13 +125,39 @@ class NerbDatabase
      */
     public function __construct( string $handle, array $params )
     {
-        // if debugging mode is on, then return a database_debug object which is the same as a 
-        // database object, but with extended polling and debugging capacity.
-        if( $params['debug'] == true ){
-            Nerb::loadClass('NerbDatabaseDebug');
-            return new NerbDatabaseDebug( $handle, $params );
-        }
+        $this->init( $handle, $params );
 
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     *   Destructor, if set will output the value of the current query array
+     *
+     *   @access     public
+     *   @param      array $params connection parameters [host|user|pass|name]
+     *   @return     void
+     */
+    public function __destruct()
+    {
+        $this->connection->close();
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * init function.
+     * 
+     * @access protected
+     * @param string $handle
+     * @param array $params
+     * @return void
+     */
+    protected function init( string $handle, array $params )
+    {
         // set credentials for connecting
         $this->params['connection'] = $params;
 
@@ -163,22 +189,6 @@ class NerbDatabase
 
 
     /**
-     *   Destructor, if set will output the value of the current query array
-     *
-     *   @access     public
-     *   @param      array $params connection parameters [host|user|pass|name]
-     *   @return     void
-     */
-    public function __destruct()
-    {
-        $this->connection->close();
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
      *   Connection string, connects to database with credentials given
      *
      *   @access     public
@@ -187,7 +197,6 @@ class NerbDatabase
      */
     protected function connect() : self
     {
-
         // error checking 
         $this->connection = new NerbSqli(
             $this->params['connection']['host'],
@@ -300,6 +309,25 @@ class NerbDatabase
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     *   debugging method that outputs all queries made from this object during the
+     *   execution of the script
+     *
+     *   @access     public
+     *   @return     array
+     */
+    public function poll() : array
+    {
+        //return the the query array
+        return $this->profile;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
     #################################################################
