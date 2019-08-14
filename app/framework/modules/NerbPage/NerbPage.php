@@ -507,8 +507,8 @@ class NerbPage
 	    $this->cache = new NerbPageCache( $this->cache_filename );
 
 	    // add meta cache data so that page can be identified as cached content
-	    $this->meta( 'cached', date("F d, Y - h:i:s a") );
-	    $this->meta( 'cached_url', $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
+	    $this->meta['cached'] = date("F d, Y - h:i:s a");
+	    $this->meta['cached_url'] = $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
 
 	    return $this;
 	    
@@ -539,8 +539,8 @@ class NerbPage
         $this->cache->uncache();
 	    
 	    // add meta cache data so that page can be identified as cached content
-	    $this->meta( 'cached', '' );
-	    $this->meta( 'cached_url', '');
+	    unset( $this->meta['cached'] );
+	    unset( $this->meta['cached_url'] );
 	    return $this;
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
