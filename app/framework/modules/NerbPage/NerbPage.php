@@ -395,6 +395,7 @@ class NerbPage
 			// set caching flag and add meta tags for cached content
 			$this->cache();
 			
+			// ------> if the page is cached, this is where the page processing ends <-------//
 			if( $this->autofetch_cache ) $this->get_cached_page();
 		
 	    } // end if page caching
@@ -489,7 +490,7 @@ class NerbPage
      * Pages that are cached can not be user authenticated
      *
      * @access protected
-     * @return NerbPage
+     * @return self
      */
     public function cache() : self
     {
@@ -527,7 +528,7 @@ class NerbPage
      * This means that any user can see a cached page INCLUDING accounts, etc.
      * 
      * @access protected
-     * @return NerbPage
+     * @return self
      */
     public function nocache() : self
     {
@@ -629,13 +630,13 @@ class NerbPage
 	    require $this->header;
 	    
 	    // if the page has a content header, include it
-	    if( $this->content_header ) require $this->content_header;
+	    if( !empty($this->content_header) ) require $this->content_header;
 	    
 	    // add page content
 	    $this->includePageContent();
 	    
 	    // add content footer
-	    if( $this->content_footer ) require $this->content_footer;
+	    if( !empty($this->content_footer) ) require $this->content_footer;
 	    
 	    // add html footer
 	    require $this->footer;
@@ -676,7 +677,6 @@ class NerbPage
 	    	return;
 	    } 
 	    
-	     
 		foreach( $this->content as $value ){
 	    	if( $this->page_preprocess ){
 				echo $value;
@@ -699,7 +699,7 @@ class NerbPage
 	 * 
      * @access public
      * @param string $content
-     * @return NerbPage
+     * @return self
      */
     public function content( string $content ) : self
     {
@@ -760,7 +760,7 @@ class NerbPage
      * @access public
      * @param string $filename
      * @throws NerbError
-     * @return NerbPage
+     * @return self
      */
     public function header( string $filename ) : self
     {
@@ -782,7 +782,7 @@ class NerbPage
      * @access public
      * @param string $filename
      * @throws NerbError
-     * @return NerbPage
+     * @return self
      * @see content_header
      */
     public function footer( string $filename ) : self
@@ -835,26 +835,13 @@ class NerbPage
 
 
 
-    #################################################################
-
-    //      !Attributes
-
-    #################################################################
-	
-	/**
-	  The following functions add HTML attributes to the page
-	  they can all be set in the page.ini file and any subsequent calls
-	  will be APPENDED to those set in  page.ini
-	 */
-
-
 
 	/**
 	 * title function.
 	 * 
 	 * @access public
 	 * @param string $title
-	 * @return NerbPage
+	 * @return self
 	 */
 	public function title( string $title ) : self
 	{
@@ -862,180 +849,6 @@ class NerbPage
 		return $this;
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * style function.
-     * 
-	 * Add stylesheet url to header
-	 * 
-     * @access public
-     * @param string $style (url of stylesheet)
-     * @return NerbPage
-     */
-    public function style( string $style ) : self
-    {
-	    $this->style[] = $style;
-	    return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-	/**
-	 * script function.
-	 * 
-	 * Add script url to header
-	 * 
-	 * @access public
-	 * @param string $script
-	 * @return NerbPage
-	 */
-	public function script( string $script ) : self
-	{
-		$this->script[] = $script;
-		return $this;
-	
-	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * meta function.
-     * 
-     * @access public
-     * @param string $title
-     * @param string $value
-     * @return void
-     */
-    public function meta( string $title, string $value ) : self
-    {
-		$this->meta[$title] = $value;
-	    return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-	/**
-	 * keyword function.
-	 *
-	 * Add single keyword to meta keyword
-	 * 
-	 * @access public
-	 * @param mixed $value
-	 * @return self
-	 */
-	public function keywords( $value ) : self
-    {
-		$this->meta['keywords'] = $value;
-	    return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-	/**
-	 * attrib function.
-	 * 
-	 * @access public
-	 * @param string $property
-	 * @param string $value
-	 * @throws NerbError
-	 * @return self
-	 */
-	public function attrib( string $property, string $value ) : self
-	{
-        if( !property_exists( $this, $property ) ){
-	       throw new NerbError( "The property <code>[$property]</code> does not exist.  Check your page.ini for proper spelling and syntax." ); 
-        }
-        
-		$this->$property = $value;
-		return $this;
-		
-	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-     * equiv function.
-     * 
-     * @access public
-     * @param string $title
-     * @param string $value
-     * @return NerbPage
-     */
-    public function equiv( string $title, string $value ) : self
-    {
-	    $this->http_equiv[$title] = $value;
-	    return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-	/**
-	 * rel function.
-	 * 
-	 * Add link rel statement to header
-	 * 
-	 * @access public
-	 * @param string $title
-	 * @param string $link
-	 * @return NerbPage
-	 */
-	public function rel( string $title, string $link ) : self
-	{
-		$this->rel[$title] = $link;
-		return $this;
-	
-	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-	/**
-	 * icon function.
-	 * 
-	 * Add link to page icons
-	 * 
-	 * @access public
-	 * @param string $title
-	 * @param string $link
-	 * @return NerbPage
-	 */
-	public function icon( string $title, string $link ) : self
-	{
-		$this->icon[$title] = $link;
-		return $this;
-	
-	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-	/**
-	 * base function.
-	 * 
-	 * Add base statment to header
-	 * 
-	 * @access public
-	 * @param string $url
-	 * @return NerbPage
-	 */
-	public function base( string $url ) : self
-	{
-		$this->base = $url;
-		return $this;
-	
-	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
