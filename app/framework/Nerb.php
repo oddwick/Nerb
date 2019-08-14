@@ -221,9 +221,9 @@ class Nerb
             // send the array to NerbError for formatting
             $error = NerbError::format( $error ); 
 			
-            // throw error and die
+            // throw error and exit
             throw new NerbError( $error['message'], $error['trace'] );
-            die;
+            exit;
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -291,7 +291,6 @@ class Nerb
     public static function listRegisteredObjects() : array
     {
         $registry = self::$registry;
-        $reg = array();
         
 		$reg = array_map( function( $registry ) {
 			return get_class($registry);
@@ -495,11 +494,6 @@ class Nerb
      */
     private static function namespaceWrap( string $name ) 
     {
-        //bypass
-        if ( !is_scalar( $name )){
-        	return $name;
-        }
-        
         // namespace wrap
         return strpos( $name, '\\' ) !== false ? $name : ( __NAMESPACE__ . '\\' . $name );
 	  
