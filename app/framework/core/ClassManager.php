@@ -1,6 +1,6 @@
 <?php
 // Nerb application library 
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb System Framework class management and loader module
@@ -187,7 +187,7 @@ class ClassManager
     /**
      * namespaceWrap function.
      * 
-     * 	wraps a class name in a namespace wrapper
+     * 	wraps a class name in a namespacewrapper
      * 
      * 	@access public
      * 	@static
@@ -196,7 +196,7 @@ class ClassManager
      */
     public static function namespaceWrap( string $name ) : string
     {
-        // namespace wrap
+        // namespacewrap
         return strpos( $name, '\\' ) !== false ? $name : ( __NAMESPACE__ . '\\' . $name );
 	  
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -208,7 +208,7 @@ class ClassManager
 
     public static function namespaceUnwrap( string $name ) : string 
     {
-        // namespace wrap
+        // namespacewrap
         $name = explode('\\', $name);
         return array_pop( $name );
 	  

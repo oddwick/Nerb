@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 
 /**
@@ -13,14 +13,14 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbDyanmicPage
+ * @class           DyanmicPage
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
  * @license         https://www.github.com/oddwick/nerb
  *
  * @property string MODULES
- * @requires NerbError
+ * @requires Error
  * @requires NerbCache
  * @requires page.ini
  * @todo
@@ -125,7 +125,7 @@ class DyanmicPage extends Page
 	 * @access public
 	 * @param string $property
 	 * @param string $value
-	 * @throws NerbError
+	 * @throws Error
 	 * @return self
 	 */
 	public function attrib( string $property, string $value ) : self

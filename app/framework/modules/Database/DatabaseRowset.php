@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 
 /**
@@ -8,15 +8,15 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @subpackage      NerbDatabase
- * @class           NerbDatabaseRowset
+ * @subpackage      Database
+ * @class           DatabaseRowset
  * @implements      Iterator
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019 
- * @see             NerbDatabase
- * @see             NerbDatabaseTable
- * @see             NerbDatabaseRow
+ * @see             Database
+ * @see             DatabaseTable
+ * @see             DatabaseRow
  *
  * @todo
  *
@@ -63,7 +63,7 @@ class DatabaseRowset implements \Iterator
      *
      *   @access     public
      *   @param      int $index
-     *   @return     NerbDatabaseRow
+     *   @return     DatabaseRow
      */
     public function __get( int $index )
     {
@@ -91,13 +91,13 @@ class DatabaseRowset implements \Iterator
      *   Adds a row to the rowset
      *
      *   @access     public
-     *   @param      NerbDatabaseRow $row NerbDatabaseRow object
-     *   @throws     NerbError
+     *   @param      DatabaseRow $row DatabaseRow object
+     *   @throws     Error
      *   @return     self
      */
     public function add( $row ) : self
     {
-        if ( $row instanceof NerbDatabaseRow || is_subclass_of( $row, 'NerbDatabaseRow' ) ) {
+        if ( $row instanceof DatabaseRow || is_subclass_of( $row, 'DatabaseRow' ) ) {
             $this->rows[] = $row;
             return $this;
         } else {
@@ -126,7 +126,7 @@ class DatabaseRowset implements \Iterator
      *   returns the current element of the rowset
      *
      *   @access     public
-     *   @return     NerbDatabaseRow
+     *   @return     DatabaseRow
      */
     public function current()
     {
@@ -214,7 +214,7 @@ class DatabaseRowset implements \Iterator
      *
      *   @access     public
      *   @param      int $key
-     *   @return     NerbDatabaseRow
+     *   @return     DatabaseRow
      */
     public function fetch( int $key )
     {

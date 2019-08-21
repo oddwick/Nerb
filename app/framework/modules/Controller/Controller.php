@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 
 /**
@@ -13,7 +13,7 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbController
+ * @class           Controller
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -98,7 +98,7 @@ abstract class Controller
      * @param string $mode
      * @param int $node
      * @param int $offset (default: 0)
-     * @throws NerbError
+     * @throws Error
      * @return void
      */
     public function __construct( string $mode, int $node, int $offset = 0 )

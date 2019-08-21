@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -11,12 +11,12 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbUser
+ * @class           User
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright (c)2017
- * @requires NerbError
- * @requires NerbDatabase
+ * @copyright       Copyright (c)2019
+ * @requires Error
+ * @requires Database
  * @todo
  *
  */
@@ -106,7 +106,7 @@ class User
     {
 		
         // check to see if a database is registered
-        if( !$database = Nerb::isClassRegistered( 'NerbDatabase' ) ){
+        if( !$database = Nerb::isClassRegistered( 'Database' ) ){
 			throw new Error( 'Could not find a registered database' );
         }
 		

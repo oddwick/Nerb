@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
 *  Abstract class for parsing urls for nerb controller
@@ -12,7 +12,7 @@ Namespace nerb\framework;
 *
 * @category        Nerb
 * @package         Nerb
-* @class           NerbUrlKeyword
+* @class           UrlKeyword
 * @version         1.0
 * @author          Dexter Oddwick <dexter@oddwick.com>
 * @copyright       Copyright (c)2019

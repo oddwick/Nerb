@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -13,14 +13,14 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbDebug
+ * @class           Debug
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
  * @license         https://www.github.com/oddwick/nerb
  *
  * @todo
- * @requires        NerbError
+ * @requires        Error
  * @requires        ~/config.ini
  *
  */

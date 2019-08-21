@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb Application Framework
@@ -14,8 +14,8 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @subpackage      NerbDatabase
- * @class           NerbDatabase
+ * @subpackage      Database
+ * @class           Database
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright ( c ) 2017
@@ -27,9 +27,9 @@ Namespace nerb\framework;
 // load required libraries
 /*
 ClassManager::loadClass('NerbSqli');
-ClassManager::loadClass('NerbDatabaseTable');
-ClassManager::loadClass('NerbDatabaseRow');
-ClassManager::loadClass('NerbDatabaseRowset');
+ClassManager::loadClass('DatabaseTable');
+ClassManager::loadClass('DatabaseRow');
+ClassManager::loadClass('DatabaseRowset');
 */
 
 
@@ -175,7 +175,7 @@ class Database
      *   Connection string, connects to database with credentials given
      *
      *   @access     public
-     *   @return     NerbDatabase
+     *   @return     Database
      *   @throws     Error
      */
     protected function connect() : self
@@ -269,14 +269,14 @@ class Database
 
 
     /**
-     *   factory function that reates a NerbDatabaseTable.
+     *   factory function that reates a DatabaseTable.
      * 	fisrt it checks the registry to see if there ia a copy of this table already
      *	registered, and if not create a new instance.
      *
      *   @access     public
      *   @throws     Error
      *   @throws     Error
-     *   @return     NerbDatabaseTable
+     *   @return     DatabaseTable
      */
     public function table( $table )
     {
@@ -492,14 +492,14 @@ class Database
 
 
     /**
-     *   retrieves values from a table and returns as a NerbDatabaseRowset object
+     *   retrieves values from a table and returns as a DatabaseRowset object
      *
      *   @access     protected
      *   @param      string $query (sql query string)
-     *   @return     NerbDatabaseRowset
+     *   @return     DatabaseRowset
      *   @throws     Error
      */
-    public function fetch( string $query ) : NerbDatabaseRowset
+    public function fetch( string $query ) : DatabaseRowset
     {
         // ensure that a table is selected
         if ( !$query ) {

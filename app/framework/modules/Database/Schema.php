@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb Application Framework
@@ -16,11 +16,11 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @subpackage      NerbDatabase
- * @class           NerbSchema
+ * @subpackage      Database
+ * @class           Schema
  * @version         1.0
- * @requires        NerbDatabase
- * @requires        NerbError
+ * @requires        Database
+ * @requires        Error
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019 
  *
@@ -35,7 +35,7 @@ class Schema
     /**
      * database
      * 
-     * @var NerbDatabase
+     * @var Database
      * @access protected
      */
     protected $database;
@@ -56,11 +56,11 @@ class Schema
      *   Constructor initiates object
      *
      *   @access     public
-     *   @param      NerbDatabase $database
+     *   @param      Database $database
      *   @return     self
-     *   @throws     NerbError
+     *   @throws     Error
      */
-    public function __construct( NerbDatabase &$database )
+    public function __construct( Database &$database )
     {
         $this->database = $database;
         $this->tables = $this->showTables();
@@ -79,7 +79,7 @@ class Schema
      * @access public
      * @param string $sql_file
      * @return int
-     * @throws NerbError
+     * @throws Error
      */
     public function sqlFromFile( string $sql_file ) : int
     {
@@ -108,7 +108,7 @@ class Schema
      * @param string $table
      * @param string $dir
      * @return string
-     * @throws NerbError
+     * @throws Error
      */
     public function backup( string $table, string $dir )
     {
@@ -158,7 +158,7 @@ class Schema
      * @param string $table
      * @param string $file
      * @return int
-     * @throws NerbError
+     * @throws Error
      */
     public function loadCvs( string $table, string $file ) : int
     {
@@ -188,7 +188,7 @@ class Schema
      * @access public
      * @param string $table
      * @return string
-     * @throws NerbError
+     * @throws Error
      */
     public function showCreateTable( string $table ) : string
     {
@@ -401,7 +401,7 @@ class Schema
      * 
      * @access public
      * @param string $table
-     * @throws NerbError
+     * @throws Error
      * @return string
      */
     public function primary( string $table ) : string
@@ -442,7 +442,7 @@ class Schema
      *   @access     public
      *   @param      string $table
      *   @param      string $column
-     *   @throws     NerbError
+     *   @throws     Error
      *   @return     array
      */
     public function describeColumn( string $table, string $column ) : array

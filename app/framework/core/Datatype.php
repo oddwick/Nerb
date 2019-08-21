@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb Application Framework
@@ -25,10 +25,10 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbDatatype
+ * @class           Datatype
  * @version         1.0
- * @requires        NerbDatabase
- * @requires        NerbError
+ * @requires        Database
+ * @requires        Error
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019 
  *
@@ -36,42 +36,8 @@ Namespace nerb\framework;
  *
  */
 
-    class Datatype
+class Datatype
 {
-    /**
-     * datatype
-     * 
-     * @var string
-     * @access protected
-     */
-    protected $datatype;
-    
-    /**
-     * types
-     * 
-     * (default value: array(
-     *         'string',
-     *         'alpha',
-     *         'alphanum',
-     *         'int',
-     *         'float',
-     *         'metaphone',
-     *         'bool',
-     *     ))
-     * 
-     * @var string
-     * @access protected
-     */
-    protected $types = array(
-        'string',
-        'alpha',
-        'alphanum',
-        'int',
-        'float',
-        'metaphone',
-        'bool',
-    );
-    
     /**
      * invalid_char
      *
@@ -82,9 +48,10 @@ Namespace nerb\framework;
      *  ))
      *
      * @var array
+     * @static
      * @access protected
      */
-    protected $invalid_char = array(
+    protected static $invalid_char = array(
         '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']', '{', '}', ':', '<', '>', '|', '$',
     );
 
@@ -95,101 +62,10 @@ Namespace nerb\framework;
      * __construct function.
      * 
      * @access public
-     * @param string $datatype
-     * @return NerbDatatype
+     * @return Datatype
      */
-    public function __construct( string $datatype )
+    public function __construct()
     {
-        // sets the datatype with error checking
-        $this->set( $datatype );
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * set function.
-     *
-     * sets the datatype with which to compare the string
-     * 
-     * @access public
-     * @param string $datatype
-     * @throws NerbError
-     * @return NerbDatatype
-     */
-    public function set( string $datatype ) : NerbDatatype
-    {
-        // force lowercase
-        $datatype = strtolower($datatype);
-        if ( !in_array($datatype, $this->types) ) {
-                throw new Error('Invalid datatype.  Datatypes must be <code>['.implode('|', $this->types).']</code>');
-        }
-
-        $this->datatype = $datatype;
-        return $this;
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-     * check function.
-     *
-     * performs the actual datacheck
-     * 
-     * @access public
-     * @param string $string
-     * @return string
-     */
-    public function check( string $string )
-    {
-        $method = $this->datatype;
-        return $this->$method( $string );
-	    
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-     * invalidChars function.  adds user defined characters to list of predefined invalid characters
-     *
-     * @access public
-     * @param array $chars
-     * @param bool $replace (default = false)
-     * @return NerbDatatype
-     */
-    public function invalidChars(array $chars, bool $replace = false) : NerbDatatype
-    {
-        // replace list
-        if ($replace) {
-            $this->invalid_char = $chars;
-        } 
-        
-        // merge to existing list
-        else {
-            $this->invalid_char = array_merge($chars, $this->invalid_char);
-        }
-        return $this;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * stopWord function.
-     *
-     * @access public
-     * @param string $char
-     * @return NerbDatatype
-     */
-    public function invalidChar(string $char) : NerbDatatype
-    {
-        // add to list
-        $this->invalid_char[] = $char;
-        return $this;
-        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -202,9 +78,10 @@ Namespace nerb\framework;
      * 
      * @access public
      * @param string $string
+     * @static
      * @return string
      */
-    public function int( string $string ) : string
+    public static function int( string $string ) : string
     {
         return preg_replace('/([^0-9])/', '', $string);
 		
@@ -220,9 +97,10 @@ Namespace nerb\framework;
      * 
      * @access public
      * @param string $string
+     * @static
      * @return string
      */
-    public function float( string $string ) : string
+    public static function float( string $string ) : string
     {
         return preg_replace( '/([^0-9\.])/', '', $string );
 		
@@ -238,11 +116,12 @@ Namespace nerb\framework;
      *
      * @access public
      * @param string $string
+     * @static
      * @return string
      */
-    public function alphanum( string $string ) : string
+    public static function alphanum( string $string ) : string
     {
-        return $this->whitespace( preg_replace( '/([^0-9a-zA-Z ])/', '', $string ) );
+        return self::whitespace( preg_replace( '/([^0-9a-zA-Z ])/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -256,11 +135,12 @@ Namespace nerb\framework;
      * 
      * @access public
      * @param string $string
+     * @static
      * @return string
      */
-    public function alpha( string $string ) : string
+    public static function alpha( string $string ) : string
     {
-        return $this->whitespace( preg_replace('/([^a-zA-Z ])/', '', $string));
+        return self::whitespace( preg_replace('/([^a-zA-Z ])/', '', $string));
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -274,11 +154,12 @@ Namespace nerb\framework;
      * 
      * @access public
      * @param string $string 
+     * @static
      * @return string
      */
     public function metaphone( string $string ) : string
     {
-        return metaphone( $this->alpha( $string ) );
+        return metaphone( self::alpha( $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -291,12 +172,13 @@ Namespace nerb\framework;
      * 
      * @access public
      * @param string $string
+     * @static
      * @return string
      */
-    public function string( string $string ) : string
+    public static function string( string $string ) : string
     {
-        $replace = '\\'.implode( '\\', $this->invalid_char );
-        return $this->whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
+        $replace = '\\'.implode( '\\', self::$invalid_char );
+        return self::whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -310,14 +192,16 @@ Namespace nerb\framework;
      * 
      * @access protected
      * @param string $string
+     * @static
      * @return string
      */
-    protected function whitespace( string $string ) : string
+    protected static function whitespace( string $string ) : string
     {
         // replace any extra whitespace with a single space
         return trim(preg_replace('/\s+/', ' ', $string));
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
+                
                 
 } // end NerbDatatype

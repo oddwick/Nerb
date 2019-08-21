@@ -1,5 +1,6 @@
 <?php
-// Nerb Application Framework
+// Nerb application library 
+namespace nerb\framework;
 
 /**
  * Extends php Exception for Nerb specific error messages
@@ -10,7 +11,7 @@
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbHandler
+ * @class           Handler
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -104,7 +105,7 @@ class Handler
      * 	 @static
      *   @param      Exception $exception
      *   @return     void
-     *   @throws     NerbError
+     *   @throws     Error
      */
     public static function exception_handler( $exception )
     {

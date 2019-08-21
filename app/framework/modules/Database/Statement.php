@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  *  Extends the mysqli_stmt class to allow for multiple binding of values 
@@ -12,7 +12,7 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Nerb_Statement
+ * @class           _Statement
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019

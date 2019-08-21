@@ -1,6 +1,6 @@
 <?php
 // Nerb application library 
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -11,7 +11,7 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbRegistry
+ * @class           Registry
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -84,7 +84,7 @@ class Registry
      * @param object $object
      * @param string $handle
      * @return bool
-     * @throws NerbError
+     * @throws Error
      */
     public function register( $object, string $handle ) : bool
     {
@@ -187,7 +187,7 @@ class Registry
      * @static
      * @param string $handle
      * @return object
-     * @throws NerbError
+     * @throws Error
      */
     public function fetch( string $handle )
     {

@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  *  Extends mysqli to return Nerb_Statement instead of standard class
@@ -17,8 +17,8 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @subpackage      NerbDatabase
- * @class           Nerb_Sqli
+ * @subpackage      Database
+ * @class           _Sqli
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019

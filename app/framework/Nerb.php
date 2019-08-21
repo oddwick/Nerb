@@ -11,7 +11,7 @@ Namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Nerb
+ * @class           
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -136,7 +136,7 @@ class Nerb
 	 * @static
 	 * @return self
 	 */
-	public static function app()
+	public static function app() : self
 	{
 		if ( empty(self::$instance) ){
 			self::$instance = new Nerb();
@@ -159,7 +159,7 @@ class Nerb
      * @return bool
      * @throws Error
      */
-    public static function registry()
+    public static function registry() : Registry
     {
 		if ( empty(self::$registry) ){
 			self::$registry = new Registry();

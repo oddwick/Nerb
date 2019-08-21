@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -8,7 +8,7 @@ Namespace nerb\framework;
  * LICENSE
  *
  * Simple but powerful logging class for maintaining copies of errors, and access etc.
- * this class is required by NerbError
+ * this class is required by Error
  *
  *
  *
@@ -21,7 +21,7 @@ Namespace nerb\framework;
  * @license         https://www.github.com/oddwick/nerb
  *
  * @todo
- * @requires        NerbError
+ * @requires        Error
  * @requires        ~/config.ini
  *
  */
@@ -52,7 +52,7 @@ class Log
      *
      * @access protected
      * @param string $log_file
-     * @throws NerbError
+     * @throws Error
      * @return void
      */
     public function __construct( string $log_file )
@@ -82,7 +82,7 @@ class Log
      * 
      * @access protected
      * @param string $log_file
-     * @throws NerbError
+     * @throws Error
      * @return bool
      */
     protected function init() : bool

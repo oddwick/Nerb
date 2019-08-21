@@ -1,6 +1,6 @@
 <?php
 // Nerb application library 
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * Nerb System Framework

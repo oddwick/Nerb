@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  *  Object class for manipulating a table
@@ -11,8 +11,8 @@ Namespace nerb\framework;
  *
  * @category    	Nerb
  * @package     	Nerb
- * @subpackage      NerbDatabase
- * @class 			NerbDatabaseTable
+ * @subpackage      Database
+ * @class 			DatabaseTable
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -32,7 +32,7 @@ class DatabaseTable
      * 
      * (default value: '')
      * 
-     * @var NerbDatabase
+     * @var Database
      * @access protected
      */
     protected $database;
@@ -96,11 +96,11 @@ class DatabaseTable
      *   easy access.
      *
      *   @access     public
-     *   @param      NerbDatabase $database
+     *   @param      Database $database
      *   @param      string $table
-     *   @return     NerbDatabaseTable
+     *   @return     DatabaseTable
      */
-    public function __construct( NerbDatabase $database, string $table )
+    public function __construct( Database $database, string $table )
     {
         // bind this object to the table
         $this->_bind( $database, $table );
@@ -127,9 +127,9 @@ class DatabaseTable
      *   @access     public
      *   @param      string $table
      *   @return     object self
-     *   @throws     NerbError
+     *   @throws     Error
      */
-    protected function _bind( NerbDatabase $database, string $table ) : self
+    protected function _bind( Database $database, string $table ) : self
     {
         // asign database table
         $this->database = $database;
@@ -389,8 +389,8 @@ class DatabaseTable
     *   @param      string $where
     *   @param      int $limit
     *   @param      int $offset
-    *   @return     NerbDatabaseRowset
-    *   @throws     NerbError
+    *   @return     DatabaseRowset
+    *   @throws     Error
     */
 	public function fetch( string $where = '', int $limit = NULL, int $offset = NULL )
     {
@@ -409,8 +409,8 @@ class DatabaseTable
      *
      *   @access     public
      *   @param      string $where
-     *   @return     NerbDatabaseRow
-     *   @throws     NerbError
+     *   @return     DatabaseRow
+     *   @throws     Error
      */
     public function fetchRow( string $where = '' )
     {
@@ -430,8 +430,8 @@ class DatabaseTable
      *
      *   @access     public
      *   @param      mixed $key
-     *   @return     NerbDatabaseRow
-     *   @throws     NerbError
+     *   @return     DatabaseRow
+     *   @throws     Error
      */
     public function key( string $key )
     {
@@ -460,7 +460,7 @@ class DatabaseTable
     *   @param      string $column column in the table
     *   @param      string $where SQL where statement
     *   @return     array
-    *   @throws     NerbError
+    *   @throws     Error
     */
 	public function fetchColumn( string $column, string $where = '', int $limit = NULL ) : array
     {
@@ -488,7 +488,7 @@ class DatabaseTable
      *   @param      string $column column in the table
      *   @param      string $where SQL where statement
      *   @return     array
-     *   @throws     NerbError
+     *   @throws     Error
      */
     public function fetchUnique( string $column, string $where = '', string $order = 'ASC' ) : array
     {
@@ -514,8 +514,8 @@ class DatabaseTable
      *   @param      int $start the starting row
      *   @param      int $limit
      *   @param      string $where
-     *   @return     NerbDatabaseRowset
-     *   @throws     NerbError
+     *   @return     DatabaseRowset
+     *   @throws     Error
      */
     public function fetchJoinedRows( string $table, string $column, $where = '' )
     {
@@ -574,7 +574,7 @@ class DatabaseTable
 		
         $sql .= ' (' . $cols . ')';
 		
-        //$values = NerbDatabase::quote(  $values  );
+        //$values = Database::quote(  $values  );
         $sql .= ' VALUES (' . $vals . ')';
 
         return $sql;
@@ -632,7 +632,7 @@ class DatabaseTable
      *
      *   @access     protected
      *   @param      array $values (values as array field=>value )
-     *   @throws     NerbError
+     *   @throws     Error
      *   @return     mysqli statement
      */
     protected function _save( array $values, $mode = 'REPLACE' )
@@ -711,7 +711,7 @@ class DatabaseTable
      *   @access     public
      *   @param      mixed $key primary key value
      *   @return     int number of rows affected
-     *   @throws     NerbError
+     *   @throws     Error
      */
     public function deleteRow( $key ) : int
     {
