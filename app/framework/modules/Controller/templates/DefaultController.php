@@ -1,6 +1,4 @@
-<?php
-// Nerb Application Framework
-namespace nerb\framework;
+<?php  /*
 
 /**
  * Default router controller for the site which handles 
@@ -24,44 +22,43 @@ namespace nerb\framework;
 class DefaultController extends Controller
 {
 
-    /**
-     * title
-     *
-     * This is the default value for the page title
-     * 
-     * (default value: 'Nerb Application Framework')
-     * 
-     * @var string
-     * @access protected
-     */
-    protected $title = 'Nerb Application Framework';
+	/**
+	 * title
+	 *
+	 * This is the default value for the page title
+	 * 
+	 * (default value: 'Nerb Application Framework')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $title = 'Nerb Application Framework';
 	
 	
 	
     /**
-     *   Container function for executing domain logic for this module
-     *
-     *   @access public
-     *   @return self
-     */
+    *   Container function for executing domain logic for this module
+    *
+    *   @access		public
+    */
     public function route()
     {
-        // define page structure for the controller
-        $this->url->defineStructure( array( 'page') );
+        // this is a public controller
+        $title = '';
+        
+        $this->defineStructure( array( 'page' ));
         
         // action calls
-        if ( $this->url->action ) {
-            $this->action();
-        }
+        if ( $this->action ) $this->action(); 
         
         $content = $this->publicPages();
 
         // fetch page object and add content to it
-        $page = Nerb::registry()->fetch( 'Page' );
-
-        //$page->nocache();
-
+        $page = Nerb::fetch( 'Page' );
+        $page->noCache();
         $page->title( $this->title );
+        $page->header( PAGES.'/header.php' );
+        $page->footer( PAGES.'/footer.php' );
         $page->content( PAGES.'/'.$content );
         
         return $this;
@@ -72,47 +69,29 @@ class DefaultController extends Controller
 
 
     /**
-     * This is a switchboard for private pages and require the user to be logged in to view them
+     * The pages called here require the user to be logged in to view them
      *
-     * @access protected
-     * @property string $page
-     * @return string
+     * @access         protected
+     * @return         string
      */
-    protected function privatePages()
+    protected function privatePages() : string
     {
-/*
-       switch ( $this->page ) {
-	        
-            case '':
-            	
-            default:
-                $page = 'default.php';
-        }// end switch
-        
-        return $page;
-*/
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * This is a switchboard for public pages and can be seen by anyone
+     * The pages called here are public and can be seen by anyone
      * 
      * @access protected
-     * @property string $page
-     * @return string
+     * @return void
      */
-    protected function publicPages()
+    protected function publicPages() : string
     {
-       switch ( $this->page ) {
-	        
-            case 'privacy':
-            	$page = '/default/privacy.php';
-            	break;
-            	
-            case 'terms':
-            	$page = '/default/terms.php';
+        switch ( $this->page ) {
+            case 'somePage':
+                $page = 'somePage.php';
             	break;
             	
             default:
@@ -127,21 +106,20 @@ class DefaultController extends Controller
 
 
     /**
-     * This is a switchboard where actions are performed. a jump is performed on the completion of an action
+     * This is where actions are performed. a jump is performed on the completion of an action
      * 
      * @access protected
-     * @property string $action
      * @return void
      */
     protected function action()
     {
-        switch ( $this->url->action() ) {
+        switch ( $this->action ) {
             default:
                 $page = '/';
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump($page);
+        Nerb::jump( $content );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

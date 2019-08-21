@@ -427,7 +427,7 @@ class Error extends \Exception
         // footer
         $footer = '<footer>'
         . '<p><strong>'.SOFTWARE.' v'.VERSION.' (build '.BUILD.')</strong></p>'
-        . '<p><em>'.COPYRIGHT.'</em>&nbsp;&nbsp;&nbsp;<a href="https://www.github.com/oddwick/nerb" target="_blank">https://www.github.com/oddwick/nerb</a></p>'
+        . '<p><em>'.COPYRIGHT.'</em>&nbsp;&nbsp;&nbsp;<a href="'.GIT.'" target="_blank">Github</a> | <a href="'.SCRUTINIZER.'" target="_blank">Scrutinizer</a></p>'
         . '</footer>';
         return $footer;
         

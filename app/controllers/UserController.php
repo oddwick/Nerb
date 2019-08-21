@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace Nerb\Framework;
+namespace nerb\framework;
 
 /**
  * 	Simple router controller for managing users
