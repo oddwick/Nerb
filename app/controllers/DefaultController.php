@@ -1,4 +1,6 @@
-<?php  /*
+<?php
+// Nerb Application Framework
+namespace Nerb\Framework;
 
 /**
  * Default router controller for the site which handles 
@@ -19,7 +21,7 @@
  */
 
 
-class DefaultController extends NerbController
+class DefaultController extends Controller
 {
 
     /**
@@ -55,7 +57,7 @@ class DefaultController extends NerbController
         $content = $this->publicPages();
 
         // fetch page object and add content to it
-        $page = Nerb::fetch( 'Page' );
+        $page = Nerb::registry()->fetch( 'Page' );
 
         //$page->nocache();
 

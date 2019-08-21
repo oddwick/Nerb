@@ -1,26 +1,30 @@
 <?PHP
+    use nerb\framework as App;
     // this file is for testing purposes with a database connection
 	
-    echo "<pre>";
-	
-    $schema = new Schema( $database );
+    $string = "searching for sheets";
+    $search = new App\Search( $string );
+    $search->field('description');
+    $search->search();
+    
+    echo $search;
+    
+    die;
     //echo $schema->primary('classes');
     //$schema->sqlFromFile( APP_PATH.'/../classes.sql' );
     //print_r( $db->tables() );
     //print_r( $schema->describe( 'classes' ) );
 	
 	
-    //$test = new DatabaseFetch( $db, 'classes' );
+    //$test = new NerbDatabaseFetch( $db, 'classes' );
     $test = $database->table( 'classes' );
 	
 	
-    print_r( Nerb::listRegisteredObjects() );
-    die;
     $results = $test->fetch('standard = 1 ORDER BY description ASC');
 	
     //echo $results->count();
 	
-    echo $test->deleteRow(3);
+    echo $test->deleteRow(91);
 	
     foreach( $results as $result ){
         echo $result->class_id." - ".$result->description.PHP_EOL;
@@ -33,10 +37,8 @@
 
 
     $query = "SELECT MAX(date_modified) FROM classes ";
-    //echo $result = $db->listTables( $query );
-	
     die;
-    //$schema =  new Schema( $db );
+    //$schema =  new NerbSchema( $db );
 
     //echo $schema->sqlFromFile(APP_PATH.'/../classes.sql');
 
@@ -60,7 +62,7 @@
 
 	
 /*
-	$log = new Log( LOG.'/testlog.log' );
+	$log = new NerbLog( LOG.'/testlog.log' );
 	//$log->write("this is a test of the logging system - ".time() );
 	
 	echo $log->getLastEntry(  );

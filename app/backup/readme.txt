@@ -1,0 +1,1 @@
+This folder is where for backing up database tables into sql files.

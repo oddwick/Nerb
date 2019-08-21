@@ -18,9 +18,14 @@
 	 *
 	*/
     //	ini_set( 'display_errors', 'On' );	
-    //	error_reporting( E_ERROR | E_WARNING | E_PARSE );
+    	error_reporting( E_ERROR | E_WARNING | E_PARSE );
+    //	error_reporting( E_ERROR | E_PARSE );
     //	error_reporting(E_ALL );
 	
+    // define namespace
+    use nerb\framework\Nerb as Nerb;
+    use nerb\framework as App;
+    
     // begin session
     session_start();
 	
@@ -30,33 +35,30 @@
     define( 'APP_PATH', realpath(__DIR__.'/..' ) );
 	
     // include required config data
-    require_once APP_PATH.'/config/credentials.php' ;
+    require_once APP_PATH.'/framework/core/Init.php';
+	require_once APP_PATH.'/data/credentials.php';
 
-    // load static class
-    require_once APP_PATH.'/framework/Nerb.php';
-	
     // initialize framework and include application config as app.ini
-    Nerb::init();
-    Nerb::loadConfig( '/config/app.ini' );   
-	
+    $app = App\Init::begin();
+
     // create a page object with an ini file
-    Nerb::register( $page = new NerbPage( '/config/page.ini' ), 'Page' );
+    Nerb::registry()->register( $page = new App\Page(), 'Page' );
     
-    //require_once APP_PATH.'/public/playground.php';
-    
-	
     // connect to the database
     // initialize & register tables
-    Nerb::register( $database = new NerbDatabase( 'Database', $DB ), 'Database' );
-    $Users = $database->table('users');
+	Nerb::registry()->register( $database = new App\Database( 'Database', $DB ), 'Database' );
 	
+    // -- include logic page for testing
+    require_once APP_PATH.'/testing/test.php';
 	
     // create a controller
-    $controller = NerbNode::controller( CONTROLLERS, URL_MODE, 0 );
-
+    App\ClassManager::setPath( CONTROLLERS, 'controllers' );
+    $controller = App\Node::controller( CONTROLLERS, URL_MODE, 0 );
     // rout and display page
     $controller->route();
 	
+	// -- force the page to display an error for testing
+    //$page->error(503);
     // display the page
     $page->render();
     
