@@ -1,4 +1,6 @@
-<?php  /*
+<?php
+// Nerb Application Framework
+Namespace nerb\framework;
 
 /**
  * Default router controller for the site which handles 
@@ -71,11 +73,21 @@ class DefaultController extends Controller
     /**
      * The pages called here require the user to be logged in to view them
      *
-     * @access         protected
-     * @return         string
+     * @access protected
+     * @return string
      */
     protected function privatePages() : string
     {
+        switch ( $this->page ) {
+            case 'somePage':
+                $page = 'somePage.php';
+            	break;
+            	
+            default:
+                $page = 'default.php';
+        }// end switch
+        
+        return $page;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -85,7 +97,7 @@ class DefaultController extends Controller
      * The pages called here are public and can be seen by anyone
      * 
      * @access protected
-     * @return void
+     * @return string
      */
     protected function publicPages() : string
     {
@@ -119,7 +131,7 @@ class DefaultController extends Controller
         }// end switch
         
         // jump to action endpoint
-        Core::jump( $content );
+        Core::jump( $page );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
