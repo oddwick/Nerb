@@ -31,7 +31,7 @@ class Setup
 {
 
     /**
-     * Singleton Pattern prevents multiple instances of NerbUtility.  all calls must be made statically e.g. NerbUtility::function(  args  );
+     * Setup utility for creating framework enviornment
      *
      *   @access     public
      *   @return     void
@@ -47,11 +47,12 @@ class Setup
      * install function.
      * 
      * @access public
-     * @return void
+     * @static
+     * @return bool
      */
     public static function install()
     {
-    	return $status = true;
+    	return true;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -66,6 +67,7 @@ class Setup
      * applies to that class 
      * 
      * @access public
+     * @static
      * @return void
      */
     public static function reconfigure()
@@ -81,7 +83,7 @@ class Setup
         // get configuration files
         $files = glob( CONFIG.'/*.ini');
         
-        $congig = '';
+        $config = '';
         
         // loop and parse config files
         foreach( $files as $file ){
@@ -109,16 +111,17 @@ class Setup
      * This writes the configuration out to a file in the CONFIG directory named .Config.cfg
      * 
      * @access protected
-     * @return bool
+     * @static
+     * @return void
      */
-    protected static function write( string $data ) : bool
+    protected static function write( string $data )
     {
 	    $config = '<?PHP'.PHP_EOL;
 	    $config .= self::head();
 	    $config .= $data;
 	    $config .= PHP_EOL.'?>';
         // append contents to file
-        return file_put_contents ( CONFIG.DIRECTORY_SEPARATOR.'.Config.cfg'  , $config , LOCK_EX );
+        file_put_contents ( CONFIG.DIRECTORY_SEPARATOR.'.Config.cfg'  , $config , LOCK_EX );
 			
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 	    
@@ -130,6 +133,7 @@ class Setup
 	 * 
 	 * @access protected
 	 * @param string $ini_file
+     * @static
 	 * @return array
 	 */
 	protected static function parse( string $ini_file ) : array
@@ -139,9 +143,9 @@ class Setup
         try {
             // if the config.ini file is read, it loads the values into the params
             $params = parse_ini_file($ini_file, true, INI_SCANNER_TYPED);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Core::halt(
-                'Could not parse configuration file <code>'.$ini.'</code>. <br /> 
+                'Could not parse configuration file <code>'.$ini_file.'</code>. <br /> 
 					Make that it is formatted properly and conforms to required standards.'
             );
         }// end try
@@ -153,10 +157,10 @@ class Setup
                 );
         }
 		
-        // and make sure that it was read properly and created an array
-        if ( !is_array( $params )) {
+        // and make sure that it was read properly and created an array with a params section
+        if ( empty( $params['params'] ) ) {
             Core::halt( 
-                'Could not parse configuration file <code>['.$ini.']</code>.<br /> 
+                'Could not parse configuration file <code>['.$ini_file.']</code>.<br /> 
 					Make that it is formatted properly and conforms to required standards. '
                 );
         }
@@ -172,6 +176,7 @@ class Setup
 	 * 
 	 * @access protected
 	 * @param array $data
+     * @static
 	 * @return string
 	 */
 	protected static function format( array $data )
@@ -199,6 +204,7 @@ class Setup
 	 * head function.
 	 * 
 	 * @access protected
+     * @static
 	 * @return string
 	 */
 	protected static function head() : string
