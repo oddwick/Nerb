@@ -41,17 +41,19 @@ class DefaultController extends Controller
     /**
     *   Container function for executing domain logic for this module
     *
-    *   @access		public
+    *   @access	public
+    *   @return	self
     */
-    public function route()
+    public function route() :  self
     {
         // this is a public controller
         $title = '';
         
-        $this->defineStructure( array( 'page' ));
+        // -- this is for restful urls --
+        //$this->defineStructure( array( 'page' ));
         
         // action calls
-        if ( $this->action ) $this->action(); 
+        if ( $this->action() ) $this->action(); 
         
         $content = $this->publicPages();
 
@@ -74,6 +76,7 @@ class DefaultController extends Controller
      * The pages called here require the user to be logged in to view them
      *
      * @access protected
+     * @property string $page
      * @return string
      */
     protected function privatePages() : string
@@ -97,6 +100,7 @@ class DefaultController extends Controller
      * The pages called here are public and can be seen by anyone
      * 
      * @access protected
+     * @property string $page
      * @return string
      */
     protected function publicPages() : string
@@ -125,7 +129,7 @@ class DefaultController extends Controller
      */
     protected function action()
     {
-        switch ( $this->action ) {
+        switch ( $this->action() ) {
             default:
                 $page = '/';
         }// end switch
