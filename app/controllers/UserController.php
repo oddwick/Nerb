@@ -48,9 +48,10 @@ class UserController extends Controller
     /**
      *   Container function for executing domain logic for this module
      *
-     *   @access		public
-     */
-    public function route()
+     *   @access public
+     *   @return self
+    */
+    public function route() : self
     {
         // define page structure for the controller
         $this->url->defineStructure( array( 'page') );
@@ -59,7 +60,7 @@ class UserController extends Controller
         $this->user = new User( 'user_table', 'user_id', 'user_name', 'user_pass' );
 		
         // action calls
-        if ( $this->url->action ) {
+        if ( $this->url->action() ) {
             $this->action();
         }
         
@@ -82,8 +83,9 @@ class UserController extends Controller
     /**
      * This is a switchboard for private pages and require the user to be logged in to view them
      *
-     * @access         protected
-     * @return         string
+     * @access protected
+     * @property string $page
+     * @return string
      */
     protected function privatePages() : string
     {
@@ -166,7 +168,7 @@ class UserController extends Controller
 	 * @access protected
 	 * @param mixed $user_name
 	 * @param mixed $user_pass
-	 * @return void
+	 * @return string
 	 */
 	protected function login( string $user_name, string $user_pass ) : string
 	{
