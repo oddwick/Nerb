@@ -80,17 +80,15 @@ class DefaultController extends Controller
      */
     protected function privatePages() : string
     {
-/*
        switch ( $this->page ) {
 	        
-            case '':
+            case 'default':
             	
             default:
                 $page = 'default.php';
         }// end switch
         
         return $page;
-*/
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
