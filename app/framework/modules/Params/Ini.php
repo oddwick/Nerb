@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-
+Namespace nerb\framework;
 
 /**
  *  This is a container class for Nerb for using ini file to generate parameters
@@ -27,8 +27,6 @@
 
 class Ini extends Params
 {
-
-
     /**
      *  defaults
      *
@@ -53,7 +51,6 @@ class Ini extends Params
      */
     public function __construct( string $ini_file, bool $read_sections = FALSE, array $additional_params = array() )
     {
-        
         // find the ini file
         $ini_file = $this->configExists( $ini_file);
 
@@ -62,9 +59,9 @@ class Ini extends Params
         try {
             // if the config.ini file is read, it loads the values into the params
             $this->params = parse_ini_file($ini_file, $read_sections, INI_SCANNER_TYPED);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new Error(
-                'Could not parse configuration file <code>'.$ini.'</code>. <br /> 
+                'Could not parse configuration file <code>'.$ini_file.'</code>. <br /> 
 					Make that it is formatted properly and conforms to required standards.'
             );
         }// end try
@@ -72,18 +69,11 @@ class Ini extends Params
         // make sure that the ini file was read
         if ( empty( $this->params )) {
             throw new Error( 
-                'Configuration file <code>[$ini]</code> appears to be empty.'
-                );
-        }
-		
-        // and make sure that it was read properly and created an array
-        if ( !is_array( $this->params )) {
-            throw new Error( 
-                'Could not parse configuration file <code>['.$ini.']</code>.<br /> 
+                'Configuration file <code>[$ini]</code> appears to be empty.<br /> 
 					Make that it is formatted properly and conforms to required standards. '
                 );
         }
-		
+				
         // convert dot notation to arrays and assign inital values to default array so that 
         // the default value can be retrieved if changed
         $this->defaults = $this->params = $this->parse($this->params);
@@ -106,6 +96,8 @@ class Ini extends Params
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
+
+
     /**
      * configExists function.
      * 
@@ -118,11 +110,11 @@ class Ini extends Params
     {
         // error checking to make sure file exists
         // if the full path is given...
-        if ( !file_exists($ini_file) && !file_exists(APP_PATH.$path.( substr($file, 0, 1) == '/' ? '' : '/').$ini_file)) {
-            throw new Error("Could not locate given configuration file <code>{$ini}</code> using: <br><code>{$path}</code><br><code>{APP_PATH}/{$path}</code>");
+        if ( !file_exists($ini_file) && !file_exists(APP_PATH.$path.( substr($ini_file, 0, 1) == '/' ? '' : '/').$ini_file)) {
+            throw new Error("Could not locate given configuration file <code>{$ini_file}</code>");
         }
             
-        $ini_file = file_exists($ini_file) ? $ini_file : APP_PATH.$path.( substr($file, 0, 1) == '/' ? '' : '/').$ini_file;
+        $ini_file = file_exists($ini_file) ? $ini_file : APP_PATH.$path.( substr($ini_file, 0, 1) == '/' ? '' : '/').$ini_file;
         
         return $ini_file;
         
@@ -149,7 +141,7 @@ class Ini extends Params
             }
             $temp = $value;
         }
-        return $config = $array;
+        return $array;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
