@@ -1,6 +1,6 @@
 <?php
 // Nerb application library 
-Namespace nerb\framework;
+namespace nerb\framework;
 
 /**
  * This lays the groundwork and creates the working environment for the framework
