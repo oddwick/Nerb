@@ -1,4 +1,4 @@
-# test/public/.htaccess
+# app/public/.htaccess
 
     RewriteEngine On
     

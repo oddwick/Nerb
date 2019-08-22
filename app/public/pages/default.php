@@ -8,7 +8,7 @@
 	*/
 	
 	// fetch the database and do something with it...
-    //$database = Nerb::fetch('database');
+    //$database = Nerb::registry()->fetch('database');
 ?>
 
 <div class="grid-x grid-margin-x grid-margin-y">

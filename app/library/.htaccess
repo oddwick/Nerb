@@ -1,3 +1,5 @@
+# /app/library
+
 Options -Indexes
 
 Order Deny,Allow
