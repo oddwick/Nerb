@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  *  Object class for manipulating a table

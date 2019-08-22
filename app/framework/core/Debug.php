@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -13,7 +13,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Debug
+ * @class           NerbDebug
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -148,13 +148,14 @@ class Debug
      */
     public static function modules() : array
     {
-        $modules = array();
-        // get loaded classes
-        $classes = get_declared_classes();
-        foreach( $classes as $key => $value ){
-            if( stristr($value, 'Nerb') )
-                $modules[] = $value;
-        } // end foreach
+        $modules = array_filter(
+		    get_declared_classes(),
+		    function($className) {
+		        return !call_user_func(
+		            array(new ReflectionClass($className), 'isInternal')
+		        );
+		    }
+		);
     	
         // sort them in alphabetical order
         sort($modules);

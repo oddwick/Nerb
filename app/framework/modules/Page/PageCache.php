@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 
 /**
@@ -13,7 +13,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Page
+ * @class           NerbPage
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -81,7 +81,7 @@ class PageCache
      * @access public
      * @param string $page
      * @throws Error
-     * @return PageCache
+     * @return NerbPageCache
      */
     public function __construct( string $filename )
     {

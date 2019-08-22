@@ -38,7 +38,7 @@ class UserController extends Controller
     /**
      * user
      * 
-     * @var NerbUser
+     * @var User
      * @access protected
      */
     protected $user;
@@ -56,7 +56,7 @@ class UserController extends Controller
         $this->url->defineStructure( array( 'page') );
         
         // create user object
-        $this->user = new NerbUser( 'user_table', 'user_id', 'user_name', 'user_pass' );
+        $this->user = new User( 'user_table', 'user_id', 'user_name', 'user_pass' );
 		
         // action calls
         if ( $this->url->action ) {
@@ -68,7 +68,7 @@ class UserController extends Controller
         $content = !$this->user->verify() ? $this->publicPages() : $this->privatePages();
         
         // fetch page object and add content to it
-        $page = Nerb::fetch('Page');
+        $page = Nerb::registry()->fetch('Page');
         $page->title($this->title);
         $page->content(PAGES.'/'.$content);
         
@@ -144,7 +144,7 @@ class UserController extends Controller
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump($page);
+        Core::jump($page);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

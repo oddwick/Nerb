@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 
 /**
@@ -13,7 +13,7 @@ namespace nerb\framework;
  * @implements 		Iterator
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright (c)2019 
+ * @copyright       Copyright (c)2019 * 
  * @see             Database
  * @see             DatabaseTable
  * @see             DatabaseRowset

@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 
 /**
@@ -13,7 +13,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           DyanmicPage
+ * @class           NerbDyanmicPage
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019

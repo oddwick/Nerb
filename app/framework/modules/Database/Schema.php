@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb Application Framework
@@ -17,7 +17,7 @@ namespace nerb\framework;
  * @category        Nerb
  * @package         Nerb
  * @subpackage      Database
- * @class           Schema
+ * @class           NerbSchema
  * @version         1.0
  * @requires        Database
  * @requires        Error

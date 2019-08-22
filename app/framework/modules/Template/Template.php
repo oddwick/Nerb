@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -11,10 +11,11 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Template
+ * @class           NerbTemplate
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
+Copyright (c)2019 *
  * @todo
  * @requires        Error
  * @requires        ~/config.ini
@@ -205,9 +206,9 @@ class Template
      * @access public
      * @param array $words
      * @param bool $replace (default = false)
-     * @return Template
+     * @return NerbTemplate
      */
-    public function tags(array $tags, bool $replace = FALSE) : Template
+    public function tags(array $tags, bool $replace = FALSE) : NerbTemplate
     {
         // replace list
         if ($replace) {
@@ -227,9 +228,9 @@ class Template
      *
      * @access public
      * @param string $word
-     * @return Template
+     * @return NerbTemplate
      */
-    public function tag(string $tag) : Template
+    public function tag(string $tag) : NerbTemplate
     {
         // add to list
         $this->excluded_words[] = $words;

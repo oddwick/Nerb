@@ -54,7 +54,7 @@ class DefaultController extends Controller
         $content = $this->publicPages();
 
         // fetch page object and add content to it
-        $page = Nerb::fetch( 'Page' );
+        $page = Nerb::registry()->fetch( 'Page' );
         $page->noCache();
         $page->title( $this->title );
         $page->header( PAGES.'/header.php' );
@@ -119,7 +119,7 @@ class DefaultController extends Controller
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump( $content );
+        Core::jump( $content );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

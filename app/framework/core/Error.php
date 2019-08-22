@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Extends php Exception for Nerb specific error messages
@@ -196,7 +196,7 @@ class Error extends \Exception
     protected function log( array $trace, string $msg, string $prefix = 'ERROR' )
 	{
         // create error string
-        $error = $this->cleanPath($trace['file']) . ' (' . $trace['line'] . ') -- ' .$msg.' --  nerb error';
+        $error = $this->cleanPath($trace['file']) . ' (' . $trace['line'] . ') -- ' .$msg;
         
         // log error to file
         ClassManager::loadClass( 'Log' );

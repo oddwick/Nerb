@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -14,7 +14,7 @@ namespace nerb\framework;
  * @class           User
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
- * @copyright       Copyright (c)2019
+ * @copyright       Copyright (c)2017
  * @requires Error
  * @requires Database
  * @todo
@@ -117,7 +117,7 @@ class User
 		
         // fetch database and check to see if table exists
         $this->database = $database ;
-        $database = Nerb::fetch( $this->database );
+        $database = Nerb::registry()->fetch( $this->database );
 		
         if( !$database->isTable( TOKEN_TABLE ) ){
 	        $this->createSessionTable();
@@ -181,7 +181,7 @@ class User
 			    PRIMARY KEY (`session_id`)
 			)';
 			
-        $database = Nerb::fetch( $this->database );
+        $database = Nerb::registry()->fetch( $this->database );
         $database->execute( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ class User
 			    PRIMARY KEY (`log_id`)
 			)';
 			
-        $database = Nerb::fetch( $this->database );
+        $database = Nerb::registry()->fetch( $this->database );
         $database->execute( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ class User
 	protected function createSession($user_id)
 	{
 		// fetch database
-		$database = Nerb::fetch($this->database);
+		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
 		$sessions = new DatabaseTable($database, TOKEN_TABLE);
@@ -292,7 +292,7 @@ class User
 	{
 		// find and unset session in database
 		// fetch database
-		$database = Nerb::fetch($this->database);
+		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
 		$sessions = new DatabaseTable($database, TOKEN_TABLE);
@@ -360,7 +360,7 @@ class User
 	{
 		if (LOG_ATTEMPTS == 'db' || LOG_ATTEMPTS == 'both') {
 			// fetch database and bind to userlog table
-			$database = Nerb::fetch($this->database);
+			$database = Nerb::registry()->fetch($this->database);
 			$log = new DatabaseTable($database, ACCESS_LOG_TABLE);
 			
 			// setup log array
@@ -426,7 +426,7 @@ class User
 		} 
 		
 		// fetch database and tables		
-		$Users = Nerb::fetch($table);
+		$Users = Nerb::registry()->fetch($table);
 		
 		// user not found
 		if (!$user = $Users->fetchRow($user.' = \''.$user_name.'\'', 1)) {
@@ -476,7 +476,7 @@ class User
 	public function verify() : bool
 	{
 		// fetch database
-		$database = Nerb::fetch($this->database);
+		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
 		$sessions = new DatabaseTable($database, TOKEN_TABLE);

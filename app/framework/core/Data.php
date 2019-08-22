@@ -1,6 +1,6 @@
 <?PHP
 // Nerb application library core data
-namespace nerb\framework;
+Namespace nerb\framework;
 
 // defines the software constants
 define('SOFTWARE', 'Nerb Application Framework');

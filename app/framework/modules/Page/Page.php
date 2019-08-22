@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 
 /**
@@ -35,7 +35,7 @@ class Page
      *
      * The page data is stored in page.ini
      * 
-     * @var NerbParams
+     * @var Params
      * @access protected
      */
     protected $params;
@@ -609,7 +609,7 @@ class Page
 	protected function process_ini( string $ini_file ) 
 	{
 		// process the ini file and merge it to params array
-		$params = new Ini( $ini_file, true );
+		$params = new ParamsIni( $ini_file, true );
 		
 		// dump the params into array
         $dump = $params->dump();

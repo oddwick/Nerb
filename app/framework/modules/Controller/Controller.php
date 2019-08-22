@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 
 /**
@@ -13,7 +13,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Controller
+ * @class           NerbController
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -54,7 +54,7 @@ abstract class Controller
     /**
      * url
      * 
-     * @var NerbUrl
+     * @var Url
      * @access protected
      */
     protected $url;

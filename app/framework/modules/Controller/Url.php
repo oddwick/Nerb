@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 
 /**
@@ -13,7 +13,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Url
+ * @class           NerbUrl
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -369,7 +369,7 @@ abstract class Url
     public function set( string $key, $value )
     {
         $_SESSION[ $key ] = $value;
-        Nerb::jump( $this->return_page );
+        Core::jump( $this->return_page );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -389,7 +389,7 @@ abstract class Url
     public function toggle( string $key )
     {
         $_SESSION[ $key ] = $_SESSION[ $key ] ? false : true;
-        Nerb::jump( $this->return_page );
+        Core::jump( $this->return_page );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

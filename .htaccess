@@ -1,0 +1,29 @@
+# test/.htaccess
+
+	Options -Indexes
+	Options +FollowSymLinks
+	
+    RewriteEngine on
+    #RewriteBase /app/public
+    
+    # safe request methods
+	RewriteCond %{REQUEST_METHOD} !^(GET|HEAD|POST|PROPFIND|OPTIONS|PUT)$ [NC]
+ 	RewriteRule .? - [F,NS,L]
+ 	
+ 	   
+    RewriteCond %{HTTPS} !=on
+	RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
+	
+	
+	
+	RewriteRule ^thumbs/(.*)$ /app/content/thumbs/$1  [L]
+
+
+	RewriteRule   ^robots.txt$ robots.txt    [L]
+   
+   
+    #RewriteCond   %{REQUEST_FILENAME} !-d
+    RewriteCond   %{REQUEST_FILENAME} !-f
+    RewriteRule   ((?s).*) /app/public/$1 [L]
+    
+    

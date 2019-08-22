@@ -141,7 +141,7 @@ class DefaultController extends Controller
         }// end switch
         
         // jump to action endpoint
-        Nerb::jump($page);
+        Core::jump($page);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

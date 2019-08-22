@@ -1,6 +1,5 @@
 <?php
-// Nerb application library 
-namespace nerb\framework;
+// Nerb Application Framework
 
 /**
  * Extends php Exception for Nerb specific error messages
@@ -132,7 +131,7 @@ class Handler
         
         // log error to file
         // WARNING | ERROR | NOTICE [date] file (line) string
-        Nerb::loadClass( 'NerbLog' );
+        ClassManager::loadClass( 'Log' );
         $log = new Log( ERROR_LOG );
         $log->write( $message , strtoupper($prefix) );
 			

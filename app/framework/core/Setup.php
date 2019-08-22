@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -203,7 +203,7 @@ class Setup
 	 */
 	protected static function head() : string
 	{
-		$header =  'namespace nerb\framework;'.PHP_EOL.PHP_EOL
+		$header =  'Namespace nerb\framework;'.PHP_EOL.PHP_EOL
 		. '/*'.PHP_EOL
 		.' ----------------------------------------------------------------------------------------------------------------'.PHP_EOL
 		.' Nerb Application Framework working configuration'.PHP_EOL

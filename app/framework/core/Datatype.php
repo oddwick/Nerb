@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb Application Framework
@@ -36,8 +36,42 @@ namespace nerb\framework;
  *
  */
 
-class Datatype
+    class Datatype
 {
+    /**
+     * datatype
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $datatype;
+    
+    /**
+     * types
+     * 
+     * (default value: array(
+     *         'string',
+     *         'alpha',
+     *         'alphanum',
+     *         'int',
+     *         'float',
+     *         'metaphone',
+     *         'bool',
+     *     ))
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $types = array(
+        'string',
+        'alpha',
+        'alphanum',
+        'int',
+        'float',
+        'metaphone',
+        'bool',
+    );
+    
     /**
      * invalid_char
      *
@@ -48,10 +82,9 @@ class Datatype
      *  ))
      *
      * @var array
-     * @static
      * @access protected
      */
-    protected static $invalid_char = array(
+    protected $invalid_char = array(
         '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']', '{', '}', ':', '<', '>', '|', '$',
     );
 
@@ -62,10 +95,101 @@ class Datatype
      * __construct function.
      * 
      * @access public
+     * @param string $datatype
      * @return Datatype
      */
-    public function __construct()
+    public function __construct( string $datatype )
     {
+        // sets the datatype with error checking
+        $this->set( $datatype );
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * set function.
+     *
+     * sets the datatype with which to compare the string
+     * 
+     * @access public
+     * @param string $datatype
+     * @throws Error
+     * @return Datatype
+     */
+    public function set( string $datatype ) : Datatype
+    {
+        // force lowercase
+        $datatype = strtolower($datatype);
+        if ( !in_array($datatype, $this->types) ) {
+                throw new Error('Invalid datatype.  Datatypes must be <code>['.implode('|', $this->types).']</code>');
+        }
+
+        $this->datatype = $datatype;
+        return $this;
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    /**
+     * check function.
+     *
+     * performs the actual datacheck
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public function check( string $string )
+    {
+        $method = $this->datatype;
+        return $this->$method( $string );
+	    
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    /**
+     * invalidChars function.  adds user defined characters to list of predefined invalid characters
+     *
+     * @access public
+     * @param array $chars
+     * @param bool $replace (default = false)
+     * @return Datatype
+     */
+    public function invalidChars(array $chars, bool $replace = false) : Datatype
+    {
+        // replace list
+        if ($replace) {
+            $this->invalid_char = $chars;
+        } 
+        
+        // merge to existing list
+        else {
+            $this->invalid_char = array_merge($chars, $this->invalid_char);
+        }
+        return $this;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * stopWord function.
+     *
+     * @access public
+     * @param string $char
+     * @return Datatype
+     */
+    public function invalidChar(string $char) : Datatype
+    {
+        // add to list
+        $this->invalid_char[] = $char;
+        return $this;
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -78,10 +202,9 @@ class Datatype
      * 
      * @access public
      * @param string $string
-     * @static
      * @return string
      */
-    public static function int( string $string ) : string
+    public function int( string $string ) : string
     {
         return preg_replace('/([^0-9])/', '', $string);
 		
@@ -97,10 +220,9 @@ class Datatype
      * 
      * @access public
      * @param string $string
-     * @static
      * @return string
      */
-    public static function float( string $string ) : string
+    public function float( string $string ) : string
     {
         return preg_replace( '/([^0-9\.])/', '', $string );
 		
@@ -116,12 +238,11 @@ class Datatype
      *
      * @access public
      * @param string $string
-     * @static
      * @return string
      */
-    public static function alphanum( string $string ) : string
+    public function alphanum( string $string ) : string
     {
-        return self::whitespace( preg_replace( '/([^0-9a-zA-Z ])/', '', $string ) );
+        return $this->whitespace( preg_replace( '/([^0-9a-zA-Z ])/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -135,12 +256,11 @@ class Datatype
      * 
      * @access public
      * @param string $string
-     * @static
      * @return string
      */
-    public static function alpha( string $string ) : string
+    public function alpha( string $string ) : string
     {
-        return self::whitespace( preg_replace('/([^a-zA-Z ])/', '', $string));
+        return $this->whitespace( preg_replace('/([^a-zA-Z ])/', '', $string));
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -154,12 +274,11 @@ class Datatype
      * 
      * @access public
      * @param string $string 
-     * @static
      * @return string
      */
     public function metaphone( string $string ) : string
     {
-        return metaphone( self::alpha( $string ) );
+        return metaphone( $this->alpha( $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -172,13 +291,12 @@ class Datatype
      * 
      * @access public
      * @param string $string
-     * @static
      * @return string
      */
-    public static function string( string $string ) : string
+    public function string( string $string ) : string
     {
-        $replace = '\\'.implode( '\\', self::$invalid_char );
-        return self::whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
+        $replace = '\\'.implode( '\\', $this->invalid_char );
+        return $this->whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -192,10 +310,9 @@ class Datatype
      * 
      * @access protected
      * @param string $string
-     * @static
      * @return string
      */
-    protected static function whitespace( string $string ) : string
+    protected function whitespace( string $string ) : string
     {
         // replace any extra whitespace with a single space
         return trim(preg_replace('/\s+/', ' ', $string));
@@ -203,5 +320,4 @@ class Datatype
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
                 
-                
-} // end NerbDatatype
+} // end Datatype

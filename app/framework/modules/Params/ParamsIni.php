@@ -112,7 +112,7 @@ class ParamsIni extends Params
      * 
      * @access public
      * @param string $ini_file
-     * @throws NerbError
+     * @throws Error
      * @return string (found file name)
      */
     public function configExists( string $ini_file ) : string

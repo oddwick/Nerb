@@ -1,6 +1,6 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb Application Framework
@@ -26,7 +26,7 @@ namespace nerb\framework;
 
 // load required libraries
 /*
-ClassManager::loadClass('NerbSqli');
+ClassManager::loadClass('Sqli');
 ClassManager::loadClass('DatabaseTable');
 ClassManager::loadClass('DatabaseRow');
 ClassManager::loadClass('DatabaseRowset');
@@ -614,7 +614,7 @@ class Database
      *
      *   @access public
      *   @param string $query_string (formatted query string)
-     *   @returnNerbStatement
+     *   @return Statement
      */
     public function prepare( $query_string )
     {

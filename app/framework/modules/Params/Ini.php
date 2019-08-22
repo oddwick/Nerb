@@ -1,6 +1,5 @@
 <?php
 // Nerb Application Framework
-namespace nerb\framework;
 
 
 /**
@@ -17,7 +16,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Params
+ * @class           NerbParams
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -65,23 +64,23 @@ class Ini extends Params
             $this->params = parse_ini_file($ini_file, $read_sections, INI_SCANNER_TYPED);
         } catch (Exception $e) {
             throw new Error(
-                "Could not parse configuration file <code>{$ini}</code>. <br /> 
-					Make that it is formatted properly and conforms to required standards."
+                'Could not parse configuration file <code>'.$ini.'</code>. <br /> 
+					Make that it is formatted properly and conforms to required standards.'
             );
         }// end try
         
         // make sure that the ini file was read
         if ( empty( $this->params )) {
             throw new Error( 
-                "Configuration file <code>[{$ini}]</code> appears to be empty."
+                'Configuration file <code>[$ini]</code> appears to be empty.'
                 );
         }
 		
         // and make sure that it was read properly and created an array
         if ( !is_array( $this->params )) {
             throw new Error( 
-                "Could not parse configuration file <code>[{$ini}]</code>.<br /> 
-					Make that it is formatted properly and conforms to required standards."
+                'Could not parse configuration file <code>['.$ini.']</code>.<br /> 
+					Make that it is formatted properly and conforms to required standards. '
                 );
         }
 		

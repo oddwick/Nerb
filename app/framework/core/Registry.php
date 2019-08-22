@@ -1,6 +1,6 @@
 <?php
 // Nerb application library 
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb System Framework
@@ -11,7 +11,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           Registry
+ * @class           NerbRegistry
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
