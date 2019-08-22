@@ -44,13 +44,13 @@ class DefaultController extends Controller
      *   @access public
      *   @return self
      */
-    public function route()
+    public function route() : self
     {
         // define page structure for the controller
         $this->url->defineStructure( array( 'page') );
         
         // action calls
-        if ( $this->url->action ) {
+        if ( $this->url->action() ) {
             $this->action();
         }
         
@@ -78,7 +78,7 @@ class DefaultController extends Controller
      * @property string $page
      * @return string
      */
-    protected function privatePages()
+    protected function privatePages() : string
     {
 /*
        switch ( $this->page ) {
