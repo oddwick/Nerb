@@ -609,7 +609,7 @@ class Page
 	protected function process_ini( string $ini_file ) 
 	{
 		// process the ini file and merge it to params array
-		$params = new ParamsIni( $ini_file, true );
+		$params = new Ini( $ini_file, true );
 		
 		// dump the params into array
         $dump = $params->dump();
