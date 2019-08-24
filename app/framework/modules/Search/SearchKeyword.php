@@ -73,13 +73,13 @@ class SearchKeyword
 
 
     /**
-     * _formatKeyword function.
+     * formatKeyword function.
      *
      * @access protected
      * @param string $keyword
      * @return string
      */
-    protected function _formatKeyword(string $field, string $keyword) : string
+    protected function formatKeyword(string $field, string $keyword) : string
     {
         $not = '';
         
@@ -95,7 +95,7 @@ class SearchKeyword
 
 
     /**
-     * _datatype function.
+     * datatype function.
      *
      * @access protected
      * @param string $keyword
@@ -104,7 +104,7 @@ class SearchKeyword
      *
      * @todo figure out bool datatype
      */
-    protected function _datatype(string $keyword, string $datatype) : string
+    protected function datatype(string $keyword, string $datatype) : string
     {
         // initialize
         $wildcard = NULL;
@@ -112,7 +112,7 @@ class SearchKeyword
         
         // if use_datatyping is not used, then escape the keyword and return
         if (!$this->params['use_datatyping']) {
-            return $this->_escapeDB($keyword);
+            return $this->escapeDB($keyword);
         }
 
         // inelegant, but checks to see if keyword is NOT
@@ -135,7 +135,7 @@ class SearchKeyword
         if (empty($keyword)) {
             return $keyword;
         } else {
-            return $this->_escapeDB($bool.$keyword.$wildcard);
+            return $this->escapeDB($bool.$keyword.$wildcard);
         }
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -143,13 +143,13 @@ class SearchKeyword
 
 
     /**
-     * _splitKeywords function.
+     * splitKeywords function.
      *
      * @access protected
      * @param string $search_string
      * @return string
      */
-    protected function _splitKeywords(string $search_string) : string
+    protected function splitKeywords(string $search_string) : string
     {
         // wildcard searches: Replace * or ? with %
         $search_string = str_replace('*', '{?}', str_replace('?', '{?}', $search_string));
@@ -158,7 +158,7 @@ class SearchKeyword
         $search_string = str_replace('!', '{NOT}', $search_string);
 
         // Send anything between quotes to transform() which replaces commas and whitespace with {PLACEHOLDERS}
-        $search_string = preg_replace_callback("~\"(.*?)\"~", "NerbSearch::transform", $search_string);
+        $search_string = preg_replace_callback("~\"(.*?)\"~", "SearchKeyword::transform", $search_string);
 
         // Split $this->keywords by spaces and commas and Populate $this->keywords with parts
         $keywords = preg_split("/\s+|,/", $search_string);
@@ -185,13 +185,13 @@ class SearchKeyword
 
 
     /**
-     * _stripStopWords function.
+     * stripStopWords function.
      *
      * @access protected
      * @param array $keywords
      * @return array
      */
-    protected function _stripStopWords(array $keywords) : array
+    protected function stripStopWords(array $keywords) : array
     {
         // loop through each keyword and kill common words
         foreach ($keywords as $key => $value) {
@@ -238,13 +238,13 @@ class SearchKeyword
 
 
     /**
-     * _escapeRlike function.
+     * escapeRlike function.
      *
      * @access protected
      * @param string $keyword
      * @return string
      */
-    protected function _escapeRlike(string $keyword) : string
+    protected function escapeRlike(string $keyword) : string
     {
         return preg_replace("~([.\[\]*^\$])~", '\\\$1', $keyword);
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -253,13 +253,13 @@ class SearchKeyword
 
 
     /**
-     * _escapeDb function.
+     * escapeDb function.
      *
      * @access protected
      * @param string $keyword
      * @return string
      */
-    protected function _escapeDb(string $keyword) : string
+    protected function escapeDb(string $keyword) : string
     {
         return str_replace('{?}[[:>:]]', '', str_replace('[[:<:]]{?}', '', '[[:<:]]'.AddSlashes($this->_escapeRlike($keyword)).'[[:>:]]'));
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -268,13 +268,13 @@ class SearchKeyword
 
 
     /**
-     * _escapeRegex function.
+     * escapeRegex function.
      *
      * @access protected
      * @param string $keyword
      * @return string
      */
-    protected function _escapeRegex(string $keyword) : string
+    protected function escapeRegex(string $keyword) : string
     {
         return '\b'.preg_quote($keyword, '/').'\b';
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -283,13 +283,13 @@ class SearchKeyword
 
 
     /**
-     * _htmlChars function.
+     * htmlChars function.
      *
      * @access protected
      * @param array $keywords
      * @return array
      */
-    protected function _htmlChars(array $keywords) : array
+    protected function htmlChars(array $keywords) : array
     {
         $out = array();
         foreach ($keywords as $keyword) {
