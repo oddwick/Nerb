@@ -44,6 +44,18 @@ abstract class Controller
     protected $mode = 'rest';
 
     /**
+     * modes
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $modes = array( 'rest' => 'UrlRest',
+    						  'key-value' => 'UrlKeyValue',
+    						  'keyword' => 'UrlKeyword',
+    						  'qsa' => 'UrlQsa',
+    						);
+
+    /**
      * controller
      * 
      * @var mixed
@@ -104,34 +116,15 @@ abstract class Controller
     public function __construct( string $mode, int $node, int $offset = 0 )
     {
         // error check
-        if( 
-        	$mode != 'rest' && 
-        	$mode != 'key-value' && 
-        	$mode != 'keyword' && 
-        	$mode != 'qsa'  
-        ){
+        if( !in_array( $mode, array_keys($this->modes) ) ){
 	        throw new Error( "The value <code>[$mode]</code> is not a valid url mode.  Expecting <code>[REST|KEY-VALUE|KEYWORD|QSA]</code>" );
         }
         
         $this->mode = strtolower( $mode );
         $this->getController();
         
-        switch( $mode ){
-	        case 'rest':
-		        $this->url = new UrlRest( $this->controller, $node, $offset );
-		        break;
-	        
-	        case 'key-value':
-		        $this->url = new UrlKeyValue( $this->controller, $node, $offset );
-		        break;
-	        
-	        case 'keyword':
-		        $this->url = new UrlKeyword( $this->controller, $node, $offset );
-		        break;
-	        
-	        default:
-		        $this->url = new UrlQsa( $this->controller, $node, $offset );
-        }// end switch
+        echo $urlmode =  ClassManager::namespaceWrap($this->modes[$mode]);
+		$this->url = new $urlmode( $this->controller, $node, $offset );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
