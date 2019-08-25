@@ -67,7 +67,7 @@ class Database
     /**
      * database
      * 
-     * @var mysqli
+     * @var \mysqli
      * @access protected
      */
     protected $connection;
