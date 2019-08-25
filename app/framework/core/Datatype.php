@@ -50,7 +50,7 @@ namespace nerb\framework;
      * types
      * 
      * (default value: array(
-     *         'string',
+     *         'str',
      *         'alpha',
      *         'alphanum',
      *         'int',
@@ -62,30 +62,41 @@ namespace nerb\framework;
      * @var string
      * @access protected
      */
-    protected $types = array(
+    protected static $types = array(
         'string',
         'alpha',
         'alphanum',
         'int',
+        'num',
         'float',
         'metaphone',
-        'bool',
+        //'bool',
+    );
+    
+    protected static $regex = array(
+	    'int' => '([^0-9\-])',
+	    'alpha' => '([^a-zA-Z ])',
+	    'alphanum' => '([^0-9a-zA-Z ])',
+	    'float' => '([^0-9\.\-])',
+	    'num' => '([^0-9\.\?\_\*\-])',
     );
     
     /**
      * invalid_char
      *
      * list of characters to filter out of search keywords
-     *
+     * allowed characters are:
+     *  - * ? _ . , !
+     * 
      * (default value: array(
-     *      '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']','{', '}',':', '<', '>', '|',
-     *  ))
-     *
-     * @var array
+     *         '(', ')', '[', ']', '{', '}', '~', '`', '@', '#', '$', '%', '^', '&', ':', ')
+     * 
+     * @var string
      * @access protected
+     * @static
      */
-    protected $invalid_char = array(
-        '(', ')', '=', '~', '`', '@', '#', '^', '&', '[', ']', '{', '}', ':', '<', '>', '|', '$',
+    protected static $invalid_char = array(
+        '(', ')', '[', ']', '~', '`', '@', '#', '$', '%', '^', '&', ':', ';', '<', '>', '|', '=', '\\', '/',
     );
 
 
@@ -122,8 +133,8 @@ namespace nerb\framework;
     {
         // force lowercase
         $datatype = strtolower($datatype);
-        if ( !in_array($datatype, $this->types) ) {
-                throw new Error('Invalid datatype.  Datatypes must be <code>['.implode('|', $this->types).']</code>');
+        if ( !in_array($datatype, self::$types) ) {
+                throw new Error('Invalid datatype.  Datatypes must be <code>['.implode('|', self::$types).']</code>');
         }
 
         $this->datatype = $datatype;
@@ -151,49 +162,6 @@ namespace nerb\framework;
 
 
 
-    /**
-     * invalidChars function.  adds user defined characters to list of predefined invalid characters
-     *
-     * @access public
-     * @param array $chars
-     * @param bool $replace (default = false)
-     * @return Datatype
-     */
-    public function invalidChars(array $chars, bool $replace = false) : Datatype
-    {
-        // replace list
-        if ($replace) {
-            $this->invalid_char = $chars;
-        } 
-        
-        // merge to existing list
-        else {
-            $this->invalid_char = array_merge($chars, $this->invalid_char);
-        }
-        return $this;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * stopWord function.
-     *
-     * @access public
-     * @param string $char
-     * @return Datatype
-     */
-    public function invalidChar(string $char) : Datatype
-    {
-        // add to list
-        $this->invalid_char[] = $char;
-        return $this;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 
     /**
      * int function.
@@ -204,9 +172,9 @@ namespace nerb\framework;
      * @param string $string
      * @return string
      */
-    public function int( string $string ) : string
+    public static function int( string $string ) : string
     {
-        return preg_replace('/([^0-9])/', '', $string);
+        return preg_replace('/'.self::$regex['int'].'/', '', $string);
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -222,9 +190,29 @@ namespace nerb\framework;
      * @param string $string
      * @return string
      */
-    public function float( string $string ) : string
+    public static function float( string $string ) : string
     {
-        return preg_replace( '/([^0-9\.])/', '', $string );
+        return preg_replace( '/'.self::$regex['float'].'/', '', $string );
+		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * num function.
+     *
+     * this is used for database searches which allows the wildcards [-|_|*|?] to be used
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public static function num( string $string ) : string
+    {
+        // replace and make sure that there is at least a single digit before returning
+        $num = preg_replace( '/'.self::$regex['num'].'/', '', $string );
+        return preg_match('/([0-9])/', $num) ? $num : '';
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -240,9 +228,9 @@ namespace nerb\framework;
      * @param string $string
      * @return string
      */
-    public function alphanum( string $string ) : string
+    public static function alphanum( string $string ) : string
     {
-        return $this->whitespace( preg_replace( '/([^0-9a-zA-Z ])/', '', $string ) );
+        return self::whitespace( preg_replace( '/'.self::$regex['alphanum'].'/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -258,9 +246,9 @@ namespace nerb\framework;
      * @param string $string
      * @return string
      */
-    public function alpha( string $string ) : string
+    public static function alpha( string $string ) : string
     {
-        return $this->whitespace( preg_replace('/([^a-zA-Z ])/', '', $string));
+        return self::whitespace( preg_replace('/'.self::$regex['alpha'].'/', '', $string));
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -276,9 +264,9 @@ namespace nerb\framework;
      * @param string $string 
      * @return string
      */
-    public function metaphone( string $string ) : string
+    public static function metaphone( string $string ) : string
     {
-        return metaphone( $this->alpha( $string ) );
+        return metaphone( self::alpha( $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -293,10 +281,10 @@ namespace nerb\framework;
      * @param string $string
      * @return string
      */
-    public function string( string $string ) : string
+    public static function string( string $string ) : string
     {
-        $replace = '\\'.implode( '\\', $this->invalid_char );
-        return $this->whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
+        $replace = '\\'.implode( '\\', self::$invalid_char );
+        return self::whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -312,7 +300,7 @@ namespace nerb\framework;
      * @param string $string
      * @return string
      */
-    protected function whitespace( string $string ) : string
+    protected static function whitespace( string $string ) : string
     {
         // replace any extra whitespace with a single space
         return trim(preg_replace('/\s+/', ' ', $string));

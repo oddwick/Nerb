@@ -1,6 +1,6 @@
 <?php
 // Nerb application library 
-namespace nerb\framework;
+Namespace nerb\framework;
 
 /**
  * Nerb System Framework class management and loader module
@@ -87,7 +87,7 @@ class ClassManager
      * $class, otherwise an exception will be thrown.
      *
      * If a directory is specified, loadClass will first search that directory, then append the directory to the path, an if not found,
-     * it will search the paths specified in ClassManager::$path.   If still not found, an exception will be thrown.
+     * it will search the paths specified in Nerb::$path.   If still not found, an exception will be thrown.
      *
      * @access public
      * @static
@@ -126,7 +126,7 @@ class ClassManager
      * loads and includes a file
      *
      * If a directory is specified, loadClass will first search that directory, then append the directory to the path, an if not found,
-     * it will search the paths specified in ClassManager::$path.   If still not found, an exception will be thrown.
+     * it will search the paths specified in Nerb::$path.   If still not found, an exception will be thrown.
      *
      * @access public
      * @static

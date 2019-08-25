@@ -89,7 +89,7 @@ class ErrorManager
         // create error string
         $error = $error_file . ' (' . $error_line . ') -- ' .$error_message;
         
-		self::log($error, self::$prefix[$error_number]);
+		self::log($error, self::$prefix[$error_number] ? self::$prefix[$error_number] : 'UNKNOWN');
 		return;
 		
 		
