@@ -11,7 +11,7 @@ namespace nerb\framework;
  *
  * @category        Nerb
  * @package         Nerb
- * @class           NerbSearchKeyword
+ * @class           SearchKeyword
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -30,17 +30,45 @@ namespace nerb\framework;
 class SearchKeyword
 {
 
-
     /**
-     * keywords_array
-     *
+     * the raw keyword
+     * 
      * (default value: '')
-     *
+     * 
      * @var string
      * @access protected
      */
     protected $keyword = '';
-
+	
+    /**
+     * datatype
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $datatype = '';
+	
+	/**
+	 * formatted_keyword
+	 * 
+	 * (default value: '')
+	 * 
+	 * @var string
+	 * @access protected
+	 */
+	protected $formatted_keyword = '';
+    
+    /**
+     * not
+     * 
+     * (default value: false)
+     * 
+     * @var bool
+     * @access protected
+     */
+    protected $not = false;
 
 
     /**
@@ -50,195 +78,99 @@ class SearchKeyword
      * @param string $keyword
      * @return void
      */
-    public function __construct( string $keyword)
+    public function __construct( string $keyword, $datatype = 'string' )
     {
-        return;
+        // cleans the keyword
+        $this->keyword = $this->clean($keyword);
+        $this->datatype = $datatype;
+        
+        // check to see if keyword is NOT
+        $this->not();
+        
+        // datatype keyword
+        $this->datatype();		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
+
     /**
-     *  to string function returns search sql statement
+     *  Returns the keyword as a MySql RLIKE formatted keyword
      *
      *  @access public
      *  @return string
      */
     public function __toString() : string
     {
+        if(empty($this->formatted_keyword)){
+	        return '';
+        }
+        
+        // replace wildcard operator
+        $keyword = ($this->not ? "NOT ":null)."RLIKE '".$this->escapeDb($this->formatted_keyword)."'";
         // returns value
-        return $this->sql;
+        return str_replace('{CHAR}', '.', $keyword);
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * formatKeyword function.
+     * Forces the keword into a datatype
      *
      * @access protected
-     * @param string $keyword
-     * @return string
+     * @return void
      */
-    protected function formatKeyword(string $field, string $keyword) : string
+    protected function datatype()
     {
-        $not = '';
-        
-        // if keyword is {NOT} create NOT RLIKE statement else return rlike
-        if (preg_match('/{NOT}/', $keyword)) {
-            $keyword = preg_replace('/{NOT}/', '', $keyword);
-            $not = 'NOT ';
-        }
-        return "`".$field."` ".$not."RLIKE '".$keyword."'";
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * datatype function.
-     *
-     * @access protected
-     * @param string $keyword
-     * @param string $datatype
-     * @return string
-     *
-     * @todo figure out bool datatype
-     */
-    protected function datatype(string $keyword, string $datatype) : string
-    {
-        // initialize
-        $wildcard = NULL;
-        $bool = NULL;
-        
-        // if use_datatyping is not used, then escape the keyword and return
-        if (!$this->params['use_datatyping']) {
-            return $this->escapeDB($keyword);
-        }
-
-        // inelegant, but checks to see if keyword is NOT
-        if (preg_match('/{NOT}/', $keyword)) {
-            $keyword = preg_replace('/{NOT}/', '', $keyword);
-            $bool = '{NOT}';
-        }
-
-        // check to see if a wildcard was used
-        if (preg_match('/{\?}/', $keyword)) {
-            $keyword = preg_replace('/{\?}/', '', $keyword);
-            $wildcard = '{?}';
-        }
+        if( !USE_DATATYPING ) return;
         
         // create datatyper
-        $type = new Datatype($datatype);
-        $keyword = $type->check($keyword);
+        $type = new Datatype( $this->datatype );
+        $this->formatted_keyword = $type->check( $this->formatted_keyword );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-        if (empty($keyword)) {
-            return $keyword;
-        } else {
-            return $this->escapeDB($bool.$keyword.$wildcard);
+
+
+    /**
+     * Flags a NOT statement and removes the placeholder from the keyword
+     * 
+     * @access protected
+     * @return void
+     */
+    protected function not()
+    {
+        // checks to see if keyword is NOT
+        if (preg_match('/{NOT}/', $this->keyword)) {
+            $this->keyword = preg_replace('/{NOT}/', '', $this->keyword);
+            $this->not = true;
         }
+        $this->formatted_keyword = $this->keyword;
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * splitKeywords function.
-     *
-     * @access protected
-     * @param string $search_string
-     * @return string
+     * quick return to make sure that the keyword is not empty
+     * 
+     * @access public
+     * @return void
      */
-    protected function splitKeywords(string $search_string) : string
+    public function empty()
     {
-        // wildcard searches: Replace * or ? with %
-        $search_string = str_replace('*', '{?}', str_replace('?', '{?}', $search_string));
-
-        // boolean searches
-        $search_string = str_replace('!', '{NOT}', $search_string);
-
-        // Send anything between quotes to transform() which replaces commas and whitespace with {PLACEHOLDERS}
-        $search_string = preg_replace_callback("~\"(.*?)\"~", "SearchKeyword::transform", $search_string);
-
-        // Split $this->keywords by spaces and commas and Populate $this->keywords with parts
-        $keywords = preg_split("/\s+|,/", $search_string);
-
-        // convert the {COMMA} and {WHITESPACE} back within each row of $this->keywords
-        foreach ($keywords as $key => $keyword) {
-            $keyword = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function($plit) {
-                return chr($plit[1]);
-            }, $keyword);
-            $keyword = preg_replace("/\{COMMA\}/", ",", $keyword);
-            $keywords[$key] = $keyword;
-        }
-
-        // convert the {COMMA} and {WHITESPACE} back in $this->keywords
-        $keywords = preg_replace_callback("~\{WHITESPACE-([0-9]+)\}~", function($plit) {
-            return chr($plit[1]);
-        }, $keywords);
-        $keywords = preg_replace("/\{COMMA\}/", ",", $keywords);
-
-        return $keywords;
+		return empty($this->formatted_keyword);        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * stripStopWords function.
-     *
-     * @access protected
-     * @param array $keywords
-     * @return array
-     */
-    protected function stripStopWords(array $keywords) : array
-    {
-        // loop through each keyword and kill common words
-        foreach ($keywords as $key => $value) {
-            if (in_array($value, $this->excluded_words)) {
-                unset($keywords[$key]);
-            } // end if
-        }// end foreach
-
-        return $keywords;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    #################################################################
-
-    //            !ESCAPE AND TRANFORM
-
-    #################################################################
-
-
-
-
-    /**
-     * transform function.
-     *
-     * replaces commas and whitespace with {PLACEHOLDERS}
-     *
-     * @access protected
-     * @param array $keyword
-     * @return string
-     */
-    protected static function transform(array $keyword) : string
-    {
-        // replace commas and whitespace with {PLACEHOLDERS}
-        $keyword[1] = preg_replace_callback("~(\s)~", function($match) {
-            return '{WHITESPACE-'.ord($match[1]).'}';
-        }, $keyword[1]);
-        $keyword = preg_replace("/,/", "{COMMA}", $keyword[1]);
-        return $keyword;
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * escapeRlike function.
+     * escapes DB characters.
      *
      * @access protected
      * @param string $keyword
@@ -246,14 +178,14 @@ class SearchKeyword
      */
     protected function escapeRlike(string $keyword) : string
     {
-        return preg_replace("~([.\[\]*^\$])~", '\\\$1', $keyword);
+        return preg_replace("/([.\[\]*^\$])/", '\\\$1', $keyword);
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * escapeDb function.
+     * Adds the opening and closing brackets for RLIKE statement
      *
      * @access protected
      * @param string $keyword
@@ -261,48 +193,54 @@ class SearchKeyword
      */
     protected function escapeDb(string $keyword) : string
     {
-        return str_replace('{?}[[:>:]]', '', str_replace('[[:<:]]{?}', '', '[[:<:]]'.AddSlashes($this->_escapeRlike($keyword)).'[[:>:]]'));
+        $keyword = '[[:<:]]'.AddSlashes( $this->escapeRlike($keyword) ).'[[:>:]]';
+        $keyword = $this->wildcard( $keyword );
+        return $keyword;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
     /**
-     * escapeRegex function.
-     *
+     * restores commas and whitespace from placeholders
+     * 
      * @access protected
      * @param string $keyword
      * @return string
      */
-    protected function escapeRegex(string $keyword) : string
+    protected function clean(string $keyword) : string
     {
-        return '\b'.preg_quote($keyword, '/').'\b';
+        return preg_replace("/\{COMMA\}/", " ", preg_replace("/\{WHITESPACE\}/", " ", $keyword));
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    
+    
+	/**
+	 * If a wildcard is present, eliminate the opening or closing RLIKE brackets
+	 * 
+	 * @access protected
+	 * @param string $keyword
+	 * @return string
+	 */
+	protected function wildcard(string $keyword) : string
+	{
+		// check to see if a wildcard was used
+        return str_replace('{WILDCARD}', '_', str_replace('{WILDCARD}[[:>:]]', '', str_replace('[[:<:]]{WILDCARD}', '', $keyword )));
+	}
 
 
 
 
     /**
-     * htmlChars function.
-     *
-     * @access protected
-     * @param array $keywords
-     * @return array
+     * reverts any changes to the keyword
+     * 
+     * @access public
+     * @return void
      */
-    protected function htmlChars(array $keywords) : array
+    public function revert()
     {
-        $out = array();
-        foreach ($keywords as $keyword) {
-            // wildcard searches
-            $keyword = str_replace('%', '*', $keyword);
-
-            if (preg_match("/\s|,/", $keyword)) {
-                $out[] = '"'.htmlspecialchars($keyword).'"';
-            } else {
-                $out[] = htmlspecialchars($keyword);
-            }
-        }
-        return $out;
+        $this->formatted_keyword = $this->keyword;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
