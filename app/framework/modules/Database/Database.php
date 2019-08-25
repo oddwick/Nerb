@@ -27,9 +27,9 @@ namespace nerb\framework;
 // load required libraries
 /*
 ClassManager::loadClass('Sqli');
-ClassManager::loadClass('DatabaseTable');
-ClassManager::loadClass('DatabaseRow');
-ClassManager::loadClass('DatabaseRowset');
+ClassManager::loadClass('Table');
+ClassManager::loadClass('Row');
+ClassManager::loadClass('Rowset');
 */
 
 
@@ -269,16 +269,17 @@ class Database
 
 
     /**
-     *   factory function that reates a DatabaseTable.
-     * 	fisrt it checks the registry to see if there ia a copy of this table already
-     *	registered, and if not create a new instance.
+     * factory function that reates a Table.
+     * fisrt it checks the registry to see if there ia a copy of this table already
+     *registered, and if not create a new instance.
      *
-     *   @access     public
-     *   @throws     Error
-     *   @throws     Error
-     *   @return     DatabaseTable
+     * @access     public
+     * @param mixed $table
+     * @param bool $writable (default: false)
+     * @throws     Error
+     * @return     Table
      */
-    public function table( $table )
+    public function table( $table, $writable = false )
     {
         // error checking to make sure the table exists first
         if( !$this->isTable( $table ) ){
@@ -287,9 +288,15 @@ class Database
         // check the registry to see if this table exists
         if( Nerb::registry()->isRegistered( $this->handle.'.'.$table ) ){
             return Nerb::registry()->fetch( $this->handle.'.'.$table );
-        } else {
-            return new DatabaseTable( $this, $table );
+        } 
+        
+        // if needed, a writeable table is returned
+        if( $writable ){
+            return new TableReadWrite( $this, $table );
         }
+
+		// by default a read only table is returned
+        return new TableRead( $this, $table );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -492,14 +499,14 @@ class Database
 
 
     /**
-     *   retrieves values from a table and returns as a DatabaseRowset object
+     *   retrieves values from a table and returns as a Rowset object
      *
      *   @access     protected
      *   @param      string $query (sql query string)
-     *   @return     DatabaseRowset
+     *   @return     Rowset
      *   @throws     Error
      */
-    public function fetch( string $query ) : DatabaseRowset
+    public function fetch( string $query ) : Rowset
     {
         // ensure that a table is selected
         if ( !$query ) {
@@ -518,11 +525,11 @@ class Database
         }
 
         // instantiate new rowset with mapped fields
-        $rows = new DatabaseRowset();
+        $rows = new Rowset();
         
         // add rows to dataset
         while ( $resultRow = mysqli_fetch_assoc($result) ) {
-            $rows->add( new DatabaseRow( $this->handle, $column->table, $columns, $resultRow ) );
+            $rows->add( new Row( $this->handle, $column->table, $columns, $resultRow ) );
         }
 		
         return $rows;

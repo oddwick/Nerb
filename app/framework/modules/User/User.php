@@ -240,7 +240,7 @@ class User
 		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
-		$sessions = new DatabaseTable($database, TOKEN_TABLE);
+		$sessions = new Table($database, TOKEN_TABLE);
 		
 		// check to see if there is already a session for this user
 		//if( $this->isSessionActive( $user_id ) ) $this->destroySession( $user_id );
@@ -295,7 +295,7 @@ class User
 		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
-		$sessions = new DatabaseTable($database, TOKEN_TABLE);
+		$sessions = new Table($database, TOKEN_TABLE);
 		
 		$sessions->deleteRows("`selector` = '".$_SESSION['auth']."'");
 		
@@ -361,7 +361,7 @@ class User
 		if (LOG_ATTEMPTS == 'db' || LOG_ATTEMPTS == 'both') {
 			// fetch database and bind to userlog table
 			$database = Nerb::registry()->fetch($this->database);
-			$log = new DatabaseTable($database, ACCESS_LOG_TABLE);
+			$log = new Table($database, ACCESS_LOG_TABLE);
 			
 			// setup log array
 			$data = array( 
@@ -479,7 +479,7 @@ class User
 		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
-		$sessions = new DatabaseTable($database, TOKEN_TABLE);
+		$sessions = new Table($database, TOKEN_TABLE);
 		
 		// fetch session data from table
 		$session = $sessions->fetchRow('`selector` = \''.$_SESSION['auth'].'\'');

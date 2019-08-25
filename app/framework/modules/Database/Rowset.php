@@ -9,20 +9,20 @@ namespace nerb\framework;
  * @category        Nerb
  * @package         Nerb
  * @subpackage      Database
- * @class           DatabaseRowset
+ * @class           Rowset
  * @implements      Iterator
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019 
  * @see             Database
- * @see             DatabaseTable
- * @see             DatabaseRow
+ * @see             Table
+ * @see             Row
  *
  * @todo
  *
  */
 
-class DatabaseRowset implements \Iterator
+class Rowset implements \Iterator
 {
 
     /**
@@ -63,7 +63,7 @@ class DatabaseRowset implements \Iterator
      *
      *   @access     public
      *   @param      int $index
-     *   @return     DatabaseRow
+     *   @return     Row
      */
     public function __get( int $index )
     {
@@ -91,13 +91,13 @@ class DatabaseRowset implements \Iterator
      *   Adds a row to the rowset
      *
      *   @access     public
-     *   @param      DatabaseRow $row DatabaseRow object
+     *   @param      Row $row Row object
      *   @throws     Error
      *   @return     self
      */
     public function add( $row ) : self
     {
-        if ( $row instanceof DatabaseRow || is_subclass_of( $row, 'DatabaseRow' ) ) {
+        if ( $row instanceof Row || is_subclass_of( $row, 'Row' ) ) {
             $this->rows[] = $row;
             return $this;
         } else {
@@ -126,7 +126,7 @@ class DatabaseRowset implements \Iterator
      *   returns the current element of the rowset
      *
      *   @access     public
-     *   @return     DatabaseRow
+     *   @return     Row
      */
     public function current()
     {
@@ -214,7 +214,7 @@ class DatabaseRowset implements \Iterator
      *
      *   @access     public
      *   @param      int $key
-     *   @return     DatabaseRow
+     *   @return     Row
      */
     public function fetch( int $key )
     {

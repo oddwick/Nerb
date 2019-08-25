@@ -9,20 +9,20 @@ namespace nerb\framework;
  * @category        Nerb
  * @package         Nerb
  * @subpackage      Database
- * @class 			DatabaseRow
+ * @class 			Row
  * @implements 		Iterator
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019 * 
  * @see             Database
- * @see             DatabaseTable
- * @see             DatabaseRowset
+ * @see             Table
+ * @see             Rowset
  *
  * @todo
  *
  */
 
-class DatabaseRow implements \Iterator
+class Row implements \Iterator
 {
 
     /**
