@@ -171,7 +171,7 @@ class Row implements \Iterator
     {
         // check to see if field exists
         if ( !array_key_exists( $field, $this->columns ) ) {
-            throw new Error( 'Column <code>'.$field.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
+            throw new Error( 'Column <code>'.$field.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns ).']</code>' );
         }
         return $this->data[$field];
         
@@ -338,7 +338,7 @@ class Row implements \Iterator
      * sets the primary_key_lock flag allowing the primary key to be changed
      *
      * @access public
-     * @return void
+     * @return self
      */
     public function unlock() : self
     {
