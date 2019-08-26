@@ -396,7 +396,7 @@ class Page
 		// check browser if necessary
 		// Warning, this method is a bit slow and 
 		// the server must be configured for it to work properly
-        if( $this->browser_check ) $this->browser_check();
+        $this->browser_check();
         
 		// this sends header commands to prevent the browser from caching contents and 
 	    // must revalidate.  this is best for pages that one must be logged in to view
@@ -449,7 +449,7 @@ class Page
     protected function browser_check()
     {
 	    // if the check has already been conducted and passed, return
-	    if( $_SESSION['browser_check'] == 'pass' ){
+	    if( !$this->browser_check || $_SESSION['browser_check'] == 'pass' ){
 		    return;
 		} 
 		
@@ -579,7 +579,7 @@ class Page
     {
 	    // cycle through the ignored cache directories and return if they exist
 	    // this prevents nocached directories and pages from being cached
-	    foreach( NOCACHE as $value ){
+	    foreach( $this->nocache as $value ){
 		    // format expression
 		    $value = '/^('.str_replace('/', '\/', $value).')/i';
 		    if( preg_match( $value , $_SERVER['REQUEST_URI'] ) ){
