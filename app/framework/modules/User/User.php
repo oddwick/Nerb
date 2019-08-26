@@ -358,7 +358,12 @@ class User
 	*/
 	protected function logAttempt(int $user_id, string $user_name, string $msg, bool $status = false)
 	{
-		if (LOG_ATTEMPTS == 'db' || LOG_ATTEMPTS == 'both') {
+		if( !$status ) {
+		    $msg = 'FAIL '.$msg;
+		}
+		
+		
+		if (LOG_ATTEMPTS == 'db') {
 			// fetch database and bind to userlog table
 			$database = Nerb::registry()->fetch($this->database);
 			$log = new Table($database, ACCESS_LOG_TABLE);
@@ -377,17 +382,11 @@ class User
 			 
 			// insert log			 
 			$log->insert( $data );	
-				 
 		} 
 		
-		if ( LOG_ATTEMPTS == 'file' || LOG_ATTEMPTS == 'both'  ){
-			if( !$status ) {
-			    $msg = 'FAIL '.$msg;
-			}
-			$msg .= '; uid='.$user_id.' uname='.$user_name.' ['.$_SERVER['REMOTE_ADDR'].']';
-			$log = new Log( ACCESS_LOG );
-			$log->write( $msg );
-		}
+		$msg .= '; uid='.$user_id.' uname='.$user_name.' ['.$_SERVER['REMOTE_ADDR'].']';
+		$log = new Log( ACCESS_LOG );
+		$log->write( $msg );
 		
 		return;
 			
