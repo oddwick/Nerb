@@ -62,8 +62,9 @@ class DefaultController extends Controller
         //$page->nocache();
 
         $page->title( $this->title );
+        $page->content( PAGES.'/header.php');
         $page->content( PAGES.'/'.$content );
-        
+        $page->content( PAGES.'/footer.php');
         return $this;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,15 +81,17 @@ class DefaultController extends Controller
      */
     protected function privatePages() : string
     {
+/*
        switch ( $this->page ) {
 	        
-            case 'default':
+            case '':
             	
             default:
                 $page = 'default.php';
         }// end switch
         
         return $page;
+*/
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
