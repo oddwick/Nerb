@@ -123,7 +123,7 @@ abstract class Controller
         $this->mode = strtolower( $mode );
         $this->getController();
         
-        echo $urlmode =  ClassManager::namespaceWrap($this->modes[$mode]);
+        $urlmode =  ClassManager::namespaceWrap($this->modes[$mode]);
 		$this->url = new $urlmode( $this->controller, $node, $offset );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
