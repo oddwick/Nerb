@@ -422,8 +422,8 @@ class Page
 	    } // end if page caching
 	    
 		// auto add content headers and content footer to page
-		if( $this->content_header ) $this->header( $this->content_header );
-		if( $this->content_footer ) $this->footer( $this->content_footer );
+		$this->header( $this->content_header );
+		$this->footer( $this->content_footer );
 	   
         return $this;
         
