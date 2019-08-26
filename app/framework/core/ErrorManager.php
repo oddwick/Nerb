@@ -131,14 +131,11 @@ class ErrorManager
      */
     public static function fatal_handler()
     {
-        // check to see if shutdown is because of an error
-        if( !empty( $error = error_get_last() ) ) {
+        // check to see if shutdown is because of an error and filter notices
+        if( !empty( $error = error_get_last() ) && $error['type'] != E_NOTICE ) {
 	        
-            // send the array to Error for formatting
-            $error = Error::format( $error ); 
-			
             // throw error and exit
-            //throw new Error( $error['message'], $error['trace'] );
+            throw new Error( $error['message'] );
             exit;
         }
         
