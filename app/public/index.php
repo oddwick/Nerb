@@ -47,9 +47,9 @@
     // connect to the database
     // initialize & register tables
 	Nerb::registry()->register( $database = new App\Database( 'Database', $DB ), 'Database' );
-	
+
     // -- include logic page for testing
-    require_once APP_PATH.'/testing/test.php';
+    //require_once APP_PATH.'/testing/test.php';
 	
     // create a controller
     App\ClassManager::setPath( CONTROLLERS, 'controllers' );
