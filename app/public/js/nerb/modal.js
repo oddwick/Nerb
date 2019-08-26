@@ -7,7 +7,6 @@ $(window).on('load', function () {
 		}
 	});
 		
-		
 	// modal trigger
 	$( "[data-modal-id]" ).click(function(event) {
 		$( "#" + $(this).attr('data-modal-id') ).fadeIn();
@@ -44,12 +43,4 @@ function centerModal(){
 	        $(this).animate({ top: pos.top }, "fast", "linear" );
 	    }
 	});
-	/*
-    $('.modal-content').css({
-        position:'absolute',
-        left: ($(window).width() - $('.modal-content').outerWidth())/2,
-        top: ($(window).height() - $('.modal-content').outerHeight())/2.5
-    });
-    */
-	
 }
