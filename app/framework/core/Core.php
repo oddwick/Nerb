@@ -83,4 +83,23 @@ class Core
 
 
 
+
+    /**
+     * filecheck function.
+     * 
+     * @access public
+     * @static
+     * @param string $file
+     * @return bool
+     */
+    public static function filecheck( string $file ) : bool
+    {
+		return ( is_dir( $file ) || !file_exists( $file )) ? false : true;
+		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
 } /* end class */
