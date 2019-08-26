@@ -674,7 +674,7 @@ class Page
     public function content( string $content ) : self
     {
 	    // error check to make sure content exists and is not a directory
-		if( !$this->filecheck($content) ){
+		if( !Core::filecheck($content) ){
 		    $this->error = 404;
 			return $this;
 		}
@@ -748,22 +748,6 @@ class Page
  		$this->error = $error;
 		return $this;
 	
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     * filecheck function.
-     * 
-     * @access protected
-     * @param string $file
-     * @return bool
-     */
-    protected function filecheck( string $file ) : bool
-    {
-		return ( is_dir( $file ) || !file_exists( $file )) ? false : true;
-		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
