@@ -80,7 +80,21 @@ class Statement extends mysqli_stmt
     } // end function ---------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
+	
+	
+	/**
+	 * __destruct function.
+	 * 
+	 * @access protected
+	 * @return void
+	 */
+	protected function __destruct()
+	{
+		parent::close();
+	}
+	
+	
+	
 
     /**
      * mbind_reset function.
