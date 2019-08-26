@@ -224,36 +224,22 @@ class Error extends \Exception
     {
         // if show error line is true, then display the 
         // actual line that caused the error
-        if( SHOW_ERROR_LINE && ERROR_LEVEL > 0 ){
-            $error .= '<h2>Details</h2>';
-        }
+        $error = '<h2>Details</h2>';
         	
-        if( ERROR_LEVEL == 1 ){
-            $trace = end( /** @scrutinizer ignore-type */ $this->trace );
+        foreach( $this->trace as $trace){
+            // read offending file into an array
             $file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
-            $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
-            $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
+        	
+            // because if an error was thrown, technically it is the previous line
+            // that caused the error, so this only shows code line if it is not a 
+            // thrown error.  makes the code list a little easier to see real error
+            if( !stristr( $file[ $trace['line']-1 ], "throw" ) ){
+                $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
+                $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
+            }
             // housekeeping for large array
             unset( $file );
-		 	
-        } 
-        
-        if ( ERROR_LEVEL == 2){
-            foreach( $this->trace as $trace){
-                // read offending file into an array
-                $file = file( $trace['file'], FILE_IGNORE_NEW_LINES );
-	        	
-                // because if an error was thrown, technically it is the previous line
-                // that caused the error, so this only shows code line if it is not a 
-                // thrown error.  makes the code list a little easier to see real error
-                if( !stristr( $file[ $trace['line']-1 ], "throw" ) ){
-                    $error .= '<p>'.end(preg_split('/\//', $trace['file'])).' ('.$trace['line'].')<br />';
-                    $error .= '<code>'.$file[ $trace['line']-1 ].'</code></p>';
-                }
-                // housekeeping for large array
-                unset( $file );
-            }// end foreach
-        }
+        }// end foreach
         
         return $error;
         
