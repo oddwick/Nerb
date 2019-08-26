@@ -235,22 +235,6 @@ class Page
 	 */
 	protected $footer = MODULES.'/Page/includes/footer.phtml';
 
-    /**
-     * content_header
-     * 
-     * @var string
-     * @access protected
-     */
-    protected $content_header; 
-
-    /**
-     * content_footer
-     * 
-     * @var string
-     * @access protected
-     */
-    protected $content_footer;
-
 	/**
 	 * content
 	 * 
@@ -404,9 +388,11 @@ class Page
 		    session_cache_limiter( $this->cache_control );
 		    
 		    // -- alternate method --
-		    //header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
-			//header("Pragma: no-cache"); // HTTP 1.0.
-			//header("Expires: 0"); // Proxies.
+		    /*
+			header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+			header("Pragma: no-cache"); // HTTP 1.0.
+			header("Expires: 0"); // Proxies.
+			*/
 		}
 
 	    // if page caching is used and page is cached, 
@@ -421,10 +407,6 @@ class Page
 		
 	    } // end if page caching
 	    
-		// auto add content headers and content footer to page
-		$this->header( $this->content_header );
-		$this->footer( $this->content_footer );
-	   
         return $this;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -487,7 +469,7 @@ class Page
      * 
      * Pages that are cached can not be user authenticated
      *
-     * @access protected
+     * @access public
      * @return self
      */
     public function cache() : self
@@ -549,10 +531,10 @@ class Page
     /**
      * get_cached_page function.
      * 
-     * @access public
+     * @access protected
      * @return void
      */
-    public function get_cached_page()
+    protected function get_cached_page()
     {
 	    // cycle through the ignored cache directories and return if they exist
 	    // this prevents nocached directories and pages from being cached
@@ -581,7 +563,7 @@ class Page
 	 *
 	 *	@access		protected
 	 *	@param		string $ini_file
-	 *	@return		self
+	 *	@return		void
 	*/
 	protected function process_ini( string $ini_file ) 
 	{
@@ -593,9 +575,6 @@ class Page
         
         // cycle through and add them to class properties
         foreach( $dump['params'] as $key => $value ){
-	        if( !property_exists( $this, $key ) ){
-				throw new Error( "The property <code>[$key]</code> does not exist.  Check your page.ini for proper spelling and syntax." ); 
-	        }		        
 			$this->$key = $value;
         }
 	}  // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -623,20 +602,14 @@ class Page
 	    ob_end_clean();
 	    ob_start();
 	    
-	    // include page header
-	    require $this->header;
-	    
-	    // if the page has a content header, include it
-	    if( !empty($this->content_header) ) require $this->content_header;
+	    // include page html header
+	    @require_once( $this->header );
 	    
 	    // add page content
 	    $this->includePageContent();
-	    
-	    // add content footer
-	    if( !empty($this->content_footer) ) require $this->content_footer;
-	    
+
 	    // add html footer
-	    require $this->footer;
+	    @require_once( $this->footer );
         
 		// if page caching is used, capture content an cache it
 	    if( $this->page_caching ){
@@ -701,7 +674,7 @@ class Page
     public function content( string $content ) : self
     {
 	    // error check to make sure content exists and is not a directory
-		if( is_dir( $content ) || !file_exists( $content )){
+		if( !$this->filecheck($content) ){
 		    $this->error = 404;
 			return $this;
 		}
@@ -743,59 +716,6 @@ class Page
 	
 	
 	
-    /**
-     * header function.
-     *
-     * This adds the site header to the page.  This should not be confused with
-     * the html header which includes styles and scripts.  this is for sites with structure like:
-     * 	HTML header
-     *    header - (content header)
-     *	  content
-     *	  footer - (content footer)
-     *	HTML footer
-     * 
-     * @access public
-     * @param string $filename
-     * @throws Error
-     * @return self
-     */
-    public function header( string $filename ) : self
-    {
-		if( !file_exists($filename) ){
-			throw new Error( 'Could not locate resource <code>'.$filename.'</code>' );
-		}
-		
-		$this->content_header = $filename;
-		return $this;
-		
-	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    
-    
-    /**
-     * footer function. (see content_header)
-     * 
-     * @access public
-     * @param string $filename
-     * @throws Error
-     * @return self
-     * @see content_header
-     */
-    public function footer( string $filename ) : self
-    {
-		if( !file_exists($filename) ){
-			throw new Error( 'Could not locate resource <code>'.$filename.'</code>' );
-		}
-		
-		$this->content_footer = $filename;
-		return $this;
-		
-	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-	
-	
 	/**
 	 * error_page function.
 	 *
@@ -828,6 +748,22 @@ class Page
  		$this->error = $error;
 		return $this;
 	
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * filecheck function.
+     * 
+     * @access protected
+     * @param string $file
+     * @return bool
+     */
+    protected function filecheck( string $file ) : bool
+    {
+		return ( is_dir( $file ) || !file_exists( $file )) ? false : true;
+		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
