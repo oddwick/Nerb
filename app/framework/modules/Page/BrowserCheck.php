@@ -104,6 +104,7 @@ class BrowserCheck
 	 *
 	 *	@access		protected
 	 *	@param		string $ini_file
+	 *	@property	array $params->browser
 	 *	@return		self
 	*/
 	protected static function process_ini( string $ini_file ) 
