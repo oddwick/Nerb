@@ -128,9 +128,6 @@ class Database
         // set credentials for connecting
         $this->params['connection'] = $params;
 
-        // ofuscate password to prevent it from being accidentally displayed
-        $this->params['connection']['pass'] =  base64_encode($this->params['connection']['pass']);
-        
         // give this database connection a name for other classes to retrieve it
         $this->handle = $handle;
 
@@ -138,8 +135,7 @@ class Database
         $this->database_name = $this->params['connection']['name'];
 
         // establish connection to the table
-        $this->connect();
-
+        $this->connection = Connection::create( $params['name'], $params['user'], $params['pass'], $params['host'], $params['port'], $params['socket'] );
         // map tables in database
         $this->tables = $this->listTables();
         
@@ -156,74 +152,6 @@ class Database
 
 
     /**
-     *   Destructor, if set will output the value of the current query array
-     *
-     *   @access     public
-     *   @param      array $params connection parameters [host|user|pass|name]
-     *   @return     void
-     */
-    public function __destruct()
-    {
-        $this->connection->close();
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     *   Connection string, connects to database with credentials given
-     *
-     *   @access     public
-     *   @return     Database
-     *   @throws     Error
-     */
-    protected function connect() : self
-    {
-        // error checking 
-        $this->connection = new Sqli(
-            $this->params['connection']['host'],
-            $this->params['connection']['user'],
-            base64_decode( $this->params['connection']['pass'] ),
-            $this->params['connection']['name'],
-            $this->params['connection']['port'],
-            $this->params['connection']['socket']
-        );
-			
-        if ( mysqli_connect_error() ) {
-            $error = mysqli_connect_error();
-            $errno = mysqli_connect_errno();
-			
-            throw new Error(
-                '<p>Could not connect to Database host <strong>'.$this->params['connection']['host'].'</strong>. Database said:</p>'
-                .'<p>'.$error.'</p>'
-                .'<p>Error #'.$errno.'</p>'
-            );
-        }
-			
-        return $this;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     *   disconnect string, disconnects from MySql server
-     *
-     *   @access     protected
-     *   @return     void
-     */
-    protected function disconnect()
-    {
-        $this->connection->close();
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
      *   returns name of database object in registry
      *
      *   @access     public
@@ -234,6 +162,7 @@ class Database
         return $this->handle;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -268,7 +197,26 @@ class Database
 
 
 
-    /**
+     /**
+     *   debugging method that outputs all queries made from this object during the
+     *   execution of the script
+     *
+     *   @access     public
+     *   @return     array
+     */
+    public function poll() : array
+    {
+        //return the the query array
+        return $this->profile;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    // !TABLES ---------->
+
+   /**
      * factory function that reates a Table.
      * fisrt it checks the registry to see if there ia a copy of this table already
      *registered, and if not create a new instance.
@@ -304,29 +252,55 @@ class Database
 
 
     /**
-     *   debugging method that outputs all queries made from this object during the
-     *   execution of the script
+     *   returns an array of table names in the current database
      *
-     *   @access     public
-     *   @return     array
+     *   @access protected
+     *   @return array
      */
-    public function poll() : array
+    protected function listTables() : array
     {
-        //return the the query array
-        return $this->profile;
+        // build query string and return
+        return $this->queryArray( 'SHOW TABLES FROM `'.$this->database().'`' );
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     *   return the current table list from the database
+     *
+     *   @access public
+     *   @return array
+     */
+    public function tables() : array
+    {
+        return $this->tables;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
-    #################################################################
+    /**
+     *   checks to see if a table exists in the current database
+     *
+     *   @access public
+     *   @param string $table
+     *   @return bool
+     */
+    public function isTable( string $table ) : bool
+    {
+        return in_array( $table, $this->tables ) ? TRUE : FALSE ;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
-    //      !QUERIES
-
-    #################################################################
 
 
+
+
+
+    // !QUERIES ---------->
 
     /**
      *   this performs a query where nothing is returned except for the number of affected rows
@@ -384,20 +358,23 @@ class Database
 
         // debugging profile
         $profile = array('query' => $query, 'start' => microtime());
-
+		
         // fetch result
-        if ( !$result = $this->connection->query( $query )) {
-            $error = mysqli_error( $this->connection );
-            $error_no = mysqli_errno( $this->connection );
-            throw new Error('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
-        }
-        
+		$result = $this->connection->query( $query );
+		
         //insert debugging profile into array
         $profile['end'] = microtime();
         $this->profile[] = $profile; 
-      
+        
         // returns mysqli_result object
-        return $result;
+        if ( !empty($result) ) {
+	        return $result;
+        }
+        
+        $error = mysqli_error( $this->connection );
+        $error_no = mysqli_errno( $this->connection );
+        throw new Error('<p>'.$error.'</p><p><code>'.$query.'</code></p><p>Error #'.$error_no.'</p>');
+      
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -572,14 +549,11 @@ class Database
         });
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-    #################################################################
-
-    //      !PREPARED STATEMENTS
-
-    #################################################################
-
-
-
+   
+   
+   
+    // !PREPARED STATEMENTS ---------->
+    
     /**
      *   cleans and escapes data for insertion into database
      *	
@@ -621,60 +595,13 @@ class Database
      *
      *   @access public
      *   @param string $query_string (formatted query string)
-     *   @return Statement
+     *   @return mysqli_stmt
      */
     public function prepare( $query_string )
     {
         return $this->connection->prepare( $query_string );
 			
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     *   returns an array of table names in the current database
-     *
-     *   @access protected
-     *   @return array
-     */
-    protected function listTables() : array
-    {
-        // build query string and return
-        return $this->queryArray( 'SHOW TABLES FROM `'.$this->database().'`' );
-
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     *   return the current table list from the database
-     *
-     *   @access public
-     *   @return array
-     */
-    public function tables() : array
-    {
-        return $this->tables;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    /**
-     *   checks to see if a table exists in the current database
-     *
-     *   @access public
-     *   @param string $table
-     *   @return bool
-     */
-    public function isTable( string $table ) : bool
-    {
-        return in_array( $table, $this->tables ) ? TRUE : FALSE ;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 } /* end class */
