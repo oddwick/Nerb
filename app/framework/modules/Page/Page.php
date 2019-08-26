@@ -451,40 +451,17 @@ class Page
 	    // if the check has already been conducted and passed, return
 	    if( !$this->browser_check || $_SESSION['browser_check'] == 'pass' ){
 		    return;
-		} 
+		}
+		
+		$browser = BrowserCheck::check(); 
 		
 	    // if a check has previously failed, and browser_fail is set set to kill, return error 100 bad browser
-		if( $_SESSION['browser_check'] == 'fail' && $this->browser_fail == 'error' ){
+		if( ( !$browser || $_SESSION['browser_check'] == 'fail') && $this->browser_fail == 'error' ){
 			// set error to serve bad browser page
 			$this->error = 100;
 			return;
 	    } 
 	    
-	    // get browser information
-	    // this requires browsercap.ini to be set up on the server and can be
-	    // checked through the phpinfo() function
-		$browser = get_browser();
-
-		// set flags to indicate what type of device the user is on
-		// to determine if you want to serve mobile specific versions of the site
-		$_SESSION['browser'] = $browser->browser;
-		$_SESSION['browser_version'] = $browser->version;
-		$_SESSION['browser_device'] = $browser->device;
-		$_SESSION['browser_platform'] = $browser->platform;
-		
-		if( $this->browser[ $browser->browser ] > $browser->version ){
-			// set session var to indicate browser failure
-			$_SESSION['browser_check'] = 'fail';
-			
-			// set error to serve bad browser page
-			if( $this->browser_fail ){	
-				$this->error = 100;
-			}
-			return;
-		} 
-			
-		$_SESSION['browser_check'] = 'pass';
-		return;
 			
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
