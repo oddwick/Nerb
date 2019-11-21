@@ -191,7 +191,9 @@ class Setup
 				$value = "'{$value}'";
 			}
 			
-			$config .= "defined(".strtoupper($key).") or define('".strtoupper($key)."', $value );".PHP_EOL;
+			// causes issues with php7
+			//$config .= "defined(".strtoupper($key).") or define('".strtoupper($key)."', $value );".PHP_EOL;
+			$config .= "define('".strtoupper($key)."', $value );".PHP_EOL;
 		} // end foreach
 		
 		return $config;

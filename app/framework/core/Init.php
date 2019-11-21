@@ -25,8 +25,8 @@ namespace nerb\framework;
 
 
 // define FRAMEWORK constants
-defined(FRAMEWORK) or define( 'FRAMEWORK', APP_PATH.'/framework' );
-defined(CONFIG) or define( 'CONFIG', APP_PATH.'/config' );
+define( 'FRAMEWORK', APP_PATH.'/framework' );
+define( 'CONFIG', APP_PATH.'/config' );
         
 
 
