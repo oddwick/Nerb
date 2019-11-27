@@ -105,8 +105,10 @@ class User
     public function __construct( string $table, string $id_field, string $user_name_field, string $pass_field )
     {
 		
+
+		
         // check to see if a database is registered
-        if( !$database = Nerb::isClassRegistered( 'Database' ) ){
+        if( !$database = Nerb::registry()->isClassRegistered( ClassManager::namespaceWrap('Database') ) ){
 			throw new Error( 'Could not find a registered database' );
         }
 		
