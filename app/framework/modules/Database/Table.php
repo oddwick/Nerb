@@ -85,7 +85,21 @@ class Table
      * @var string
      * @access protected
      */
-    protected $data_type = array( 's', 'int' => 'i','float' => 'd','string' => 's');
+    protected $data_type = array( 
+	    'int' => 'i',
+	    'date' => 'i',
+	    'datetime' => 'i',
+	    'timestamp' => 'i',
+	    'float' => 'd',
+	    'double' => 'd',
+	    'decimal' => 'd',
+	    'string' => 's', 
+	    'char' => 's', 
+	    'varchar' => 's', 
+	    'text' => 's', 
+	    'mediumtext' => 's',
+	    'longtext' => 's',
+    );
 
 
 
