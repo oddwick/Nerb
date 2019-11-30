@@ -12,7 +12,7 @@ namespace nerb\framework;
  * @category    	Nerb
  * @package     	Nerb
  * @subpackage      Database
- * @class 			TableReadWrite
+ * @class 			TableWrite
  * @version         1.0
  * @author          Dexter Oddwick <dexter@oddwick.com>
  * @copyright       Copyright (c)2019
@@ -24,7 +24,7 @@ namespace nerb\framework;
 
 
 #todo: fetchRow (  where, limit ); instead of fetch first row
-class TableReadWrite extends TableRead
+class TableWrite extends TableRead
 {
 
 
@@ -83,14 +83,14 @@ class TableReadWrite extends TableRead
      * 	@param 		array $values
      * 	@return 	self
      */
-    protected function execute( NerbStatement $statement, array $values ) : self
+    protected function execute( Statement $statement, array $values ) : self
     {
         // iterate trhrough the $values array 
         foreach( $values as $key => $value ){
 			
-            // trim off the parenthes 
+            // trim off the parenthes - eg varchar(255) etc
             $type =  explode( '(',  $this->attribs[$key]['type'] );
-			
+
             // use variable variable to hold the value and bind the data type to it
             ${$key} = $value;
 			
