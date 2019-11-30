@@ -43,14 +43,13 @@ class UrlRest extends Url
     {
         // turn the url into an array by nodes
         $this->attribs = explode('/', $this->url);
-
+        
 		// check to see if action is present
-        if( $this->attribs[0] === 'action' ){
-	        $this->action = $this->attribs[1];
+        if( $this->attribs[ $this->node_offset ] == 'action' ){
+	        $this->action = $this->attribs[ $this->node_offset + 1 ];
         }
 
-
-                
+               
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
