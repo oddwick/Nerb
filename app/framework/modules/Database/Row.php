@@ -120,6 +120,7 @@ class Row implements \Iterator
      */
     public function __construct( string $database, string $table, array $columns, array $data )
     {
+
         $this->database = $database;
         $this->table = $table;
         $this->columns = $columns;
