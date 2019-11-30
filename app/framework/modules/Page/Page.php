@@ -359,6 +359,12 @@ class Page
 	 */
 	protected $cache = null;
 
+	/**
+	 * controller (name of calling controller)
+	 * 
+	 * @access protected
+	 */
+	protected $controller = null;
 
 
 
@@ -767,6 +773,27 @@ class Page
 		
 	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
+
+
+
+	/**
+	 * controller function.  if a controller is given, sets the controller, otherwise
+	 * returns the currently set controller
+	 * 
+	 * @access public
+	 * @param string $controller
+	 * @return mixed
+	 */
+	public function controller( string $controller = '' )
+	{
+		if( $controller ){
+			$this->controller = $controller;
+			return $this;
+		} else {
+			return $this->controller;
+		}
+		
+	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
