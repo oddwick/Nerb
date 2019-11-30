@@ -142,6 +142,7 @@ class TableRead extends Table
         $query = "SELECT * FROM `$this->name`".$this->where( $where, 1 );
 
         $result = $this->database->fetch( $query );
+        
         return $result->current();
     
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
