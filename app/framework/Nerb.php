@@ -38,7 +38,7 @@ class Nerb
      * @access public
      * @static
      */
-    private $url;
+    private static $url;
 
     /**
      * config
@@ -74,7 +74,7 @@ class Nerb
      * @access private
      * @static
      */
-    protected $path = array();
+    private static $path = array();
 
 	/**
 	 * instance
@@ -116,10 +116,10 @@ class Nerb
     public function init()
     {
         // Create a registry object
-		$this->registry = new Registry();
+		self::$registry = new Registry();
 		
         // set the current url and path root
-        $this->url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].(  str_replace( $_SERVER['DOCUMENT_ROOT'], '', $this->path['root'] )  );
+        self::$url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].(  str_replace( $_SERVER['DOCUMENT_ROOT'], '', self::$path['root'] )  );
         
         // begin output buffering
         ob_start();
@@ -142,6 +142,7 @@ class Nerb
 			self::$instance = new Nerb();
 		}
 		return self::$instance;
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -154,10 +155,7 @@ class Nerb
      *
      * @access public
      * @static
-     * @param object $object
-     * @param string $handle
-     * @return bool
-     * @throws Error
+     * @return Registry
      */
     public static function registry()
     {
@@ -165,7 +163,24 @@ class Nerb
 			self::$registry = new Registry();
 		}
 		return self::$registry;
-        
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    /**
+     * jump function.
+     * 
+     * wrapper for Core::jump function
+     *
+     * @access public
+     * @static
+     * @return void
+     */
+    public static function jump( $location )
+    {
+		\nerb\framework\Core::jump( $location );
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
