@@ -40,7 +40,7 @@ namespace nerb\framework;
  *
  */
 
-class Statement extends mysqli_stmt
+class Statement extends \mysqli_stmt
 {
     /**
      * mbind_types
@@ -88,7 +88,7 @@ class Statement extends mysqli_stmt
 	 * @access protected
 	 * @return void
 	 */
-	protected function __destruct()
+	public function __destruct()
 	{
 		parent::close();
 	}
