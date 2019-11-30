@@ -150,7 +150,8 @@ abstract class Url
 	        $this->bypass();
         }
         
-   } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -232,10 +233,18 @@ abstract class Url
     {
         // set the return page as the refering page minus the arguments
         // (this only works for clean urls)
-        $return = explode('?', $_SERVER['HTTP_REFERER']);
+        
+        // do not set return page for actions or page refreshes
+        if( $this->action() ) return;
+        
+        if( $_SESSION['current_page'] != $_SERVER['REQUEST_URI'] ){ 
+	        // set previous and return pages
+	        $_SESSION['return_page'] = $_SESSION['current_page'];
+	        $_SESSION['current_page'] = $_SERVER['REQUEST_URI'];
+	    }
         
         // if there is no referer, then set return page as default conroller
-        $this->return_page = empty( $return[0] ) || $return[0] == $this->url ? $this->controller : $return[0];
+        $this->return_page = empty( $_SESSION['return_page'] ) ? '/' : $_SESSION['return_page'];
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
