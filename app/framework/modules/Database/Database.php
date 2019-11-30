@@ -240,11 +240,11 @@ class Database
         
         // if needed, a writeable table is returned
         if( $writable ){
-            return new TableReadWrite( $this, $table );
+            return new \nerb\framework\TableReadWrite( $this, $table );
         }
 
 		// by default a read only table is returned
-        return new TableRead( $this, $table );
+        return new \nerb\framework\TableRead( $this, $table );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -502,11 +502,11 @@ class Database
         }
 
         // instantiate new rowset with mapped fields
-        $rows = new Rowset();
+        $rows = new \nerb\framework\Rowset();
         
         // add rows to dataset
         while ( $resultRow = mysqli_fetch_assoc($result) ) {
-            $rows->add( new Row( $this->handle, $column->table, $columns, $resultRow ) );
+            $rows->add( new \nerb\framework\Row( $this->handle, $column->table, $columns, $resultRow ) );
         }
 		
         return $rows;
