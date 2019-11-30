@@ -46,6 +46,8 @@ class Rowset implements \Iterator
     protected $pointer = 0;
 
 
+
+
     /**
      *   Constructor -- this object is only intended to be called by a Database object and is not for standing alone
      *
@@ -55,6 +57,7 @@ class Rowset implements \Iterator
     public function __construct()
     {
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -73,6 +76,7 @@ class Rowset implements \Iterator
 
 
 
+
     /**
      *   returns a listing of columns
      *
@@ -87,6 +91,7 @@ class Rowset implements \Iterator
 
 
 
+
     /**
      *   Adds a row to the rowset
      *
@@ -97,6 +102,7 @@ class Rowset implements \Iterator
      */
     public function add( $row ) : self
     {
+       
         if ( $row instanceof Row || is_subclass_of( $row, 'Row' ) ) {
             $this->rows[] = $row;
             return $this;
@@ -105,6 +111,7 @@ class Rowset implements \Iterator
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -119,6 +126,7 @@ class Rowset implements \Iterator
         return count($this->rows);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -139,6 +147,7 @@ class Rowset implements \Iterator
 
 
 
+
     /**
      *   validates the position of the pointer
      *
@@ -150,6 +159,7 @@ class Rowset implements \Iterator
         return $this->pointer < count($this->rows);
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -167,6 +177,7 @@ class Rowset implements \Iterator
 
 
 
+
     /**
      *   decrements the pointer
      *
@@ -178,6 +189,7 @@ class Rowset implements \Iterator
         return --$this->pointer;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -195,6 +207,7 @@ class Rowset implements \Iterator
 
 
 
+
     /**
      *   resets the pointer to 0
      *
@@ -206,6 +219,7 @@ class Rowset implements \Iterator
         return $this->pointer = 0;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -226,6 +240,7 @@ class Rowset implements \Iterator
 
 
 
+
     /**
      *   returns the entire $rows as an array
      *
@@ -237,6 +252,7 @@ class Rowset implements \Iterator
         return $this->rows;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
