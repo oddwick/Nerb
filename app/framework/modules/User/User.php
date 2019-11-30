@@ -238,11 +238,12 @@ class User
 	 */
 	protected function createSession($user_id)
 	{
+	
 		// fetch database
 		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
-		$sessions = new Table($database, TOKEN_TABLE);
+		$sessions = new \nerb\framework\TableWrite($database, TOKEN_TABLE);
 		
 		// check to see if there is already a session for this user
 		//if( $this->isSessionActive( $user_id ) ) $this->destroySession( $user_id );
@@ -261,7 +262,6 @@ class User
    		
    		// save data to table
    		$sessions->insert($data);
-   		
    		
    		// set cookie variables
 		if (SESSION_TYPE == 'cookie') {
@@ -297,7 +297,7 @@ class User
 		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
-		$sessions = new Table($database, TOKEN_TABLE);
+		$sessions = new \nerb\framework\TableWrite($database, TOKEN_TABLE);
 		
 		$sessions->deleteRows("`selector` = '".$_SESSION['auth']."'");
 		
@@ -364,11 +364,10 @@ class User
 		    $msg = 'FAIL '.$msg;
 		}
 		
-		
 		if (LOG_ATTEMPTS == 'db') {
 			// fetch database and bind to userlog table
-			$database = Nerb::registry()->fetch($this->database);
-			$log = new Table($database, ACCESS_LOG_TABLE);
+			$database = Nerb::registry()->fetch( $this->database );
+			$log = new \nerb\framework\TableWrite($database, ACCESS_LOG_TABLE);
 			
 			// setup log array
 			$data = array( 
@@ -385,9 +384,8 @@ class User
 			// insert log			 
 			$log->insert( $data );	
 		} 
-		
 		$msg .= '; uid='.$user_id.' uname='.$user_name.' ['.$_SERVER['REMOTE_ADDR'].']';
-		$log = new Log( ACCESS_LOG );
+		$log = new \nerb\framework\Log( ACCESS_LOG );
 		$log->write( $msg );
 		
 		return;
@@ -411,7 +409,9 @@ class User
 	{
 		
 		// inport table data
-		extract($this->params);
+		$pass_field = $this->pass_field;
+		$id_field = $this->id_field;
+		$user_name_field = $this->user_name_field;
 		
 		// validation
 		// no user name
@@ -426,23 +426,28 @@ class User
 			return array(false, $msg);
 		} 
 		
-		// fetch database and tables		
-		$Users = Nerb::registry()->fetch($table);
-		
+		// fetch database and tables
+        $database = Nerb::registry()->fetch( $this->database );
+		$Users = new \nerb\framework\TableRead( $database, $this->table );	
+		$user = $Users->fetchRow( '`'.$user_name_field.'` = \''.$user_name.'\'', 1);
+				
 		// user not found
-		if (!$user = $Users->fetchRow($user.' = \''.$user_name.'\'', 1)) {
+		if (!$user) {
 			$this->logAttempt(0, $user_name, $msg = 'user not found');
 			return array(false, $msg);
 		}
-
-		if ( !password_verify($user_pass, $user->$pass)) {
-			$this->logAttempt($user->user_id, $user_name, $msg = 'invalid password');
+		
+		if ( !password_verify($user_pass, $user->$pass_field)) {
+			$this->logAttempt($user->{$this->id_field}, $user_name, $msg = 'invalid password');
 			return array(false, $msg);
 		}
-			
+		
+		
 		// log attempt to the log file
-		$this->logAttempt($user->user_id, $user_name, 'user authenticated', true);
-		$session_id = $this->createSession($user->user_id);
+		$this->logAttempt($user->$id_field, $user_name, 'user authenticated', true);
+		$session_id = $this->createSession( $user->$id_field );
+		
+		
 		return array(true, $session_id);
 			
 				
@@ -480,12 +485,38 @@ class User
 		$database = Nerb::registry()->fetch($this->database);
 		
 		// create session table
-		$sessions = new Table($database, TOKEN_TABLE);
+		$sessions = new \nerb\framework\TableRead($database, TOKEN_TABLE);
 		
 		// fetch session data from table
 		$session = $sessions->fetchRow('`selector` = \''.$_SESSION['auth'].'\'');
 
 		return $session->expires > time() && hash_equals($session->hash, hash('sha256', $_COOKIE['token'] ) ) ? true : false; 
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+	/**
+	 * identifies the user and returns the user's id if session is active.  returns user_id on success and 0 on failure
+	 * 
+	 * @access public
+	 * @return bool
+	 * @property expires;
+	 * @property hash;
+	 */
+	public function identify() : int
+	{
+		// fetch database
+		$database = Nerb::registry()->fetch($this->database);
+		
+		// create session table
+		$sessions = new \nerb\framework\TableRead($database, TOKEN_TABLE);
+		
+		// fetch session data from table
+		$session = $sessions->fetchRow('`selector` = \''.$_SESSION['auth'].'\'');
+
+		return count($session) == 1 ? $session->user_id : 0; 
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
