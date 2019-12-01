@@ -42,13 +42,13 @@ class UrlQsa extends Url
     public function parse()
     {
         // turn the url into an array by nodes
-        $this->attribs = explode('/', $this->url);
+        $this->nodes = explode('/', $this->url);
         
         // slide the controller off the first element
-        $this->controller = array_shift($this->attribs);
+        $this->controller = array_shift($this->nodes);
 	    // break the path apart into its segments
 	    // controller -  params ( node will always be empty for restful urls )
-	    //@list( ,  $this->attribs ) = explode( '/', $this->url, 2 );
+	    //@list( ,  $this->nodes ) = explode( '/', $this->url, 2 );
 	
 	    // add params to the to the params array
 /*
@@ -82,7 +82,7 @@ class UrlQsa extends Url
 	    $count = count( $structure);
         //add additional index so that params can be accessed by index and name
         for( $i = 0;  $i < $count; $i++ ){
-            $this->attribs[ $structure[$i] ] = $this->attribs[$i];
+            $this->nodes[ $structure[$i] ] = $this->nodes[$i];
         }
 
         return $this;

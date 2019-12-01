@@ -48,7 +48,7 @@ class UrlKeyValue extends Url
         for( $i = 0; $i < count($parts); $i += 2){
 	        $hold[ $parts[$i] ] = $parts[ $i+1 ];
         }
-        $this->attribs = $hold;
+        $this->nodes = $hold;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

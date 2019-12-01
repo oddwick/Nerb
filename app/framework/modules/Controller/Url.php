@@ -60,14 +60,14 @@ abstract class Url
     protected $node_offset = 0;
     
     /**
-     * attribs indexed parameter array
+     * nodes indexed parameter array
      * 
      * (default value: array())
      * 
      * @var array
      * @access protected
      */
-    protected $attribs = array();
+    protected $nodes = array();
 
     /**
      * mask_values
@@ -178,7 +178,7 @@ abstract class Url
         if( STRUCTURE_MASKING && !empty( $_SESSION['mask_values'][$node] )){
             return  $_SESSION['mask_values'][$node];
         } else{
-            return $this->attribs[$node];
+            return $this->nodes[$node];
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -296,7 +296,7 @@ abstract class Url
      */
     public function node( $node ) : string
     {
-        return $this->attribs[ $node ];
+        return $this->nodes[ $node ];
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -311,7 +311,7 @@ abstract class Url
      */
     public function getNodeCount() : int
     {
-        return count($this->attribs); //[ $node + $this->node_offset ];
+        return count($this->nodes); //[ $node + $this->node_offset ];
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -333,15 +333,15 @@ abstract class Url
     protected function bypass()
     {
         // action bypasses
-        switch (strtolower($this->attribs[0])) {
+        switch (strtolower($this->nodes[0])) {
             case 'set':
                 // set action if given ( /controller/set/key/value )
-                $this->set( $this->attribs[1], $this->attribs[2] );
+                $this->set( $this->nodes[1], $this->nodes[2] );
                 break;
 
             case 'toggle':
                 // set action if given ( /controller/toggle/key )
-                $this->toggle( $this->attribs[1] );
+                $this->toggle( $this->nodes[1] );
                 break;
 	        	
             default:

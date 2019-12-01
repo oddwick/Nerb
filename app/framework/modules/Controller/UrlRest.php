@@ -31,6 +31,7 @@ class UrlRest extends Url
 {
 
     // ! abstract functions 
+    protected $nodeCount = 0;
     
     /**
      *   This parses the url based on the what type of url is being parsed    
@@ -42,11 +43,13 @@ class UrlRest extends Url
     public function parse()
     {
         // turn the url into an array by nodes
-        $this->attribs = explode('/', $this->url);
+        $this->nodes = explode('/', $this->url);
+        
+        $this->nodeCount = count($this->nodes);
         
 		// check to see if action is present
-        if( $this->attribs[ $this->node_offset ] == 'action' ){
-	        $this->action = $this->attribs[ $this->node_offset + 1 ];
+        if( $this->nodes[ $this->node_offset ] == 'action' ){
+	        $this->action = $this->nodes[ $this->node_offset + 1 ];
         }
 
                
@@ -66,7 +69,7 @@ class UrlRest extends Url
     {
         //add additional index so that params can be accessed by index and name
         for( $i = 0;  $i < count( $structure); $i++ ){
-            $this->$mask_values[ $structure[$i] ] = $this->attribs[$i];
+            $this->$mask_values[ $structure[$i] ] = $this->nodes[$i];
         }
 
         return $this;
@@ -89,7 +92,7 @@ class UrlRest extends Url
 	    $count = count( $structure);
         //add additional index so that params can be accessed by index and name
         for( $i = 0;  $i < $count; $i++ ){
-            $this->attribs[ $structure[$i] ] = $this->attribs[$i];
+            $this->nodes[ $structure[$i] ] = $this->nodes[$i];
         }
 
         return $this;

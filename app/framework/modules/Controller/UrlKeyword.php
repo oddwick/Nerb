@@ -40,7 +40,7 @@ class UrlKeyword extends Url
      */
     public function parse()
     {
-        $this->attribs = explode( KEYWORD_SEPARATOR, $this->url);   
+        $this->nodes = explode( KEYWORD_SEPARATOR, $this->url);   
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ class UrlKeyword extends Url
 	    $count = count( $structure);
         //add additional index so that params can be accessed by index and name
         for( $i = 0;  $i < $count; $i++ ){
-            $this->attribs[ $structure[$i] ] = $this->attribs[$i];
+            $this->nodes[ $structure[$i] ] = $this->nodes[$i];
         }
 
         return $this;
