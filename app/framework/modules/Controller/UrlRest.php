@@ -31,8 +31,7 @@ class UrlRest extends Url
 {
 
     // ! abstract functions 
-    protected $nodeCount = 0;
-    
+
     /**
      *   This parses the url based on the what type of url is being parsed    
      * 
@@ -44,8 +43,6 @@ class UrlRest extends Url
     {
         // turn the url into an array by nodes
         $this->nodes = explode('/', $this->url);
-        
-        $this->nodeCount = count($this->nodes);
         
 		// check to see if action is present
         if( $this->nodes[ $this->node_offset ] == 'action' ){

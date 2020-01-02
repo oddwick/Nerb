@@ -51,6 +51,16 @@ class User
     protected $database = '';
 	
     /**
+     * users_table
+     * 
+     * (default value: '')
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $users_table = '';
+	
+    /**
      * user_name_field
      * 
      * (default value: '')
@@ -82,68 +92,43 @@ class User
 
 
     /**
-     * data
-     * 
-     * (default value: array() )
-     * 
-     * @var array
-     * @access protected
-     */
-    protected $data = array();
-
-
-
-    /**
      * __construct function.
      * 
      * @access public
-     * @param string $user_id
+     * @param string $userstable
+     * @param string $id_field
+     * @param string $user_name_field
+     * @param string $pass_field
+     * @param array $params (default: array())
      * @return void
      */
-    public function __construct( string $user_id )
+    public function __construct( string $users_table, string $id_field, string $user_name_field, string $pass_field )
     {
 	    // check to see if a database is registered
         if( !$database = Nerb::registry()->isClassRegistered( ClassManager::namespaceWrap('Database') ) ){
 			throw new Error( 'Could not find a registered database' );
         }
 		
+        // fetch database and check to see if token table exists
+        if( null == TOKEN_TABLE ) {
+            throw new Error( '<code>[TOKEN_TABLE]</code> was not defined.' );
+        }
+		
         // fetch database and check to see if table exists
         $this->database = $database ;
         $database = Nerb::registry()->fetch( $this->database );
 		
-        if( !$database->isTable( USER_TABLE ) ){
-			throw new Error( 'User table was not defined' );
+        if( !$database->isTable( TOKEN_TABLE ) ){
+	        $this->createSessionTable();
         } // end if
         
-        // get user
-        $Users = new TableRead( $database, USER_TABLE, false ); 
-        $user = $Users->fetchRow( USER_ID_FIELD." = ".$user_id );
-        $this->data = $user->values();
-        
+        // pass parameters
+        $this->users_table = $users_table;
+        $this->id_field = $id_field;
+        $this->user_name_field = $user_name_field;
+        $this->pass_field = $pass_field;
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-    /**
-     *   returns a value by key
-     *
-     *   @access     public
-     *   @param      string $field (field name)
-     *   @return     mixed
-     */
-    public function __get( string $field ) 
-    {
-        // check to see if field exists
-        if ( !array_key_exists( $field, $this->data ) ) {
-			return false;
-        }
-        return $this->data[$field];
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 
 
@@ -445,7 +430,7 @@ class User
 		
 		// fetch database and tables
         $database = Nerb::registry()->fetch( $this->database );
-		$Users = new \nerb\framework\TableRead( $database, $this->users_table, false );	
+		$Users = new \nerb\framework\TableRead( $database, $this->users_table );	
 		$user = $Users->fetchRow( '`'.$user_name_field.'` = \''.$user_name.'\'', 1);
 				
 		// user not found
@@ -564,7 +549,7 @@ class User
 	public function sendRecoveryKey( $user_email )
 	{
 		$Database = Nerb::registry()->fetch( $this->database );
-		$Users = new TableRead( $Database, $this->users_table, false);
+		$Users = new TableRead( $Database, $this->users_table);
 		
 		$user = $Users->fetchRow( $this->user_name_field." = '".$user_email."'");
 		//::inspect($user);

@@ -70,6 +70,16 @@ abstract class Url
     protected $nodes = array();
 
     /**
+     * nodeCount
+     * 
+     * (default value: 0)
+     * 
+     * @var int
+     * @access protected
+     */
+    protected $nodeCount = 0;
+    
+    /**
      * mask_values
      * 
      * ( default value: array() )
@@ -136,13 +146,16 @@ abstract class Url
 	    
         // sets the node_offset for offsetting the params index
         $this->node_offset = $offset;
-
+        
 	    // clean the url
         $this->extractUrl();
         
 	    // parse the url
         $this->parse();
         
+        // gets the count of the number of nodes
+        $this->nodeCount = count($this->nodes);
+
 	    // parse the return page
 	    $this->get_return_page();
 	    
@@ -259,7 +272,7 @@ abstract class Url
      */
     public function return_page() : string
     {
-        return $this->return_page;
+        return $this->return_page ?? $_SESSION['return_page'];
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -294,8 +307,9 @@ abstract class Url
      *   @param mixed $node
      *   @return string
      */
-    public function node( $node ) : string
+    public function node( $node )
     {
+       // Debug::inspect( $this->nodes, true, "" );
         return $this->nodes[ $node ];
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -309,10 +323,25 @@ abstract class Url
      *   @access public
      *   @return int
      */
-    public function getNodeCount() : int
+    public function nodeCount() : int
     {
-        return count($this->nodes); //[ $node + $this->node_offset ];
+        return $this->nodeCount; 
         
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * nodesToSession function.  Transfers the nodes to $_SESSION
+     * 
+     * @access public
+     * @return void
+     */
+    public function nodesToSession()
+    {
+        $_SESSION['nodes'] = $this->nodes; //[ $node + $this->node_offset ];
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 

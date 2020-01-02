@@ -158,7 +158,7 @@ class TableRead extends Table
      *   @return     Row
      *   @throws     Error
      */
-    public function key( string $key )
+    public function row( string $key )
     {
         // make sure the table has a primary key defined
         if ( !$this->primary ) {

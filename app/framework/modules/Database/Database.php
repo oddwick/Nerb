@@ -542,8 +542,10 @@ class Database
      *   @param      array $data
      *   @return     array
      */
-    public function filterNullValues( array $data ): array
+    public function filterNullValues( $data )
     {
+        if( !is_array( $data) ) return array();
+        
         return array_filter( $data, function ( $value ) {
             return $value !== '';
         });

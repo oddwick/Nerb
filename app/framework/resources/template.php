@@ -6,7 +6,7 @@
 
 
 <!-- TODO: load icon to website -->
-<link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+<!-- <link rel="icon" href="/images/favicon.ico" type="image/x-icon"> -->
 
 
 <meta name="description" content="Nerb PHP Framework">

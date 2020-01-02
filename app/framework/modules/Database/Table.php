@@ -86,7 +86,11 @@ class Table
      * @access protected
      */
     protected $data_type = array( 
+	    'tinyint' => 'i',
+	    'smallint' => 'i',
+	    'mediumint' => 'i',
 	    'int' => 'i',
+	    'bigint' => 'i',
 	    'date' => 'i',
 	    'datetime' => 'i',
 	    'timestamp' => 'i',
@@ -114,13 +118,13 @@ class Table
      *   @param      string $table
      *   @return     Table
      */
-    public function __construct( Database $database, string $table )
+    public function __construct( Database $database, string $table, bool $register = true )
     {
         // bind this object to the table
         $this->bind( $database, $table );
         
         // register this table so that other classes can access it
-        Nerb::registry()->register( $this, $database->handle().'.'.$table );
+        if( $register ) Nerb::registry()->register( $this, $database->handle().'.'.$table );
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

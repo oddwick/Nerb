@@ -132,13 +132,14 @@ class Row implements \Iterator
 
 
     /**
-     *  returns an array of values
+     *  returns an array of values.  if flag is set to true, then all 
+     *  columns are returned, otherwise only populated fields are returned
      * 
      * 	@access public
      * 	@param bool $return_all_columns (default: false)
      * 	@return array
      */
-    public function __toArray(bool $return_all_columns = false): array
+    public function values( bool $return_all_columns = true ): array
     {
         if ($return_all_columns) {
             return $this->data;
@@ -194,7 +195,7 @@ class Row implements \Iterator
         // error checking
         // ensure the field is a valid column
         if ( !array_key_exists( $field, $this->columns ) ) {
-            throw new Error( 'Column <code>'.$field.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns() ).']</code>' );
+            throw new Error( 'Column <code>'.$field.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns ).']</code>' );
         }
 
         // primary key cant be modified
@@ -210,6 +211,23 @@ class Row implements \Iterator
 
         // return old value
         return $old;
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    /**
+     *   seter that changes value of dataset
+     *
+     *   @access     public
+     *   @param      array $data array of data to be updated
+     *   @return     void
+     *   @throws     Error
+     */
+    public function update( array $data )
+    {
+        // new value
+        $this->data = array_merge( $this->data, $data );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
