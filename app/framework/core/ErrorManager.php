@@ -135,7 +135,7 @@ class ErrorManager
         if( !empty( $error = error_get_last() ) && $error['type'] != E_NOTICE ) {
 	        
             // throw error and exit
-            throw new Error( $error['message'] );
+            //throw new Error( $error['message'] );
         }
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------

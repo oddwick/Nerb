@@ -78,7 +78,7 @@ class Error extends \Exception
      */
     public function __construct( string $message, array $trace = array() )
     {
-
+		//die;
         // fire the constructor for the default error class
         parent::__construct( $message );
         //trigger_error( strip_tags( $message ), E_USER_ERROR );

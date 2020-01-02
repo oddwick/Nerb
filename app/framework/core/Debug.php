@@ -152,7 +152,7 @@ class Debug
 		    get_declared_classes(),
 		    function($className) {
 		        return !call_user_func(
-		            array(new ReflectionClass($className), 'isInternal')
+		            array(new \ReflectionClass($className), 'isInternal')
 		        );
 		    }
 		);

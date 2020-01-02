@@ -156,6 +156,9 @@ class Init
 	 */
 	protected static function setHandlers()
 	{
+		// exit if not using custom handlers
+		if(!USE_CUSTOM_HANDLERS) return;
+		
 		// sets the default exception handler for all uncaught errors
 		set_exception_handler( [__NAMESPACE__.'\ErrorManager', 'exception_handler']);
 		
