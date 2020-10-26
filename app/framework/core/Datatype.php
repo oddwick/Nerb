@@ -36,8 +36,10 @@ namespace nerb\framework;
  *
  */
 
-    class Datatype
+class Datatype
 {
+
+
     /**
      * datatype
      * 
@@ -73,6 +75,13 @@ namespace nerb\framework;
         //'bool',
     );
     
+    /**
+     * regex
+     * 
+     * @var mixed
+     * @access protected
+     * @static
+     */
     protected static $regex = array(
 	    'int' => '([^0-9\-])',
 	    'alpha' => '([^a-zA-Z ])',

@@ -56,6 +56,14 @@ abstract class Controller
     						);
 
     /**
+     * name
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $name = 'test';
+    
+    /**
      * controller
      * 
      * @var mixed
@@ -123,8 +131,11 @@ abstract class Controller
         $this->mode = strtolower( $mode );
         $this->getController();
         
-        $urlmode =  ClassManager::namespaceWrap($this->modes[$mode]);
-		$this->url = new $urlmode( $this->controller, $node, $offset );
+        $this->name = ClassManager::namespaceUnwrap( $this->controller );
+        
+        $urlmode =  ClassManager::namespaceWrap( $this->modes[$mode] );
+		Nerb::registry()->register( $this->url = new $urlmode( $this->controller, $node, $offset ), 'Url');
+		
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -166,6 +177,21 @@ abstract class Controller
     public function getController() : string
     {
         return $this->controller = str_replace('controller', '', strtolower( get_class($this) ) );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * name function.
+     * 
+     * @access public
+     * @return string
+     */
+    public function name() : string
+    {
+        return $this->name;
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

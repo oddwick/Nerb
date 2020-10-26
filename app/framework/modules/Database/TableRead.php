@@ -129,6 +129,23 @@ class TableRead extends Table
 
 
     /**
+    *   run a raw query on the database and returns a Rowset
+    *
+    *   @access     public
+    *   @param      string $query
+    *   @return     Rowset
+    *   @throws     Error
+    */
+	public function query( string $query  )
+    {
+        return $this->database->fetch( $query );
+
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
      *   returns a single row specified by a select clause
      *
      *   @access     public
@@ -162,7 +179,7 @@ class TableRead extends Table
     {
         // make sure the table has a primary key defined
         if ( !$this->primary ) {
-            throw new Error( $this->_errorString( "Table <code>[$this->name]</code> has no primary key" ));
+            throw new Error( $this->errorString( "Table <code>[$this->name]</code> has no primary key" ));
         }
         
         //build query strin and execute
@@ -191,7 +208,7 @@ class TableRead extends Table
     {
         // make sure the column exists
         if ( !$this->isColumn( $column ) ) {
-            throw new Error( $this->_errorString("The column <code>[$column]</code> is not in table <code>[$this->name]</code><p>" ));
+            throw new Error( $this->errorString("The column <code>[$column]</code> is not in table <code>[$this->name]</code><p>" ));
         }
         
         // build query string
@@ -215,17 +232,21 @@ class TableRead extends Table
      *   @return     array
      *   @throws     Error
      */
-    public function fetchUnique( string $column, string $where = '', string $order = 'ASC' ) : array
+    public function distinct( string $column, string $where = '', string $order = 'ASC', int $limit = 0, int $offset = 0 ) : array
     {
         // make sure the table has a primary key defined
         if ( !$this->isColumn( $column ) ) {
-            throw new Error( $this->_errorString('The column <code>['.$column.']</code> is not in table <code>['.$this->name.']</code><p>' ));
+            throw new Error( $this->errorString('The column <code>['.$column.']</code> is not in table <code>['.$this->name.']</code><p>' ));
         }
-        $query = "SELECT DISTINCT `$column` FROM `$this->name`".$this->where( $where );
-        $order = $order ? " ORDER BY `$column` ".$order : NULL;
+        
+		// add order by column
+        $where .= $order ? " ORDER BY `$column` ".$order.' ' : NULL;
+       
+        // create query string
+        $query = "SELECT DISTINCT `$column` FROM `$this->name`".$this->where( $where, $limit, $offset );
 
         // execute query string return array
-        return $this->database->queryArray( $query.$order );
+        return $this->database->queryArray( $query );
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 

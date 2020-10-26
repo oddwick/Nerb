@@ -71,7 +71,7 @@ class Account
      * @param array $params (default: array())
      * @return void
      */
-    public function __construct()
+    public function __construct( string $database )
     {
 	    // ensure that the configurtion is properly set up
         if( !defined('USER_TABLE') ||  !defined('USER_ID_FIELD') || !defined('USER_NAME_FIELD') || !defined('USER_EMAIL_FIELD')){
@@ -79,8 +79,9 @@ class Account
         }
         
 	    // check to see if a database is registered
-        if( !$database = Nerb::registry()->isClassRegistered( ClassManager::namespaceWrap('Database') ) ){
-			throw new Error( 'Could not find a registered database' );
+        //if( !$database = Nerb::registry()->isClassRegistered( ClassManager::namespaceWrap('Database') ) ){
+        if( !Nerb::registry()->isRegistered( $database ) ){
+			throw new Error( 'Could not find database [<code>'.$database.'</code>]' );
         }
 		
         // fetch database and check to see if token table exists
@@ -100,6 +101,8 @@ class Account
         if( (LOG_ATTEMPTS == 'both' || LOG_ATTEMPTS == 'db') && !$database->isTable( ACCESS_LOG_TABLE ) ){
 	        $this->createLogTable();
         } // end if
+        
+        return $this;
         		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -118,9 +121,9 @@ class Account
      * createSessionTable function.
      * 
      * @access protected
-     * @return void
+     * @return bool
      */
-    protected function createSessionTable()
+    protected function createSessionTable() : bool
     {
         $query = '
 			CREATE TABLE `'.TOKEN_TABLE.'` (
@@ -133,7 +136,7 @@ class Account
 			)';
 			
         $database = Nerb::registry()->fetch( $this->database );
-        $database->execute( $query );
+        return $database->execute( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -144,9 +147,9 @@ class Account
      * createSessionTable function.
      * 
      * @access protected
-     * @return void
+     * @return bool
      */
-    protected function createLogTable()
+    protected function createLogTable() : bool
     {
         $query = '
 			CREATE TABLE `'.ACCESS_LOG_TABLE.'` (
@@ -163,7 +166,7 @@ class Account
 			)';
 			
         $database = Nerb::registry()->fetch( $this->database );
-        $database->execute( $query );
+        return $database->execute( $query );
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -176,7 +179,7 @@ class Account
 	*	@access	protected
 	*	@return	void
 	*/
-	protected function createRecoveryTable()
+	protected function createRecoveryTable() : bool
 	{
         $query = '
 			CREATE TABLE `'.PASSWORD_RECOVERY_TABLE.'` (
@@ -191,7 +194,7 @@ class Account
 			';
 			
         $database = Nerb::registry()->fetch( $this->database );
-        $database->execute( $query );
+        return $database->execute( $query );
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -259,7 +262,7 @@ class Account
 	 * @param mixed $user_id
 	 * @return string
 	 */
-	protected function createSession($user_id)
+	protected function createSession($user_id) : string
 	{
 	
 		// fetch database
@@ -451,18 +454,24 @@ class Account
         $database = Nerb::registry()->fetch( $this->database );
 		$Users = new \nerb\framework\TableRead( $database, USER_TABLE, false );	
 		$user = $Users->fetchRow( '`'.USER_NAME_FIELD.'` = \''.$user_name.'\'', 1);
-				
+		
 		// user not found
-		if ( !$user ) {
-			$this->logAttempt(0, $user_name, $msg = 'user not found');
+		if ( empty($user) ) {
+			$this->logAttempt( -1, $user_name, $msg = 'user not found');
 			return array(false, $msg);
 		}
 		
+		// if using flagging and user has been flagged
+		if ( defined(USER_FLAGGED_FIELD) && $user->{USER_FLAGGED_FIELD} ) {
+			$this->logAttempt($user->{USER_ID_FIELD}, $user_name, $msg = 'flagged user' );
+			return array(false, $msg);
+		}
+		
+		// password not match
 		if ( !password_verify( $user_pass, $user->{USER_PASS_FIELD} ) ) {
 			$this->logAttempt($user->{USER_ID_FIELD}, $user_name, $msg = 'invalid password' );
 			return array(false, $msg);
 		}
-		
 		
 		// log attempt to the log file
 		$this->logAttempt( $user->{USER_ID_FIELD}, $user_name, 'user authenticated', true );

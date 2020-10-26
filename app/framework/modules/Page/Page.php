@@ -522,7 +522,9 @@ class Page
         $this->page_caching = false;
         
         // remove cached content if it exists
-        $this->cache->uncache();
+        if( $this->cache ){
+        	$this->cache->uncache();
+        }
 	    
 	    // add meta cache data so that page can be identified as cached content
 	    unset( $this->meta['cached'] );

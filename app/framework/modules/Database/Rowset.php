@@ -149,6 +149,25 @@ class Rowset implements \Iterator
 
 
     /**
+     *   returns the first element of the rowset
+     *
+     *   @access     public
+     *   @return     Row
+     */
+    public function first()
+    {
+        $this->pointer = 0;
+        // make sure that the pointer points to a valid row
+    
+        return $this->current();
+        
+                
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
      *   validates the position of the pointer
      *
      *   @access     public

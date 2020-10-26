@@ -170,6 +170,27 @@ class TableWrite extends TableRead
 
 
     /**
+     *   updates data set
+     *
+     *   @access     public
+     *   @param      string $values
+     *   @param      string $where
+     *   @return     int rows affected
+     */
+    public function update( string $values, string $where ) : int
+    {
+        // create sql statement
+        $sql = 'UPDATE `'.$this->name.'` SET '.$values.' WHERE '.$where;
+        
+        // execute and return rows affected
+        return $this->database->execute( $sql );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
      *   creates an Insert object and populates it and then inserts it into the table
      *
      *   @access     public
@@ -193,6 +214,23 @@ class TableWrite extends TableRead
     //                      !DELETION METHODS
 
     #################################################################
+
+
+
+    /**
+     *   alias of deleteRow
+     *
+     *   @access     public
+     *   @param      mixed $key primary key value
+     *   @return     int number of rows affected
+     *   @throws     Error
+     */
+    public function delete( $key ) : int
+    {
+        return $this->deleteRow( $key );
+                
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 

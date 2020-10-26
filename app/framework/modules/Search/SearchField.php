@@ -56,6 +56,16 @@ class SearchField
      */
     protected $keywords = array();
     
+    /**
+     * greedy - flag for greedy or lazy searching
+     * 
+     * (default value: TRUE)
+     * 
+     * @var mixed
+     * @access protected
+     */
+    protected $greedy = TRUE;
+    
     
     
     /**
@@ -95,6 +105,21 @@ class SearchField
 	
 	
 	
+    /**
+     * greedy function.
+     * 
+     * @access public
+     * @param bool $greedy (default: FALSE)
+     * @return void
+     */
+    public function greedy( bool $greedy = FALSE ) : void
+    {
+        $this->greedy = $greedy;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+	
+	
+	
 	/**
 	 * addKeywords function.
 	 * 
@@ -127,7 +152,7 @@ class SearchField
 		foreach( $this->keywords as $keyword){
 			$format[] = '`'.$this->field.'` '.$keyword;
 		}
-		$format = implode( GREEDY_SEARCH ? ' OR ' : ' AND ', $format );
+		$format = implode( $this->greedy ? ' OR ' : ' AND ', $format );
 		
 		// make sure that if only one keyword is present, there is never
 		// a NOT statement otherwise the entire database or very large datasets

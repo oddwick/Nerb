@@ -112,6 +112,16 @@ class Search
      */
     protected $error = FALSE;
 
+	/**
+	 * greedy
+	 * 
+	 * (default value: TRUE)
+	 * 
+	 * @var mixed
+	 * @access protected
+	 */
+	protected $greedy = TRUE;
+	
     /**
      * msg
      *
@@ -185,6 +195,11 @@ class Search
      */
     public function search() : string
     {
+        // set greedy flag for each search fields
+        foreach( $this->search_fields as $field ){
+        	$field->greedy( $this->greedy );
+        } // end foreach
+        
         // create the search strings
         // (field1 = keyword1 [AND|OR] ...) [OR (field2 = keyword1]...
         //$search = '( '.implode(') OR ( ', $this->search_fields).' )';
@@ -215,6 +230,49 @@ class Search
     public function error() : string
     {
         return !empty($this->error_msg) ? $this->error_msg : '' ;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * stopword function.
+     * 
+     * @access public
+     * @param string $word
+     * @return void
+     */
+    public function stopword( string $word ) : void
+    {
+		$this->excluded_words[] = $word;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * greedy function.
+     * 
+     * @access public
+     * @return void
+     */
+    public function greedy() : void 
+    {
+		$this->greedy = TRUE;
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * lazy function.
+     * 
+     * @access public
+     * @return void
+     */
+    public function lazy() : void
+    {
+		$this->greedy = FALSE;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 

@@ -171,10 +171,27 @@ class Row implements \Iterator
      */
     public function __get( string $field ) 
     {
+        return REMOVE_SLASHES ? $this->deslash( $this->raw( $field ) ) : $this->raw( $field );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * raw function.  returns unfiltered database data
+     * 
+     * @access public
+     * @param string $field
+     * @return void
+     */
+    public function raw( string $field ) 
+    {
         // check to see if field exists
         if ( !array_key_exists( $field, $this->columns ) ) {
             throw new Error( 'Column <code>'.$field.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->columns ).']</code>' );
         }
+        
         return $this->data[$field];
         
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -216,20 +233,6 @@ class Row implements \Iterator
 
 
 
-    /**
-     *   seter that changes value of dataset
-     *
-     *   @access     public
-     *   @param      array $data array of data to be updated
-     *   @return     void
-     *   @throws     Error
-     */
-    public function update( array $data )
-    {
-        // new value
-        $this->data = array_merge( $this->data, $data );
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -386,6 +389,44 @@ class Row implements \Iterator
         // return
         return $this;
         
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     *   seter that changes value of dataset
+     *
+     *   @access     public
+     *   @param      array $data array of data to be updated
+     *   @return     void
+     *   @throws     Error
+     */
+    public function update( array $data )
+    {
+        // new value
+        $this->data = array_merge( $this->data, $data );
+        
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    protected function deslash( $data )
+    {
+		// Replace one or more backslashes followed by a single quote with a single quote.
+		$data = preg_replace( "/\\\+'/", "'", $data );
+		
+		// Replace one or more backslashes followed by a double quote with a double quote.
+		$data = preg_replace( '/\\\+"/', '"', $data );
+		
+		// Replace one or more backslashes with one backslash.
+		//$data = preg_replace('#/+#','/',$data);
+		$data = preg_replace( '/\\\+/', '', $data );
+		
+		return $data;
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 } /* end class */
