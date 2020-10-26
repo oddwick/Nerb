@@ -82,7 +82,7 @@ class DefaultController extends Controller
     protected function privatePages() : string
     {
 /*
-       switch ( $this->page ) {
+       switch (  $switch = $this->page ?? $this->url->node(0)  ) {
 	        
             case '':
             	
@@ -106,7 +106,7 @@ class DefaultController extends Controller
      */
     protected function publicPages()
     {
-       switch ( $this->page ) {
+       switch (  $switch = $this->page ?? $this->url->node(0)  ) {
 	        
             case 'privacy':
             	$page = '/default/privacy.php';

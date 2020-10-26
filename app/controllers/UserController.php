@@ -89,7 +89,7 @@ class UserController extends Controller
      */
     protected function privatePages() : string
     {
-        switch ($this->page) {
+        switch ( $this->page ?? $this->url->node(0) ) {
             case 'forgotPass':
             default:
                 $page = $this->module.'/login.php';
@@ -110,7 +110,7 @@ class UserController extends Controller
      */
     protected function publicPages()
     {
-        switch ($this->page) {
+        switch ( $this->page ?? $this->url->node(0) ) {
             case 'forgotPass':
             default:
                 $page = $this->module.'/login.php';

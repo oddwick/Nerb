@@ -60,7 +60,7 @@ class DefaultController extends Controller
         // fetch page object and add content to it
         $page = Nerb::registry()->fetch( 'Page' );
         $page->noCache();
-        $page->title( $this->title );
+        $page->title( $title ?? $this->title );
         $page->header( PAGES.'/header.php' );
         $page->footer( PAGES.'/footer.php' );
         $page->content( PAGES.'/'.$content );
@@ -76,12 +76,12 @@ class DefaultController extends Controller
      * The pages called here require the user to be logged in to view them
      *
      * @access protected
-     * @property string $page
+     * @property $page
      * @return string
      */
     protected function privatePages() : string
     {
-        switch ( $this->page ) {
+        switch (  $this->page ?? $this->url->node(0)  ) {
             case 'somePage':
                 $page = 'somePage.php';
             	break;
@@ -100,12 +100,12 @@ class DefaultController extends Controller
      * The pages called here are public and can be seen by anyone
      * 
      * @access protected
-     * @property string $page
+     * @property $page
      * @return string
      */
     protected function publicPages() : string
     {
-        switch ( $this->page ) {
+        switch (  $this->page ?? $this->url->node(0)  ) {
             case 'somePage':
                 $page = 'somePage.php';
             	break;
@@ -129,7 +129,7 @@ class DefaultController extends Controller
      */
     protected function action()
     {
-        switch ( $this->action() ) {
+        switch ( $this->url->action() ) {
             default:
                 $page = '/';
         }// end switch
