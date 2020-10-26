@@ -102,8 +102,6 @@ class Account
 	        $this->createLogTable();
         } // end if
         
-        return $this;
-        		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -351,6 +349,12 @@ class Account
 	 */
 	public function isSessionActive() : bool
 	{
+		// fetch database and tables
+        $database = Nerb::registry()->fetch( $this->database );
+		$Tokens = new \nerb\framework\TableRead( $database, TOKEN_TABLE, false );	
+		$token = $Tokens->fetchRow( "`selector` = '".$_SESSION['auth']."'" );
+		
+		return $token->expires <= time();
    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -366,7 +370,7 @@ class Account
 	 */
 	protected function generateToken(int $length = 64) : string
 	{
-	    return bin2hex(random_bytes($length));
+	    return bin2hex( random_bytes( $length ) );
 	    
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -453,7 +457,7 @@ class Account
 		// fetch database and tables
         $database = Nerb::registry()->fetch( $this->database );
 		$Users = new \nerb\framework\TableRead( $database, USER_TABLE, false );	
-		$user = $Users->fetchRow( '`'.USER_NAME_FIELD.'` = \''.$user_name.'\'', 1);
+		$user = $Users->fetchRow( '`'.USER_NAME_FIELD.'` = \''.$user_name.'\'' );
 		
 		// user not found
 		if ( empty($user) ) {
@@ -529,11 +533,11 @@ class Account
 	 * identifies the user and returns the user's id if session is active.  returns user_id on success and 0 on failure
 	 * 
 	 * @access public
-	 * @return bool
+	 * @return int
 	 * @property expires;
 	 * @property hash;
 	 */
-	public function identify() : int
+	public function identify() : ?int
 	{
 		// fetch database
 		$database = Nerb::registry()->fetch($this->database);
@@ -544,7 +548,7 @@ class Account
 		// fetch session data from table
 		$session = $sessions->fetchRow('`selector` = \''.$_SESSION['auth'].'\'');
 
-		return count($session) == 1 ? $session->user_id : 0; 
+		return empty($session) ? NULL : $session->user_id; 
 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -602,8 +606,6 @@ class Account
 
 		
 		//imap_mail($to, $subject, $message, $headers);
-		
-		die;
 		
 		
 		return;

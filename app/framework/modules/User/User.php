@@ -446,7 +446,7 @@ class User
 		// fetch database and tables
         $database = Nerb::registry()->fetch( $this->database );
 		$Users = new \nerb\framework\TableRead( $database, $this->users_table, false );	
-		$user = $Users->fetchRow( '`'.$user_name_field.'` = \''.$user_name.'\'', 1);
+		$user = $Users->fetchRow( '`'.$user_name_field.'` = \''.$user_name.'\'' );
 				
 		// user not found
 		if (!$user) {
