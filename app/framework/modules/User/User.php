@@ -116,7 +116,7 @@ class User
         } // end if
         
         // get user
-        $Users = new TableRead( $database, USER_TABLE, false ); 
+        $Users = new TableRead( $database, USER_TABLE ); 
         $user = $Users->fetchRow( USER_ID_FIELD." = ".$user_id );
         $this->data = $user->values();
         
@@ -445,7 +445,7 @@ class User
 		
 		// fetch database and tables
         $database = Nerb::registry()->fetch( $this->database );
-		$Users = new \nerb\framework\TableRead( $database, $this->users_table, false );	
+		$Users = new \nerb\framework\TableRead( $database, $this->users_table );	
 		$user = $Users->fetchRow( '`'.$user_name_field.'` = \''.$user_name.'\'' );
 				
 		// user not found
@@ -564,7 +564,7 @@ class User
 	public function sendRecoveryKey( $user_email )
 	{
 		$Database = Nerb::registry()->fetch( $this->database );
-		$Users = new TableRead( $Database, $this->users_table, false);
+		$Users = new TableRead( $Database, $this->users_table );
 		
 		$user = $Users->fetchRow( $this->user_name_field." = '".$user_email."'");
 		//::inspect($user);
