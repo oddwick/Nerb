@@ -93,6 +93,7 @@ class Mail
      * @param string $subject (default: '')
      * @param string $content (default: '')
      * @param string $file (default: '')
+     * @property from
      * @return Mail
      */
     public function __construct( string $from, string $displayName = '' )
