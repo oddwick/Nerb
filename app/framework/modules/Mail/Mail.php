@@ -276,7 +276,7 @@ class Mail
      * @return Mail
      * @throws Error
      */
-    public function template( string $file )
+    public function template( string $file ) : self
     {
 		if( !is_file( $file ) ){
             throw new Error( 'Could not find template' );
@@ -296,7 +296,7 @@ class Mail
      * @param array $data
      * @return Mail
      */
-    public function data( array $data )
+    public function data( array $data ) : self
     {
 		$this->data = $data;
 		return $this;
@@ -343,7 +343,7 @@ class Mail
      * @param string $value
      * @return Mail
      */
-    public function setHeader( string $key, string $value )
+    public function setHeader( string $key, string $value ) : self
     {
 		$this->headers[$key] = $value;
 		return $this;
