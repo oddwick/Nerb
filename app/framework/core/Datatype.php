@@ -12,7 +12,11 @@ namespace nerb\framework;
  * string - alphanum and certain special chars
  * aplha - only a-z A-Z
  * alpannum - A-Z a-z 0-9
- * int - 0-9
+ * int - 0-9 -
+ * digit - 0-9
+ * num - 0-9 .?_*-
+ * float - 0-9.-
+ * email - filters email
  * float - 0-9.
  * phonetic - converts keyword to metaphone and ignores special characters
  * bool - 0|1 true|false
@@ -72,6 +76,7 @@ class Datatype
         'num',
         'float',
         'metaphone',
+        'email',
         //'bool',
     );
     
@@ -88,6 +93,7 @@ class Datatype
 	    'alphanum' => '([^0-9a-zA-Z ])',
 	    'float' => '([^0-9\.\-])',
 	    'num' => '([^0-9\.\?\_\*\-])',
+	    'digit' => '([^0-9])',
     );
     
     /**
@@ -162,7 +168,7 @@ class Datatype
      * @param string $string
      * @return string
      */
-    public function check( string $string )
+    public function check( string $string ) : ?string
     {
         $method = $this->datatype;
         return $this->$method( $string );
@@ -181,7 +187,7 @@ class Datatype
      * @param string $string
      * @return string
      */
-    public static function int( string $string ) : string
+    public static function int( string $string ) : ?string
     {
         return preg_replace('/'.self::$regex['int'].'/', '', $string);
 		
@@ -199,7 +205,7 @@ class Datatype
      * @param string $string
      * @return string
      */
-    public static function float( string $string ) : string
+    public static function float( string $string ) : ?string
     {
         return preg_replace( '/'.self::$regex['float'].'/', '', $string );
 		
@@ -217,11 +223,28 @@ class Datatype
      * @param string $string
      * @return string
      */
-    public static function num( string $string ) : string
+    public static function num( string $string ) : ?string
     {
         // replace and make sure that there is at least a single digit before returning
-        $num = preg_replace( '/'.self::$regex['num'].'/', '', $string );
-        return preg_match('/([0-9])/', $num) ? $num : '';
+        return preg_replace( '/'.self::$regex['num'].'/', '', $string );
+		
+    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    /**
+     * ditig function.
+     *
+     * returns only 0-9
+     * 
+     * @access public
+     * @param string $string
+     * @return string
+     */
+    public static function digit( string $string ) : ?string
+    {
+        return preg_replace( '/'.self::$regex['digit'].'/', '', $string );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -237,7 +260,7 @@ class Datatype
      * @param string $string
      * @return string
      */
-    public static function alphanum( string $string ) : string
+    public static function alphanum( string $string ) : ?string
     {
         return self::whitespace( preg_replace( '/'.self::$regex['alphanum'].'/', '', $string ) );
 		
@@ -255,7 +278,7 @@ class Datatype
      * @param string $string
      * @return string
      */
-    public static function alpha( string $string ) : string
+    public static function alpha( string $string ) : ?string
     {
         return self::whitespace( preg_replace('/'.self::$regex['alpha'].'/', '', $string));
 		
@@ -273,7 +296,7 @@ class Datatype
      * @param string $string 
      * @return string
      */
-    public static function metaphone( string $string ) : string
+    public static function metaphone( string $string ) : ?string
     {
         return metaphone( self::alpha( $string ) );
 		
@@ -290,12 +313,29 @@ class Datatype
      * @param string $string
      * @return string
      */
-    public static function string( string $string ) : string
+    public static function string( string $string ) : ?string
     {
         $replace = '\\'.implode( '\\', self::$invalid_char );
         return self::whitespace( preg_replace( '/(['.$replace.'])/', '', $string ) );
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
+ 
+ 
+                
+    /**
+     * email function.
+     * 
+     * @access public
+     * @static
+     * @param string $email
+     * @return string
+     */
+    public static function email( string $email ) : ?string
+    {
+		return filter_var($email, FILTER_SANITIZE_EMAIL);
+
+	} // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
  
  
@@ -309,7 +349,7 @@ class Datatype
      * @param string $string
      * @return string
      */
-    protected static function whitespace( string $string ) : string
+    protected static function whitespace( string $string ) : ?string
     {
         // replace any extra whitespace with a single space
         return trim(preg_replace('/\s+/', ' ', $string));
