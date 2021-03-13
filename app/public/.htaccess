@@ -1,9 +1,9 @@
-# app/public/.htaccess
+# test/public/.htaccess
 
     RewriteEngine On
+    RewriteBase /app/public
     
-    #RewriteCond   %{REQUEST_FILENAME} !-d
-    #RewriteCond   %{REQUEST_FILENAME} !-f
-    
-    RewriteCond %{REQUEST_FILENAME} !\.(js|ico|gif|jpe?g|png|css)
-    RewriteRule $ index.php?_url=/$1 [QSA,L]
+		
+	RewriteCond %{REQUEST_FILENAME} !-f
+	#RewriteCond %{REQUEST_FILENAME} !\.(js|ico|jpe?g|gif|png|css)
+	RewriteRule ^.*$ /index.php [PT,L,QSA]

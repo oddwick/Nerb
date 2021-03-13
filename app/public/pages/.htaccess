@@ -1,0 +1,4 @@
+# test/.htaccess
+
+    RewriteCond   %{REQUEST_FILENAME} !-f
+    RewriteRule   ((?s).*) /$1 [PT,L]

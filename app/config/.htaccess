@@ -1,5 +1,3 @@
-# /app/config
-
 Options -Indexes
 
 Order Deny,Allow

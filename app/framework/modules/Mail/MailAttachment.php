@@ -52,7 +52,7 @@ class MailAttachment extends Mail
      * @param string $file (default: '')
      * @return Mail
      */
-    public function __construct( string $from, string $displayName, string $file )
+    public function __construct( string $from, string $displayName, string $file)
     {
 		// set params
 		$this->init( $from, $displayName );

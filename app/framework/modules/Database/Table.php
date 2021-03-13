@@ -118,7 +118,7 @@ class Table
      *   @param      string $table
      *   @return     Table
      */
-    public function __construct( Database $database, string $table, bool $register = false )
+    public function __construct( Database $database, string $table, bool $register = true )
     {
         // bind this object to the table
         $this->bind( $database, $table );

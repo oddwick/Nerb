@@ -188,7 +188,8 @@ class Debug
         // gets the trace data that lead up to the error
         $trace_data = array_reverse(debug_backtrace());
 
-        $count = count( $trace_data );
+        $count = count($trace_data);
+        $count = 1;
         $trace = '<p><strong>Trace</strong></p>'
                 .'<div>#0 {INIT}</div>';
 

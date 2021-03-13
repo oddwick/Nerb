@@ -29,6 +29,16 @@ namespace nerb\framework;
 class Mail
 {
 
+    /**
+     * path to the file being attached
+     * 
+     * (default value: "")
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $file = '';
+
 	/**
 	 * path to the template used for email
 	 * 
@@ -106,28 +116,8 @@ class Mail
      * @param string $file (default: '')
      * @return Mail
      */
-    public function __construct( string $from, string $displayName )
+    public function __construct( string $from, string $displayName = '' )
     {
-		// set params
-		$this->init( $from, $displayName );
-		
-		return $this;
-        
-    } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-	
-	
-	/**
-	 * init function.
-	 * 
-	 * @access protected
-	 * @param string $from
-	 * @param string $displayName
-	 * @return void
-	 */
-	protected function init( string $from, string $displayName ) : void
-	{
 		// set params
 		$this->from = $from;
 		$this->displayName = $displayName;
@@ -136,8 +126,11 @@ class Mail
 		$this->headers['From'] = $displayName ? $displayName.' <'.$from.'>' : $from;
 		$this->headers['X-Mailer'] = 'PHP/'.phpversion();
 		$this->headers['X-Sender'] = $this->headers['Reply-To'] = $from;
-		
+
+		return $this;
+        
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -171,7 +164,7 @@ class Mail
         // error checking
         // ensure the field is a valid column
         if ( !array_key_exists( $key, $this->params ) ) {
-            throw new Error( 'Key <code>'.$key.'</code> does not exist.<br /><br /><code>['.implode( ', ', array_keys( $this->params ) ).']</code>' );
+            throw new Error( 'Key <code>'.$key.'</code> does not exist.<br /><br /><code>['.implode( ', ', $this->params ).']</code>' );
         }
 
         // set params key
@@ -190,24 +183,23 @@ class Mail
      * @throws Error
 	 * @return bool
 	 */
-	public function send() : bool
+	public function send( string $to ) : bool
 	{
 		// guard functions
-		if( empty( $this->params['to'] ) ||
-			empty( $this->params['from'] ) ||
+		if( empty( $this->params['from'] ) ||
 			empty( $this->params['subject'] ) 
 		){
             throw new Error( 'Undefined fields <code>[from] [subject] [message]</code> can not be empty' );
 		}
 
 		//header for sender info
-		$this->headers['To'] = $this->to;
+		$this->to  = $this->headers['To'] = $to;
 		
 		// build the message
 		$this->create_message();
 		
 		// send the message
-		return @mail( $this->to, $this->subject, $this->message, $this->header, $this->returnpath ); 
+		return @mail($this->to, $this->subject, $this->message, $this->header, $this->returnpath ); 
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -217,9 +209,9 @@ class Mail
 	 * send_attachment function.
 	 * 
 	 * @access protected
-	 * @return Mail
+	 * @return void
 	 */
-	protected function create_message() : void
+	protected function create_message()
 	{
 		// build header for sender info
 		$this->create_headers();
@@ -239,6 +231,8 @@ class Mail
 		// set the return path
 		$this->returnpath = "-f " . $this->from;
 		
+		return $this; 
+
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 	
 	
@@ -250,17 +244,18 @@ class Mail
      * create_headers function.
      * 
      * @access protected
-     * @return void
+     * @return Mail
      */
-    protected function create_headers() : void
+    protected function create_headers()
     {
 		// create and return basic headers
 		$this->header = "To: ".$this->headers['To']."\n"
-					 . "From: ".$this->headers['From']."\n"
-					 . "MIME-Version: ".$this->headers['MIME-Version']."\n" 
-					 . "X-Sender: ".$this->headers['X-Sender']."\n"
-					 . "X-Mailer: ".$this->headers['X-Mailer']."\n"
-					 . "X-Priority: ".$this->headers['X-Priority']."\n";	
+				 . "From: ".$this->headers['From']."\n"
+				 . "MIME-Version: ".$this->headers['MIME-Version']."\n" 
+				 . "X-Sender: ".$this->headers['X-Sender']."\n"
+				 . "X-Mailer: ".$this->headers['X-Mailer']."\n"
+				 . "X-Priority: ".$this->headers['X-Priority']."\n";		 
+		return $this;
 		
     } // end function -----------------------------------------------------------------------------------------------------------------------------------------------
 		
